@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoqz - Add Category</title>
+  
+</head>
+<body style="background: linear-gradient(135deg, #fff 0%, #764ba2 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
+  <div style="background-color: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); width: 100%; max-width: 500px; padding: 30px;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">Add New Category</h2>
+      <p>Create a new product category</p>
+    </div>
+
+    <form onsubmit="return submitCategory(event)">
+      
+      <div style="margin-bottom: 20px;">
+        <label for="categoryName" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">Category Name</label>
+        <input 
+          type="text" 
+          id="categoryName" 
+          name="name" 
+          placeholder="Enter category name"
+          required
+          style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+        >
+        <div id="name-error" style="color: #e74c3c; font-size: 14px; margin-top: 5px; display: none;"></div>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label for="categoryDescription" style="display: block; margin-bottom: 8px; color: #555; font-weight: 600;">Description</label>
+        <textarea 
+          id="categoryDescription" 
+          name="description" 
+          rows="4" 
+          placeholder="Enter category description"
+          required
+          style="width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+        ></textarea>
+        <div id="description-error" style="color: #e74c3c; font-size: 14px; margin-top: 5px; display: none;"></div>
+      </div>
+      
+      <button type="submit" style="width: 100%; padding: 12px; background-color: #0095ff; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">Add Category</button>
+    
+    </form>
+    
+    <a href="/admin/category" style="display: block; text-align: center; margin-top: 15px; color: #0095ff; text-decoration: none; font-weight: 600;">Back to Categories</a>
+  </div>
+</body>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        function submitCategory(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const categoryName = document.getElementById('categoryName').value.trim();
+            const categoryDescription = document.getElementById('categoryDescription').value.trim();
+            
+            // Reset previous error messages
+            clearErrorMessages();
+            
+            // Validate inputs
+            let isValid = true;
+            
+            // Validate category name
+            if (categoryName === '') {
+                displayErrorMessage('name-error', 'Please enter a category name');
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
+                displayErrorMessage('name-error', 'Category name can contain only alphabetic characters');
+                isValid = false;
+            }
+            
+            // Validate description
+            if (categoryDescription === '') {
+                displayErrorMessage('description-error', 'Please enter a category description');
+                isValid = false;
+            }
+            
+            // If validation fails, stop submission
+            if (!isValid) {
+                return false;
+            }
+            
+            // Prepare data for submission
+            const categoryData = {
+                name: categoryName,
+                description: categoryDescription
+            };
+            
+            // Send data to server
+            fetch('/admin/addCategory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(categoryData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to add category');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success message
+                swal({
+                    title: "Success!",
+                    text: "Category added successfully",
+                    icon: "success",
+                    button: "Go to Categories"
+                }).then(() => {
+                    // Redirect to category management page
+                    window.location.href = '/admin/category';
+                });
+            })
+            .catch(error => {
+                // Handle specific error messages
+                if (error.message === "Category already exists") {
+                    swal({
+                        title: "Oops!",
+                        text: "Category already exists",
+                        icon: "error",
+                        button: "Try Again"
+                    });
+                } else {
+                    swal({
+                        title: "Error!",
+                        text: error.message,
+                        icon: "error",
+                        button: "Try Again"
+                    });
+                }
+            });
+            
+            return false;
+        }
+        
+        function displayErrorMessage(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function clearErrorMessages() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(element => {
+                element.textContent = '';
+                element.style.display = 'none';
+            });
+        }
+    </script>
+
+</html>

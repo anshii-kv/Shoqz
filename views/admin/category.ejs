@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoqz - Category Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff 0%, #764ba2 100%);
+            color: #346ccc;
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.03"><circle cx="30" cy="30" r="2"/></g></g></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #182f95 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        /* Search and Add Category Container */
+        .search-add-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-container {
+            display: flex;
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #2d3748;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .search-button {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .add-category-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: #fff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 8px 32px rgba(72, 187, 120, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .add-category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(72, 187, 120, 0.4);
+        }
+        
+        /* Categories Table Container */
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .categories-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .categories-table th, .categories-table td {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .categories-table thead th {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-weight: 700;
+            color: #4a5568;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .categories-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .categories-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-1px);
+        }
+
+        /* Action buttons container */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .table-btn, .btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 70px;
+            justify-content: center;
+        }
+
+        .table-btn:hover, .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-blue, .ash-grey-btn {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-blue:hover, .ash-grey-btn:hover {
+            box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
+        }
+        
+        .btn-green, .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-green:hover, .btn-success:hover {
+            box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-red, .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+        }
+
+        .btn-red:hover, .btn-danger:hover {
+            box-shadow: 0 6px 16px rgba(245, 101, 101, 0.4);
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
+        }
+
+        .edit-btn:hover {
+            box-shadow: 0 6px 16px rgba(237, 137, 54, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #9ae6b4 0%, #68d391 100%);
+            color: #22543d;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #feb2b2 0%, #fc8181 100%);
+            color: #742a2a;
+        }
+
+        .rounded-pill {
+            border-radius: 50px;
+        }
+
+        /* Link styling */
+        .text-white {
+            color: white !important;
+            text-decoration: none;
+        }
+
+        .text-start {
+            text-align: left;
+        }
+        
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+        
+        .pagination-container a, .pagination-container span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a5568;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .pagination-container a:hover {
+            background: linear-gradient(135deg, #bdc0c9 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .pagination-container .current-page {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .header h2 {
+                font-size: 2rem;
+            }
+
+            .search-add-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .categories-table {
+                font-size: 0.875rem;
+            }
+
+            .categories-table th, .categories-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .table-btn, .btn {
+                width: 100%;
+                margin-bottom: 0.25rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .table-container:hover {
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+    </style>
+</head>
+<body>
+
+      <%-include("../../views/partials/admin/sidebar")%>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2><i class="fas fa-tags"></i> Category Management</h2>
+            <p>Manage your product categories with ease</p>
+        </div>
+
+        <!-- Search and Add Category Container -->
+        <div class="search-add-container">
+            <form action="/admin/category" method="GET" class="search-container">
+                <input type="text"  class="search-input"  name="search" placeholder="Search categories... " value="<%=search%>">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+            </form>
+            
+            <!-- Add Category Button -->
+             <a href="/admin/addingCategory" class="add-category-btn">
+                <i class="fas fa-plus"></i>
+                Add Category
+             </a>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="table-container">
+            <table class="categories-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i></th>
+                        <th><i class="fas fa-tag"></i> Name</th>
+                        <th><i class="fas fa-align-left"></i> Description</th>
+                        <th><i class="fas fa-percentage"></i> Offer</th>
+                        <th><i class="fas fa-gift"></i> Add/Remove Offer</th>
+                        <th><i class="fas fa-info-circle"></i> Status</th>
+                        <th><i class="fas fa-toggle-on"></i> List/Unlist</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% category.forEach(category => { %>
+                    <tr>
+                        <td></td>
+                        <td class="text-start"><%= category.name %></td>
+                        <td class="text-start"><%= category.description %></td>
+                        <td>
+                            <%=console.log(category.name)%>
+                            <%=console.log(category.offer)%>
+                            <%if(category.offer.discount_percentage ){%>
+                            <span class="badge alert-success"><%= category.offer.discount_percentage %>%</span>
+                            <%}else{%>
+                            <span class="badge" style="background: #e2e8f0; color: #4a5568;">0%</span>
+                            <%}%>
+                        </td>
+                        <td class="text-start">
+                            <% if(!category.offer.discount_percentage  || category.offer.discount_percentage  === 0) { %>
+                            <button class="btn ash-grey-btn">
+                                <a href="#" class="text-white" onclick="addOffer('<%=category._id%>')">
+                                    <i class="fas fa-plus"></i> Add
+                                </a>
+                            </button>
+                            <% } else { %>
+                            <button class="btn ash-grey-btn">
+                                <a href="#" class="text-white" onclick="removeOffer('<%=category._id%>')">
+                                    <i class="fas fa-times"></i> Remove
+                                </a>
+                            </button>
+                            <% } %>
+                        </td>
+                        <td class="text-start">
+                            <% if (category.isListed) { %>
+                            <span class="badge rounded-pill alert-success">
+                                <i class="fas fa-check-circle"></i> Listed
+                            </span>
+                            <% } else { %>
+                            <span class="badge rounded-pill alert-danger">
+                                <i class="fas fa-times-circle"></i> Unlisted
+                            </span>
+                            <% } %>
+                        </td>
+                        <td class="text-start">
+                            <% if (category.isListed) { %>
+                            <button class="btn btn-danger">
+                               <a href="/admin/listCategory?id=<%=category._id%>" class="text-white">
+                                <i class="fas fa-eye-slash"></i> Unlist
+                               </a> 
+                            </button>
+                            <% } else { %>
+                            <button class="btn btn-success">
+                                <a href="/admin/unlistCategory?id=<%=category._id%>" class="text-white">
+                                    <i class="fas fa-eye"></i> List
+                                </a>
+                            </button>
+                            <% } %>
+                        </td>
+                        <td class="text-start">
+                            <a href="/admin/editCategory?id=<%=category._id%>" class="btn edit-btn">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </td>
+                        <!-- <td class="text-start">
+                            <button class="btn delete-btn" onclick="deleteCategory('<%=category._id%>', '<%=category.name%>')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td> -->
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+            <span class="current-page"><%= i %></span>
+            <% } else { %>
+            <a href="?page=<%= i %>"><%= i %></a>
+            <% } %>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+            <% } %>
+        </div>
+    </div>
+   </body>
+    <script>
+        function openAddCategoryModal() {
+            // You can implement a modal or redirect to an add category page
+            // For now, I'll leave a placeholder
+            alert('Add Category functionality to be implemented');
+        }
+
+        // Delete Category Function
+        // function deleteCategory(categoryId, categoryName) {
+        //     swal({
+        //         title: "Are you sure?",
+        //         text: `You are about to delete the category "${categoryName}". This action cannot be undone!`,
+        //         icon: "warning",
+        //         buttons: {
+        //             cancel: {
+        //                 text: "Cancel",
+        //                 value: null,
+        //                 visible: true,
+        //                 className: "btn-cancel",
+        //                 closeModal: true,
+        //             },
+        //             confirm: {
+        //                 text: "Yes, Delete!",
+        //                 value: true,
+        //                 visible: true,
+        //                 className: "btn-danger",
+        //                 closeModal: true
+        //             }
+        //         },
+        //         dangerMode: true,
+        //     })
+        //     .then((willDelete) => {
+        //         if (willDelete) {
+        //             // Make the delete request
+        //             fetch(`/admin/deleteCategory?id=${categoryId}`, {
+        //                 method: 'DELETE',
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                 }
+        //             })
+        //             .then(response => {
+        //                 if (!response.ok) {
+        //                     return response.json().then(err => {
+        //                         throw new Error(err.error || 'Failed to delete category');
+        //                     });
+        //                 }
+        //                 return response.json();
+        //             })
+        //             .then(data => {
+        //                 swal({
+        //                     title: "Deleted!",
+        //                     text: `Category "${categoryName}" has been deleted successfully.`,
+        //                     icon: "success",
+        //                 }).then(() => {
+        //                     location.reload();
+        //                 });
+        //             })
+        //             .catch(error => {
+        //                 swal({
+        //                     title: "Error!",
+        //                     text: error.message || "Failed to delete category. Please try again.",
+        //                     icon: "error",
+        //                 });
+        //             });
+        //         }
+        //     });
+        // }
+
+        // Add Offer Function
+        async function addOffer(categoryId) {
+    const value = await swal({
+        title: "Add Category Offer",
+        text: "Enter the offer percentage (0-100):",
+        content: "input",
+        button: {
+            text: "Add Offer",
+            closeModal: false,
+        },
+    });
+
+    if (value === null) return;
+
+    const offerPercentage = parseInt(value);
+
+    if (isNaN(offerPercentage) || offerPercentage < 0 || offerPercentage > 100) {
+        swal({
+            title: "Invalid Input",
+            text: "Please enter a valid percentage between 0 and 100.",
+            icon: "error",
+        });
+        return;
+    }
+
+    try {
+        const response = await fetch(`/admin/addCategoryOffer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                categoryId: categoryId,
+                offerPercentage: offerPercentage
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Failed to add offer');
+        }
+
+        const data = await response.json();
+        console.log("Data",data)
+        await swal({
+            title: "Success!",
+            text: `Offer of ${offerPercentage}% has been added successfully.`,
+            icon: "success",
+        });
+
+        location.reload();
+
+    } catch (error) {
+        swal({
+            title: "Error!",
+            text: error.message || "Failed to add offer. Please try again.",
+            icon: "error",
+        });
+    }
+}
+
+
+        // Remove Offer Function
+        function removeOffer(categoryId) {
+            swal({
+                title: "Remove Category Offer",
+                text: "Are you sure you want to remove this category offer?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willRemove) => {
+                if (willRemove) {
+                    fetch(`/admin/removeCategoryOffer`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            categoryId: categoryId
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.error || 'Failed to remove offer');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        swal({
+                            title: "Removed!",
+                            text: "Category offer has been removed successfully.",
+                            icon: "success",
+                        }).then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        swal({
+                            title: "Error!",
+                            text: error.message || "Failed to remove offer. Please try again.",
+                            icon: "error",
+                        });
+                    });
+                }
+            });
+        }
+
+        function deleteCategory(categoryId, categoryName) {
+            swal({
+                title: "Are you sure?",
+                text: `You are about to delete the category "${categoryName}". This action cannot be undone!`,
+                icon: "warning",
+                buttons: {
+                    cancel: {
+                        text: "Cancel",
+                        value: null,
+                        visible: true,
+                        className: "btn-cancel",
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Yes, Delete!",
+                        value: true,
+                        visible: true,
+                        className: "btn-danger",
+                        closeModal: true
+                    }
+                },
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    // Make the delete request
+                    fetch(`/admin/deleteCategory?id=${categoryId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.error || 'Failed to delete category');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        swal({
+                            title: "Deleted!",
+                            text: `Category "${categoryName}" has been deleted successfully.`,
+                            icon: "success",
+                        }).then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        swal({
+                            title: "Error!",
+                            text: error.message || "Failed to delete category. Please try again.",
+                            icon: "error",
+                        });
+                    });
+                }
+            });
+        }
+
+        const descriptionId = "description";
+
+        function FormSubmit(event) {
+            event.preventDefault();
+            if (!validateForm()) {
+                return;
+            }
+            const name = document.getElementsByName("name")[0].value;
+            const description = document.getElementById(descriptionId).value;
+
+            fetch("/admin/addCategory", {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                location.reload();
+            })
+            .catch(error => {
+                if (error.message === "Category already exists") {
+                    swal({
+                        icon: "error",
+                        title: "Oops",
+                        text: "Category already exists"
+                    });
+                } else {
+                    swal({
+                        icon: "error",
+                        title: "Oops",
+                        text: "An error occurred while adding the category"
+                    });
+                }
+            });
+        }
+
+        function validateForm() {
+            clearErrorMessages();
+            const name = document.getElementById("name").value.trim();
+            const description = document.getElementById(descriptionId).value.trim();
+            
+            let isValid = true;
+
+            if (name === '') {
+                displayErrorMessage("name-error", "Please enter a name");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                displayErrorMessage("name-error", "Category name can contain only alphabetic characters");
+                isValid = false;
+            }
+            
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description");
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            document.getElementById(elementId).innerText = message;
+            document.getElementById(elementId).style.display = "block";
+        }
+
+        function clearErrorMessages() {
+            document.querySelectorAll(".error-message").forEach(element => {
+                element.innerText = "";
+                element.style.display = "none";
+            });
+        }
+    </script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+</html>

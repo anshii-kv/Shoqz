@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - ZENVOGUE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        a.text-decoration-none {
+            color: black;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a.text-decoration-none:hover {
+            color: #bdd5eb;
+        }
+
+        .breadcrumb-option {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+        }
+
+        .breadcrumb__text h4 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .card-title::after {
+            content: "";
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            border: none;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(189, 213, 235, 0.3);
+            background: linear-gradient(45deg, #a9c1d6, #bdd5eb);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            transition: all 0.3s ease-in-out;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+            transition: all 0.3s ease-in-out;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            transition: all 0.3s ease-in-out;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            transition: all 0.3s ease-in-out;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+        }
+
+        .table th {
+            padding: 15px;
+            text-align: center;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f0f8ff;
+            transform: scale(1.001);
+            transition: all 0.3s;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-processing {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-shipped {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #bdd5eb;
+        }
+
+        .product-details {
+            text-align: left;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .product-category {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .search-filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            border-color: #bdd5eb;
+            box-shadow: 0 0 0 0.2rem rgba(189, 213, 235, 0.25);
+        }
+
+        .form-select:focus {
+            border-color: #bdd5eb;
+            box-shadow: 0 0 0 0.2rem rgba(189, 213, 235, 0.25);
+        }
+
+        .order-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 1;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #bdd5eb;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .page-link {
+            color: #bdd5eb;
+            border-color: #bdd5eb;
+        }
+
+        .page-link:hover {
+            background-color: #bdd5eb;
+            border-color: #bdd5eb;
+            color: white;
+        }
+
+        .page-item.active .page-link {
+            background-color: #bdd5eb;
+            border-color: #bdd5eb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 15px;
+            }
+            
+            .table-responsive {
+                font-size: 0.8em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .product-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .order-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <section style="background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="container py-4">
+            <div class="row pt-3">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text pt-3">
+                        <h4><i class="fas fa-shopping-bag me-2"></i> Order Management</h4>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                <li class="breadcrumb-item"><a href="/profile">Profile</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Orders</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section style="background-color: #f8f9fa; min-height: 100vh;">
+        <div class="container py-5">
+            <!-- Order Statistics -->
+            <div class="order-stats">
+                <div class="stat-card">
+                    <div class="stat-number">25</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Delivered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Processing</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="search-filter-section">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Search orders..." id="searchInput">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="dateFilter">
+                            <option value="">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="applyFilters()">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-list me-2"></i>Order History
+                    </h5>
+                    
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Product Name</th>
+                                        <th>Price</th>
+                                        <th>Order Date</th>
+                                        <th>Expiry Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTableBody">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>
+                                            <div class="product-info">
+                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
+                                                <div class="product-details">
+                                                    <div class="product-name">Premium Cotton T-Shirt</div>
+                                                    <div class="product-category">Men's Clothing</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="price">₹1,299</td>
+                                        <td>2024-01-15</td>
+                                        <td>2024-02-15</td>
+                                        <td><span class="status-badge status-delivered">Delivered</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn btn-info" onclick="viewOrder(1)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn btn-warning" onclick="returnOrder(1)">
+                                                    <i class="fas fa-undo"></i> Return
+                                                </button>
+                                                <button class="action-btn btn-success" onclick="downloadInvoice(1)">
+                                                    <i class="fas fa-download"></i> Invoice
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>
+                                            <div class="product-info">
+                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
+                                                <div class="product-details">
+                                                    <div class="product-name">Wireless Bluetooth Headphones</div>
+                                                    <div class="product-category">Electronics</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="price">₹2,499</td>
+                                        <td>2024-01-18</td>
+                                        <td>2024-02-18</td>
+                                        <td><span class="status-badge status-processing">Processing</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn btn-info" onclick="viewOrder(2)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn btn-primary" onclick="trackOrder(2)">
+                                                    <i class="fas fa-truck"></i> Track
+                                                </button>
+                                                <button class="action-btn btn-danger" onclick="cancelOrder(2)">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>
+                                            <div class="product-info">
+                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
+                                                <div class="product-details">
+                                                    <div class="product-name">Designer Handbag</div>
+                                                    <div class="product-category">Women's Accessories</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="price">₹3,799</td>
+                                        <td>2024-01-20</td>
+                                        <td>2024-02-20</td>
+                                        <td><span class="status-badge status-shipped">Shipped</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn btn-info" onclick="viewOrder(3)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn btn-primary" onclick="trackOrder(3)">
+                                                    <i class="fas fa-truck"></i> Track
+                                                </button>
+                                                <button class="action-btn btn-danger" onclick="cancelOrder(3)">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>
+                                            <div class="product-info">
+                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
+                                                <div class="product-details">
+                                                    <div class="product-name">Smart Watch Series 5</div>
+                                                    <div class="product-category">Electronics</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="price">₹8,999</td>
+                                        <td>2024-01-22</td>
+                                        <td>2024-02-22</td>
+                                        <td><span class="status-badge status-pending">Pending</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn btn-info" onclick="viewOrder(4)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn btn-success" onclick="payNow(4)">
+                                                    <i class="fas fa-credit-card"></i> Pay Now
+                                                </button>
+                                                <button class="action-btn btn-danger" onclick="cancelOrder(4)">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>
+                                            <div class="product-info">
+                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
+                                                <div class="product-details">
+                                                    <div class="product-name">Running Shoes</div>
+                                                    <div class="product-category">Sports & Fitness</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="price">₹4,299</td>
+                                        <td>2024-01-10</td>
+                                        <td>2024-02-10</td>
+                                        <td><span class="status-badge status-cancelled">Cancelled</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="action-btn btn-info" onclick="viewOrder(5)">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                <button class="action-btn btn-primary" onclick="reorder(5)">
+                                                    <i class="fas fa-redo"></i> Reorder
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        // View Order Function
+        function viewOrder(orderId) {
+            Swal.fire({
+                title: 'Order Details',
+                html: `
+                    <div class="text-start">
+                        <h5>Order #${orderId}</h5>
+                        <p><strong>Status:</strong> Processing</p>
+                        <p><strong>Order Date:</strong> 2024-01-15</p>
+                        <p><strong>Delivery Address:</strong> 123 Main Street, City</p>
+                        <p><strong>Payment Method:</strong> Credit Card</p>
+                        <p><strong>Total Amount:</strong> ₹1,299</p>
+                    </div>
+                `,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#bdd5eb'
+            });
+        }
+
+        // Track Order Function
+        function trackOrder(orderId) {
+            Swal.fire({
+                title: 'Order Tracking',
+                html: `
+                    <div class="text-start">
+                        <h5>Order #${orderId}</h5>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <strong>Order Placed</strong> - Jan 15, 2024
+                            </div>
+                            <div class="timeline-item">
+                                <strong>Processing</strong> - Jan 16, 2024
+                            </div>
+                            <div class="timeline-item">
+                                <strong>Shipped</strong> - Jan 18, 2024
+                            </div>
+                            <div class="timeline-item text-muted">
+                                <strong>Out for Delivery</strong> - Expected Jan 20, 2024
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#bdd5eb'
+            });
+        }
+
+        // Cancel Order Function
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: 'Cancel Order',
+                text: `Are you sure you want to cancel order #${orderId}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Cancel Order'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Cancelled!',
+                        text: 'Your order has been cancelled.',
+                        icon: 'success',
+                        confirmButtonColor: '#bdd5eb'
+                    });
+                }
+            });
+        }
+
+        // Return Order Function
+        function returnOrder(orderId) {
+            Swal.fire({
+                title: 'Return Order',
+                text: `Do you want to return order #${orderId}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Return Order'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Return Initiated!',
+                        text: 'Your return request has been submitted.',
+                        icon: 'success',
+                        confirmButtonColor: '#bdd5eb'
+                    });
+                }
+            });
+        }
+
+        // Download Invoice Function
+        function downloadInvoice(orderId) {
+            Swal.fire({
+                title: 'Download Invoice',
+                text: `Downloading invoice for order #${orderId}...`,
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Pay Now Function
+        function payNow(orderId) {
+            Swal.fire({
+                title: 'Payment',
+                text: `Redirecting to payment gateway for order #${orderId}...`,
+                icon: 'info',
+                confirmButtonColor: '#bdd5eb'
+            });
+        }
+
+        // Reorder Function
+        function reorder(orderId) {
+            Swal.fire({
+                title: 'Reorder',
+                text: `Adding items from order #${orderId} to cart...`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Apply Filters Function
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            // Here you would implement the actual filtering logic
+            console.log('Applying filters:', { searchTerm, statusFilter, dateFilter });
+            
+            Swal.fire({
+                title: 'Filters Applied',
+                text: 'Search results have been updated.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    </script>
+</body>
+</html>

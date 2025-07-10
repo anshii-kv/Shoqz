@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign Up Page</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Roboto:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            body {
+                display: flex;
+                min-height: 100vh;
+                justify-content: center;
+                align-items: center;
+                background-color: #f5f5f5;
+            }
+
+            .container {
+                display: flex;
+                width: 1000px;
+                height: 700px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+            }
+
+            .signup-container {
+                flex: 1;
+                padding: 30px 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                overflow-y: auto;
+            }
+
+            .image-container {
+                flex: 1;
+                background-color: #bdd5eb;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .image-container img {
+                max-width: 85%;
+                max-height: 65%;
+                margin-top: 30px;
+            }
+
+            .stylish-description {
+                width: 80%;
+                margin-bottom: 30px;
+                text-align: center;
+                font-family: "Poppins", sans-serif;
+                color: #333;
+                font-size: 24px;
+                font-weight: 600;
+                line-height: 1.6;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+                letter-spacing: 0.5px;
+            }
+
+            h2 {
+                font-family: "Poppins", sans-serif;
+                margin-bottom: 20px;
+                margin-top: 10px;
+                color: #333;
+                font-size: 28px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 6px;
+                color: #333;
+                font-size: 15px;
+            }
+
+            input[type="text"],
+            input[type="tel"],
+            input[type="email"],
+            input[type="password"] {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 15px;
+            }
+
+            .signup-btn {
+                background-color: #bdd5eb;
+                color: white;
+                border: none;
+                padding: 14px;
+                width: 100%;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: 600;
+                margin-top: 10px;
+                margin-bottom: 15px;
+            }
+
+            .signup-btn:hover {
+                background-color: #a9c1d6;
+            }
+
+            .google-signup-btn {
+                background-color: white;
+                color: #555;
+                border: 1px solid #ddd;
+                padding: 14px;
+                width: 100%;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+
+            .google-signup-btn:hover {
+                background-color: #f5f5f5;
+            }
+
+            .google-logo {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+            }
+
+            .divider {
+                display: flex;
+                align-items: center;
+                margin: 15px 0;
+            }
+
+            .divider-line {
+                flex-grow: 1;
+                height: 1px;
+                background-color: #ddd;
+            }
+
+            .divider-text {
+                padding: 0 15px;
+                color: #777;
+                font-size: 14px;
+            }
+
+            .signup-link {
+                text-align: center;
+                font-size: 15px;
+                margin-top: 15px;
+            }
+
+            .signup-link a {
+                color: #bdd5eb;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+            .signup-link a:hover {
+                text-decoration: underline;
+            }
+
+            .error-message {
+                color: red;
+                font-size: 12px;
+                margin-top: 3px;
+                min-height: 16px;
+            }
+            /* Image Upload Styles */
+            .image-upload-container {
+                position: relative;
+                margin-bottom: 12px;
+            }
+
+            .image-upload-wrapper {
+                border: 2px dashed #bdd5eb;
+                border-radius: 8px;
+                padding: 20px;
+                text-align: center;
+                background-color: #f9f9f9;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .image-upload-wrapper:hover {
+                border-color: #a9c1d6;
+                background-color: #f0f8ff;
+            }
+
+            .image-upload-wrapper.dragover {
+                border-color: #4CAF50;
+                background-color: #e8f5e8;
+            }
+
+            #profileImage {
+                display: none;
+            }
+
+            .upload-icon {
+                font-size: 24px;
+                color: #bdd5eb;
+                margin-bottom: 8px;
+            }
+
+            .upload-text {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .upload-hint {
+                color: #999;
+                font-size: 12px;
+            }
+
+            .image-preview {
+                position: relative;
+                margin-top: 10px;
+                display: none;
+            }
+
+            .preview-image {
+                max-width: 100px;
+                max-height: 100px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid #bdd5eb;
+            }
+
+            .remove-image {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background-color: #ff4757;
+                color: white;
+                border: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .remove-image:hover {
+                background-color: #ff3742;
+            }
+            /* Image Upload Styles */
+.image-upload-container {
+    position: relative;
+    width: 100%;
+}
+
+.image-upload-wrapper {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.image-upload-wrapper:hover {
+    border-color: #007bff;
+    background-color: #f0f8ff;
+}
+
+.image-upload-wrapper.drag-over {
+    border-color: #007bff;
+    background-color: #e6f3ff;
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.upload-text {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: #666;
+}
+
+#profileImage {
+    display: none;
+}
+
+.image-preview {
+    display: none;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 200px;
+    margin: 0 auto;
+    border: 2px solid #ddd;
+}
+
+.preview-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.remove-image:hover {
+    background: rgba(255, 0, 0, 1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .image-upload-wrapper {
+        padding: 30px 15px;
+        min-height: 100px;
+    }
+    
+    .upload-icon {
+        font-size: 1.5rem;
+    }
+    
+    .upload-text {
+        font-size: 14px;
+    }
+    
+    .upload-hint {
+        font-size: 12px;
+    }
+}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="signup-container">
+                <h2>Create Your Account</h2>
+                <form id="signupform" action="/signup" method="post">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" name="name" id="name" placeholder="Enter your full name"   />
+                        <div id="nameError" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" placeholder="Enter your phone number"  />
+                        <div id="phoneError" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" name="email" id="email" placeholder="Enter your email"  />
+                        <div id="emailError" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" placeholder="Enter your password"  />
+                        <div id="passwordError" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+        
+                        />
+                        <div id="confirmPasswordError" class="error-message"></div>
+                    </div>
+                      <!-- Profile Image Upload -->
+                    <div class="form-group">
+                        <label for="profileImage">Profile Image (Optional)</label>
+                        <div class="image-upload-container">
+                            <div class="image-upload-wrapper" id="imageUploadWrapper">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">Click to upload or drag and drop</div>
+                                <div class="upload-hint">PNG, JPG or JPEG (max 5MB)</div>
+                            </div>
+                            <input type="file" name="profileImage" id="profileImage" accept="image/*" />
+                            <div class="image-preview" id="imagePreview">
+                                <img class="preview-image" id="previewImage" src="" alt="Preview" />
+                                <button type="button" class="remove-image" id="removeImage">×</button>
+                            </div>
+                        </div>
+                        <div id="profileImageError" class="error-message"></div>
+                    </div>
+
+                    <button type="submit" class="signup-btn">Sign Up</button>
+                </form>
+
+                <div class="divider">
+                    <div class="divider-line"></div>
+                    <div class="divider-text">OR</div>
+                    <div class="divider-line"></div>
+                </div>
+
+                <a
+                    href="/auth/google"
+                    class="google-signup-btn"
+                    style="display: inline-flex; align-items: center; text-decoration: none"
+                >
+                    <svg class="google-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24">
+                        <path
+                            fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                        />
+                        <path
+                            fill="#4285F4"
+                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                        />
+                        <path
+                            fill="#FBBC05"
+                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                        />
+                        <path
+                            fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                        />
+                    </svg>
+                    <span style="margin-left: 10px">Sign up with Google</span>
+                </a>
+
+                <div class="signup-link">Already have an account? <a href="/login">Login</a></div>
+            </div>
+            <div class="image-container">
+                <div class="stylish-description">Turn heads. Break norms. Define your style with Shoqz.</div>
+                <img src="user/footwear-master/images/shooooo.jpg" alt="Modern athletic shoe" />
+            </div>
+        </div>
+
+        <script>
+            
+            document.getElementById("signupform").addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                document.querySelectorAll(".error-message").forEach((el) => (el.textContent = ""));
+
+                const name = document.getElementById("name").value.trim();
+                const phone = document.getElementById("phone").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value;
+                const confirmPassword = document.getElementById("confirmPassword").value;
+
+                let hasError = false;
+
+                if (name.length < 3) {
+                    document.getElementById("nameError").textContent = "Full name must be at least 3 characters.";
+                    hasError = true;
+                } else if (!/^[A-Za-z][A-Za-z\s'-]*$/.test(name)) {
+                    document.getElementById("nameError").textContent =
+                        "Name must start with a letter and can only contain letters, spaces, hyphens, or apostrophes.";
+                    hasError = true;
+                } else {
+                    document.getElementById("nameError").textContent = "";
+                }
+
+                if (!/^\d{10}$/.test(phone)) {
+                    document.getElementById("phoneError").textContent = "Phone number must be 10 digits.";
+                    hasError = true;
+                }
+
+                if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+                    document.getElementById("emailError").textContent = "Enter a valid email address.";
+                    hasError = true;
+                }
+
+                if (password.length < 6) {
+                    document.getElementById("passwordError").textContent = "Password must be at least 6 characters.";
+                    hasError = true;
+                } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/.test(password)) {
+                    document.getElementById("passwordError").textContent =
+                        "Password must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character.";
+                    hasError = true;
+                } else {
+                    document.getElementById("passwordError").textContent = "";
+                }
+
+                if (password !== confirmPassword) {
+                    document.getElementById("confirmPasswordError").textContent = "Passwords do not match.";
+                    hasError = true;
+                }
+
+                if (hasError) return;
+
+                try {
+                    const response = await fetch("/signup", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            name,
+                            phone,
+                            email,
+                            password,
+                            cpassword: confirmPassword,
+                        }),
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Signup Successful",
+                            text: "Welcome aboard!",
+                            confirmButtonColor: "#3085d6",
+                        }).then(() => {
+                            window.location.href = "/verifyOtp";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Signup Failed",
+                            text: result.message || "Please try again.",
+                            confirmButtonColor: "#d33",
+                        });
+                    }
+                } catch (error) {
+                    console.log(error, "error");
+                }
+            });
+
+            
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    </body>
+</html>

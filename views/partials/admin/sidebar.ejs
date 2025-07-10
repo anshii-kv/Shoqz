@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoqz Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        
+        body {
+            display: flex;
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar {
+            width: 240px;
+            background-color: white;
+            height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #333;
+        }
+        
+        .logo span {
+            color: #5cd8c4;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #555;
+            text-decoration: none;
+        }
+        
+        .menu-item.active {
+            background-color: #e6f9f7;
+            color: #5cd8c4;
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .menu-item span {
+            font-size: 14px;
+        }
+        
+        .page-header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .chart-placeholder {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            color: #777;
+        }
+        
+        .orders-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .orders-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #f0f0f0;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .icon {
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .icon-dashboard {
+            background-color: #e6f9f7;
+            color: #5cd8c4;
+        }
+        
+        .icon-products {
+            background-color: #fff4e6;
+            color: #ff9843;
+        }
+        
+        .icon-add {
+            background-color: #eee6ff;
+            color: #8f5aff;
+        }
+        
+        .icon-categories {
+            background-color: #fff6e6;
+            color: #ffb443;
+        }
+        
+        .icon-users {
+            background-color: #e6e6ff;
+            color: #7d7dff;
+        }
+        
+        .icon-orders {
+            background-color: #f0f0f0;
+            color: #777;
+        }
+        
+        .icon-coupons {
+            background-color: #ffe6f0;
+            color: #ff4384;
+        }
+        
+        .icon-banners {
+            background-color: #e6fff0;
+            color: #43ff84;
+        }
+        
+        .icon-logout {
+            background-color: #f0f0ff;
+            color: #7043ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">Sho<span>qz</span></div>
+        
+        <a href="#" class="menu-item active">
+            <div class="icon icon-dashboard">📊</div>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="/admin/products" class="menu-item">
+            <div class="icon icon-products">🍪</div>
+            <span>Products</span>
+        </a>
+        
+        <a href="/admin/addProduct" class="menu-item">
+            <div class="icon icon-add">➕</div>
+            <span>Add Product</span>
+        </a>
+        
+        <a href="/admin/category" class="menu-item">
+            <div class="icon icon-categories">🏷️</div>
+            <span>Categories</span>
+        </a>
+        
+        <a href="/admin/user" class="menu-item">
+            <div class="icon icon-users">👥</div>
+            <span>Users</span>
+        </a>
+        
+        <a href="#" class="menu-item">
+            <div class="icon icon-orders">🛒</div>
+            <span>Orders</span>
+        </a>
+        
+        <a href="#" class="menu-item">
+            <div class="icon icon-coupons">🏷️</div>
+            <span>Coupons</span>
+        </a>
+        
+        <a href="#" class="menu-item">
+            <div class="icon icon-banners">🖼️</div>
+            <span>Banners</span>
+        </a>
+        
+        <a href="/admin/logout" class="menu-item">
+            <div class="icon icon-logout">🚪</div>
+            <span>Logout</span>
+        </a>
+    </div>

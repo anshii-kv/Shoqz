@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - ZENVOGUE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .edit-profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #bdd5eb 0%, #a9c1d6 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border: none;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body {
+            padding: 3rem;
+        }
+
+        .profile-image-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .profile-image-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-image-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #bdd5eb 0%, #a9c1d6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            border: 5px solid #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+
+        .profile-image-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-image-container:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-overlay i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        .image-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .image-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(45deg, #a9c1d6, #bdd5eb);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(189, 213, 235, 0.4);
+        }
+
+        .remove-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .remove-btn:hover {
+            background: linear-gradient(45deg, #da190b, #f44336);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h5 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #bdd5eb;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            border-color: #bdd5eb;
+            box-shadow: 0 0 0 0.2rem rgba(189, 213, 235, 0.25);
+            background: white;
+        }
+
+        .form-control:read-only {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(189, 213, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #a9c1d6, #bdd5eb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(189, 213, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .section-save-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .validation-message {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .breadcrumb-section {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+        }
+
+        .breadcrumb-item a {
+            color: #bdd5eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #a9c1d6;
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .loading .btn-text {
+            display: none;
+        }
+
+        .password-strength {
+            height: 4px;
+            margin-top: 5px;
+            border-radius: 2px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background: #dc3545; }
+        .strength-medium { background: #ffc107; }
+        .strength-strong { background: #28a745; }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .password-toggle:hover {
+            color: #495057;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .edit-profile-container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .card-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .profile-image,
+            .profile-image-placeholder {
+                width: 120px;
+                height: 120px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .section-save-btn .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Breadcrumb Section -->
+    <section class="breadcrumb-section">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/profile">Profile</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Profile</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Edit Profile Container -->
+    <div class="edit-profile-container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-user-edit me-2"></i>Edit Profile</h2>
+            </div>
+            <div class="card-body">
+                <!-- Profile Image Section -->
+                <div class="profile-image-section">
+                    <div class="profile-image-container">
+                        <div id="profileImageDisplay" class="profile-image-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="image-overlay" onclick="triggerFileInput()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="image-actions">
+                        <button class="image-action-btn upload-btn" onclick="triggerFileInput()">
+                            <i class="fas fa-upload"></i> Upload Photo
+                        </button>
+                        <button class="image-action-btn remove-btn" onclick="removeProfileImage()">
+                            <i class="fas fa-trash"></i> Remove Photo
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="profileImageInput" class="file-input" accept="image/*" onchange="handleImageUpload(event)">
+                </div>
+
+                <!-- Profile Form -->
+                   <!-- Personal Information Form -->
+            <form onsubmit="savePersonalInfo(event)" id="personalInfoForm">
+                <div class="form-section">
+                    <h5><i class="fas fa-user me-2"></i>Personal Information</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="firstName"
+                                name="name"
+                               value="<%=user.name %>"
+
+                                required
+                            />
+                            <div id="firstNameMessage" class="validation-message text-danger"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="email"
+                                name="email"
+                                value="<%=user.email%>"
+                                readonly
+                            />
+                            <small class="form-text text-muted">Email cannot be changed</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="mobile" class="form-label">
+                                <i class="fas fa-mobile-alt"></i> Mobile Number
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="mobile"
+                                name="phone"
+                                value="<%=user.phone%>"
+                                required
+                            />
+                            <div id="mobileMessage" class="validation-message text-danger"></div>
+                        </div>
+                    </div>
+
+                    <!-- Save Personal Information Button -->
+                    <div class="section-save-btn">
+                        <button type="submit" class="btn btn-primary" id="savePersonalInfoBtn">
+                            <span class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                            </span>
+                            <span class="btn-text">
+                                <i class="fas fa-save me-2"></i>Save Personal Information
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Password Change Form -->
+           
+            
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.js"></script>
+   <script>
+    // Main Profile Update Function
+async function savePersonalInfo(event) {
+    event.preventDefault();
+    
+    const saveBtn = document.getElementById('savePersonalInfoBtn');
+    const name = document.getElementById('firstName').value.trim();
+    const phone = document.getElementById('mobile').value.trim();
+    
+    // Basic validation
+    if (!name) {
+        document.getElementById('firstNameMessage').textContent = 'Name is required';
+        document.getElementById('firstNameMessage').classList.add('show');
+        return;
+    }
+    
+    if (!phone) {
+        document.getElementById('mobileMessage').textContent = 'Mobile number is required';
+        document.getElementById('mobileMessage').classList.add('show');
+        return;
+    }
+    
+    // Clear validation messages
+    document.getElementById('firstNameMessage').classList.remove('show');
+    document.getElementById('mobileMessage').classList.remove('show');
+    
+    // Show loading state
+    saveBtn.classList.add('loading');
+    saveBtn.disabled = true;
+    
+    console.log(name, phone);
+    
+    try {
+        const response = await fetch("/update-profile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId: "<%=user._id%>", name, phone }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            Swal.fire({
+                title: "Success!",
+                text: result.message,
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire("Failed!", result.message, "error");
+        }
+    } catch (err) {
+        console.error("Profile update error:", err);
+        Swal.fire("Error!", "Something went wrong", "error");
+    } finally {
+        // Remove loading state
+        saveBtn.classList.remove('loading');
+        saveBtn.disabled = false;
+    }
+}
+
+
+
+
+
+   </script>
+
+<script>
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === "password" ? "text" : "password";
+}
+</script>
+
+<script>
+async function changePassword(event) {
+  event.preventDefault();
+
+  const currentPassword = document.getElementById("currentPassword").value.trim();
+  const newPassword = document.getElementById("newPassword").value.trim();
+  const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+  const currentPasswordMessage = document.getElementById("currentPasswordMessage");
+  const newPasswordMessage = document.getElementById("newPasswordMessage");
+  const confirmPasswordMessage = document.getElementById("confirmPasswordMessage");
+
+  // Clear previous messages
+  currentPasswordMessage.textContent = "";
+  newPasswordMessage.textContent = "";
+  confirmPasswordMessage.textContent = "";
+
+  let hasError = false;
+
+  // Check if new passwords match
+  if (newPassword !== confirmPassword) {
+    confirmPasswordMessage.textContent = "Passwords do not match.";
+    hasError = true;
+  }
+
+  // Password strength check
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  if (newPassword && !strongPasswordRegex.test(newPassword)) {
+    newPasswordMessage.textContent = "Password must be 8+ characters with uppercase, lowercase, number, and special character.";
+    hasError = true;
+  }
+
+  // Check current password via backend
+  if (currentPassword) {
+    const response = await fetch("/edit-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ currentPassword }),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      currentPasswordMessage.textContent = "Current password is incorrect.";
+      hasError = true;
+    }
+  }
+
+  // Final submit
+  if (!hasError) {
+    document.getElementById("passwordChangeForm").submit();
+  }
+}
+</script>
+

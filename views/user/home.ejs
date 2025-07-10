@@ -1,0 +1,766 @@
+<%-include("../../views/partials/user/header")%>
+		<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footwear Collection</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .colorlib-intro {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .colorlib-intro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="0.5" fill="%23000" opacity="0.02"/><circle cx="75" cy="75" r="0.5" fill="%23000" opacity="0.02"/><circle cx="50" cy="10" r="0.5" fill="%23000" opacity="0.02"/><circle cx="10" cy="60" r="0.5" fill="%23000" opacity="0.02"/><circle cx="90" cy="40" r="0.5" fill="%23000" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .intro {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #2c3e50;
+            max-width: 800px;
+            margin: 0 auto;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .colorlib-product {
+            padding: 60px 0;
+        }
+
+        .featured {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            margin-bottom: 30px;
+        }
+
+        .featured:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .featured-img {
+            display: block;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .featured-img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+            transition: all 0.4s ease;
+        }
+
+        .featured:hover .featured-img::before {
+            background: linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.05));
+        }
+
+        .featured .desc {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        .featured:hover .desc {
+            transform: translateY(0);
+        }
+
+        .featured .desc h2 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .featured .desc h2 a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .featured .desc h2 a:hover {
+            color: #ffd700;
+        }
+
+        .colorlib-heading h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 50px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .colorlib-heading h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 2px;
+        }
+
+        .product-entry {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            height: 100%;
+        }
+
+        .product-entry:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: #007bff;
+        }
+
+        .prod-img {
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prod-img img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: all 0.4s ease;
+        }
+
+        .product-entry:hover .prod-img img {
+            transform: scale(1.05);
+        }
+
+        .prod-img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0,123,255,0.1), rgba(0,123,255,0.05));
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .product-entry:hover .prod-img::before {
+            opacity: 1;
+        }
+
+        .product-entry .desc {
+            padding: 25px 20px;
+            text-align: center;
+            background: white;
+        }
+
+        .product-entry .desc h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        .product-entry .desc h2 a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .product-entry .desc h2 a:hover {
+            color: #007bff;
+        }
+
+        .product-entry .price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #007bff;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,123,255,0.4);
+            background: linear-gradient(45deg, #0056b3, #004085);
+        }
+
+        .row-pb-md {
+            padding-bottom: 60px;
+        }
+
+        .mb-4 {
+            margin-bottom: 2rem !important;
+        }
+
+        @media (max-width: 768px) {
+            .intro {
+                font-size: 1.8rem;
+            }
+            
+            .colorlib-heading h2 {
+                font-size: 2.2rem;
+            }
+            
+            .featured {
+                margin-bottom: 20px;
+            }
+            
+            .featured-img {
+                height: 300px;
+            }
+        }
+
+        .loading-animation {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- <div class="colorlib-intro">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <h2 class="intro">It started with a simple idea: Create quality, well-designed products that I wanted myself.</h2>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    
+    <div class="colorlib-product">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6 text-center">
+                    <div class="featured loading-animation">
+                        <a href="#" class="featured-img" style="background-image: url(/user/footwear-master/images/men.jpg);"></a>
+                        <div class="desc">
+                            <h2><a href="#">Shop Men's Collection</a></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 text-center">
+                    <div class="featured loading-animation">
+                        <a href="#" class="featured-img" style="background-image: url(/user/footwear-master/images/women.jpg);"></a>
+                        <div class="desc">
+                            <h2><a href="#">Shop Women's Collection</a></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="colorlib-product">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
+                    <h2>Best Sellers</h2>
+                </div>
+            </div>
+            <div class="row row-pb-md">
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-1.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-2.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Minam Meaghan</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-3.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Men's Taja Commissioner</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-4.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Russ Men's Sneakers</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100"></div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-5.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-6.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-7.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-8.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100"></div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-9.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-10.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-11.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-12.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100"></div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-13.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-14.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-15.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4 text-center">
+                    <div class="product-entry border loading-animation">
+                        <a href="#" class="prod-img">
+                            <img src="/user/footwear-master/images/item-16.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+                        </a>
+                        <div class="desc">
+                            <h2><a href="#">Women's Boots Shoes Maca</a></h2>
+                            <span class="price">$139.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p><a href="#" class="btn btn-primary btn-lg">Shop All Products</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Staggered animation for product entries
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.loading-animation');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
+		<!-- <div class="colorlib-intro">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-12 text-center">
+						<h2 class="intro">It started with a simple idea: Create quality, well-designed products that I wanted myself.</h2>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="colorlib-product">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-sm-6 text-center">
+						<div class="featured">
+							<a href="#" class="featured-img" style="background-image: url(/user/footwear-master/images/men.jpg);"></a>
+							<div class="desc">
+								<h2><a href="#">Shop Men's Collection</a></h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6 text-center">
+						<div class="featured">
+							<a href="#" class="featured-img" style="background-image: url(/user/footwear-master/images/women.jpg);"></a>
+							<div class="desc">
+								<h2><a href="#">Shop Women's Collection</a></h2>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="colorlib-product">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
+						<h2>Best Sellers</h2>
+					</div>
+				</div>
+				<div class="row row-pb-md">
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-1.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-2.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Minam Meaghan</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-3.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Men's Taja Commissioner</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-4.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Russ Men's Sneakers</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="w-100"></div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-5.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-6.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-7.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-8.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="w-100"></div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-9.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-10.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-11.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-12.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="w-100"></div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-13.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-14.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-15.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 mb-4 text-center">
+						<div class="product-entry border">
+							<a href="#" class="prod-img">
+								<img src="/user/footwear-master/images/item-16.jpg" class="img-fluid" alt="Free html5 bootstrap 4 template">
+							</a>
+							<div class="desc">
+								<h2><a href="#">Women's Boots Shoes Maca</a></h2>
+								<span class="price">$139.00</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<p><a href="#" class="btn btn-primary btn-lg">Shop All Products</a></p>
+					</div>
+				</div>
+			</div>
+		</div> -->
+
+					
+		<%-include("../../views/partials/user/footer")%>
+
+		

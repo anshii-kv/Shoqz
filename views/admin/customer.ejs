@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .main-content {
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .page-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899);
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .page-title::before {
+            content: '👥';
+            font-size: 24px;
+            -webkit-text-fill-color: initial;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+            transform: translateY(0);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .customers-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .customers-header {
+            padding: 24px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .customers-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .customers-title::before {
+            content: '📊';
+            font-size: 16px;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.15);
+            background: white;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .search-input:focus + .search-icon {
+            color: #4f46e5;
+        }
+        
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .customer-table th,
+        .customer-table td {
+            padding: 18px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+        }
+        
+        .customer-table th {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .customer-table td {
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+        }
+        
+        .customer-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .customer-table tr:hover {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.03), rgba(124, 58, 237, 0.03));
+            transform: scale(1.002);
+            transition: all 0.2s ease;
+        }
+        
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .block-button {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+        
+        .block-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-top: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pagination-button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .pagination-button:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+        
+        .pagination-button.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        
+        .pagination-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-button.disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: rgba(148, 163, 184, 0.2);
+            color: #64748b;
+        }
+        
+        .pagination-ellipsis {
+            padding: 0 8px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .customers-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .search-container {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .customer-table th,
+            .customer-table td {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+        
+        /* Enhanced focus states */
+        .btn:focus,
+        .search-input:focus,
+        .pagination-button:focus {
+            outline: 2px solid #4f46e5;
+            outline-offset: 2px;
+        }
+        
+        /* Subtle animation for table rows */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .customer-table tbody tr {
+            animation: fadeInUp 0.3s ease-out both;
+        }
+        
+        .customer-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+        .customer-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+        .customer-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+        .customer-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+        .customer-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+
+    <%- include("../../views/partials/admin/sidebar") %>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="page-title">Customers</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary">Add New Customer</button>
+            </div>
+        </div>
+        
+        <div class="customers-container">
+            <div class="customers-header">
+                <div class="customers-title">Customer Management</div>
+                <div class="search-container">
+                    <form action="/admin/user" method="GET">
+                        <input 
+                            type="text" 
+                            class="search-input" 
+                            name="search" 
+                            placeholder="Search customers..." 
+                            value="<%= searchQuery %>"
+                        >
+                        <span class="search-icon">🔍</span>
+                    </form>
+                </div>
+            </div>
+            
+            <table class="customer-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0;i<data.length;i++){%>
+                    <tr>
+                        <td><%=data[i].name %></td>
+                        <td><%=data[i].email%></td>
+                        <td><%=data[i].phone%></td>
+                        <td>
+                            <% if (!data[i].isBlocked) { %>
+                                <button class="action-button block-button" onclick="confirmBlock('<%= data[i]._id %>')">Block</button>
+                            <% } else { %>
+                                <button class="action-button block-button" onclick="confirmUnblock('<%= data[i]._id %>')">Unblock</button>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% } %>      
+                </tbody>
+            </table>
+            
+            <!-- Updated pagination section -->
+            <div class="pagination">
+                <div class="pagination-info">
+                    <% if (totalCustomers > 0) { %>
+                        Showing <%= showing.start %> to <%= showing.end %> of <%= showing.total %> entries
+                    <% } else { %>
+                        No customers found
+                    <% } %>
+                </div>
+                
+                <div class="pagination-buttons">
+                    <!-- Previous page button -->
+                    <% if (currentPage > 1) { %>
+                        <a href="/admin/user?page=<%= currentPage - 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>" 
+                           class="pagination-button">«</a>
+                    <% } else { %>
+                        <span class="pagination-button disabled">«</span>
+                    <% } %>
+                    
+                    <% 
+                    // Logic to show appropriate page numbers
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    
+                    // Adjust if we're near the end
+                    if (endPage - startPage < 4 && startPage > 1) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    %>
+                    
+                    <!-- First page link if not in first group -->
+                    <% if (startPage > 1) { %>
+                        <a href="/admin/user?page=1<%= searchQuery ? '&search=' + searchQuery : '' %>" 
+                           class="pagination-button">1</a>
+                        
+                        <% if (startPage > 2) { %>
+                            <span class="pagination-ellipsis">...</span>
+                        <% } %>
+                    <% } %>
+                    
+                    <!-- Page number buttons -->
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                        <% if (i === currentPage) { %>
+                            <span class="pagination-button active"><%= i %></span>
+                        <% } else { %>
+                            <a href="/admin/user?page=<%= i %><%= searchQuery ? '&search=' + searchQuery : '' %>" 
+                               class="pagination-button"><%= i %></a>
+                        <% } %>
+                    <% } %>
+                    
+                    <!-- Last page link if not in last group -->
+                    <% if (endPage < totalPages) { %>
+                        <% if (endPage < totalPages - 1) { %>
+                            <span class="pagination-ellipsis">...</span>
+                        <% } %>
+                        
+                        <a href="/admin/user?page=<%= totalPages %><%= searchQuery ? '&search=' + searchQuery : '' %>" 
+                           class="pagination-button"><%= totalPages %></a>
+                    <% } %>
+                    
+                    <!-- Next page button -->
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/admin/user?page=<%= currentPage + 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>" 
+                           class="pagination-button">»</a>
+                    <% } else { %>
+                        <span class="pagination-button disabled">»</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+     function confirmBlock(userId){
+        swal({
+            tittle:"Are you sure?",
+            text:"You want to block this user!",
+            icon:"warning",
+            buttons:["Cancel","Block!"]
+        }).then((willBlock) => {
+                if (willBlock) {
+                    fetch(`/admin/blockCustomer?id=${userId}`,{
+                        method:'PATCH'
+                    })
+                        .then(() => {
+                            swal("Blocked!", "User has been blocked.", "success")
+                                .then(() => location.reload());
+                        })
+                        .catch(() => {
+                            swal("Error!", "Something went wrong.", "error");
+                        });
+                }
+     });
+    }
+      function confirmUnblock(userId) {
+            swal({
+                title: "Are you sure?",
+                text: "You want to unblock this user!",
+                icon: "warning",
+                buttons: ["Cancel"," Unblock!"],
+            }).then((willUnblock) => {
+                if (willUnblock) {
+                    fetch(`/admin/unblockCustomer?id=${userId}`,{
+                        method:"PATCH"
+                    })
+                        .then(() => {
+                            swal("Unblocked!", "User has been unblocked.", "success")
+                                .then(() => location.reload());
+                        })
+                        .catch(() => {
+                            swal("Error!", "Something went wrong.", "error");
+                        });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

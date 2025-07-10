@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Shoqz Admin Login</title>
+    </head>
+    <body style="margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; height: 100vh; display: flex; justify-content: center; align-items: center;">
+        <div style="position: absolute; top: 20px; left: 20px; font-size: 28px; font-weight: 700; color: #333;">Sho<span style="color: #b3e0ed;">qz</span></div>
+
+        <div style="background-color: #fff; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); width: 400px; overflow: hidden;">
+            <div style="background-color: #b3e0ed; color: white; padding: 25px 20px; text-align: center; font-size: 24px; font-weight: 600;">Admin Login</div>
+            <div style="padding: 30px;">
+                <form id="login-form">
+                    <div style="margin-bottom: 20px;">
+                        <label for="email" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Email</label>
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            required
+                            style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#3949ab'; this.style.outline='none'; this.style.boxShadow='0 0 0 2px rgba(57, 73, 171, 0.2)';"
+                            onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
+                        />
+                        <div id="email-error" style="color: #e53935; font-size: 14px; margin-top: 5px; display: none;">Please enter a valid email</div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label for="password" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333; font-size: 14px;">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                            style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border-color 0.3s;"
+                            onfocus="this.style.borderColor='#3949ab'; this.style.outline='none'; this.style.boxShadow='0 0 0 2px rgba(57, 73, 171, 0.2)';"
+                            onblur="this.style.borderColor='#ddd'; this.style.boxShadow='none';"
+                        />
+                        <div id="password-error" style="color: #e53935; font-size: 14px; margin-top: 5px; display: none;">Please enter your password</div>
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <a href="adminLogin" style="color: #b3e0ed; text-decoration: none; font-size: 14px;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">Forgot password?</a>
+                    </div>
+                    <button 
+                        type="submit" 
+                        style="background-color: #b3e0ed; color: white; border: none; border-radius: 5px; padding: 12px 0; width: 100%; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 0.3s;"
+                        onmouseover="this.style.backgroundColor='#90bef0';"
+                        onmouseout="this.style.backgroundColor='#b3e0ed';"
+                    >Login</button>
+                </form>
+            </div>
+            <div style="text-align: center; padding: 15px 30px; border-top: 1px solid #eee; color: #666; font-size: 14px;">Shoqz Admin Portal &copy; 2025. All rights reserved.</div>
+        </div>
+    </body>
+            <script>
+                const form = document.getElementById("login-form");
+                const emailInput = document.getElementById("email");
+                const passwordInput = document.getElementById("password");
+                const emailError = document.getElementById("email-error");
+                const passwordError = document.getElementById("password-error");
+
+                function validateEmail() {
+                    const emailValue = emailInput.value.trim();
+                    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                    if (!emailPattern.test(emailValue)) {
+                        emailError.style.display = "block";
+                        emailError.innerHTML = "Invalid email format";
+                        return false;
+                    } else {
+                        emailError.style.display = "none";
+                        emailError.innerHTML = "";
+                        return true;
+                    }
+                }
+
+                function validatePassword() {
+                    const passwordValue = passwordInput.value.trim();
+
+                    if (passwordValue === "") {
+                        passwordError.style.display = "block";
+                        passwordError.innerHTML = "Password cannot be empty";
+                        return false;
+                    } else {
+                        passwordError.style.display = "none";
+                        passwordError.innerHTML = "";
+                        return true;
+                    }
+                }
+
+                form.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const isEmailValid = validateEmail();
+                    const isPasswordValid = validatePassword();
+
+                    if (!isEmailValid || !isPasswordValid) {
+                        return;
+                    }
+                    //  Send data to back end:
+                    const loginData = {
+                        email: emailInput.value.trim(),
+                        password: passwordInput.value.trim(),
+                    };
+
+                 try {
+                        const response = await fetch("/admin/login", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(loginData),
+                        });
+                        const data = await response.json();
+                        console.log(data, "res");
+                        if (data.message == "AdminLogin successfully") {
+                            swal({
+                                title: "Success!",
+                                text: "Signup successful!",
+                                icon: "success",
+                                timer: 2000,
+                                buttons: false,
+                            }).then(() => {
+                                window.location.href = "/admin/";
+                            });
+                        } else if (data.message === "Admin not found") {
+                            swal({
+                                title: "Failed!",
+                                text: "User not found",
+                                icon: "error",
+                                timer: 2000,
+                                buttons: false,
+                            });
+                        } else if (data.message === "Password does not match") {
+                            swal({
+                                title: "Failed!",
+                                text: "Password does not match",
+                                icon: "error",
+                                timer: 2000,
+                                buttons: false,
+                            });
+                        } else if (data.message === "User blocked by admin") {
+                            swal({
+                                title: "Failed!",
+                                text: "User blocked by admin",
+                                icon: "error",
+                                timer: 2000,
+                                buttons: false,
+                            });
+                        }
+                    } catch (error) {
+                        swal("Error!", "Something went wrong. Try again.", "error");
+                    }
+                });
+            </script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        </div>
+    
+</html>
