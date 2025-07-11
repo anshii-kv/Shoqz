@@ -637,50 +637,52 @@ select {
             <h2>Update Product</h2> 
             <form id="product-form" method="post" action="/admin/updateProduct" enctype="multipart/form-data" onsubmit="return validateForm(event)">
                 <input type="hidden" id="productId" name="productId" value="product123">
-                
+                <%=console.log(product,'sldfj')%>
                 <div class="form-group">
                     <label for="productName">Product Name</label>
-                    <input type="text" id="productName" name="productName" placeholder="Type here" value="Sample Product">
+                    <input type="text" id="productName" name="productName" placeholder="Type here" value="<%= product.productName %>">>
                     <div id="productName-error" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="description">Full Description</label>
-                    <textarea id="description" name="description" placeholder="Type here">Sample description</textarea>
+                    <textarea id="description" name="description" placeholder="Type here" value="<%= product.description %>">Sample description</textarea>
                     <div id="description-error" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="regularPrice">Regular Price</label>
-                    <input type="number" id="regularPrice" name="regularPrice" step="0.01" value="100.00">
+                    <input type="number" id="regularPrice" name="regularPrice" value="<%= product.regularPrice %>" step="0.01" value="100.00">
                     <div id="regularPrice-error" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="salePrice">Sale Price</label>
-                    <input type="number" id="salePrice" name="salePrice" step="0.01" value="80.00">
+                    <input type="number" id="salePrice" name="salePrice" value="<%= product.salePrice%>" step="0.01" value="80.00">
                     <div id="salePrice-error" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="productOffer">Product Offer Percentage</label>
-                    <input type="number" id="productOffer" name="productOffer" min="0" max="100" step="1" placeholder="Enter % discount (0-100)" value="20">
+                    <input type="number" id="productOffer" name="productOffer" min="0" max="100" step="1" placeholder="Enter % discount (0-100)" value="0">
                     <div id="productOffer-error" class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
                     <label>Size Variants</label>
                     <div class="variants-container" id="variants-container">
+                        <% product.sizes.forEach(size=>{ %>
                         <div class="variant-row">
-                            <input type="text" name="sizes[]" placeholder="Size (1-10)" value="8">
-                            <input type="number" name="quantities[]" placeholder="Stock" value="50" min="0">
+                            <input type="text" name="sizes[]" placeholder="Size (1-10)" value="<%=size.size%>">
+                            <input type="number" name="quantities[]" placeholder="Stock" value="<%=size.quantity%>" " min="0">
                             <button type="button" class="remove-btn btn btn-danger" onclick="removeVariant(this)">Remove</button>
                         </div>
-                        <div class="variant-row">
+                        <%})%>
+                        <!-- <div class="variant-row">
                             <input type="text" name="sizes[]" placeholder="Size (1-10)" value="9">
                             <input type="number" name="quantities[]" placeholder="Stock" value="30" min="0">
                             <button type="button" class="remove-btn btn btn-danger" onclick="removeVariant(this)">Remove</button>
-                        </div>
+                        </div> -->
                     </div>
                     <button type="button" class="btn btn-primary" onclick="addVariant()">Add Size Variant</button>
                     <div id="sizeVariants-error" class="error-message"></div>
@@ -689,9 +691,11 @@ select {
                 <div class="form-group">
                     <label for="category">Category</label>
                     <select id="category" name="category">
-                        <option value="cat1" selected>Category 1</option>
-                        <option value="cat2">Category 2</option>
-                        <option value="cat3">Category 3</option>
+                        <%category.forEach(categories=>{%>
+                        <option value="cat1" selected><%=categories.name%></option>
+                        <%})%>
+                        <!-- <option value="cat2">Category 2</option>
+                        <option value="cat3">Category 3</option> -->
                     </select>
                     <div id="category-error" class="error-message"></div>
                 </div>

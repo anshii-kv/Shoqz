@@ -4,11 +4,12 @@ const bcrypt = require ('bcrypt');
 const User = require("../../model/userSchema")
 const Offer =require("../../model/offer")
 
-
+const Order =require("../../model/orderSchema")
 
 
 const loadLogin =async(req,res)=>{
     try{
+        console.log(req.session.admin,'dfsdfl')
     if(req.session.admin){
         return res.redirect('/admin/dashboard')
     }
@@ -30,10 +31,13 @@ const adminLogin =async (req,res)=>{
         if(!adminMatch){
             return res.status(404).json({message:'Admin not found'})
         }
+        console.log('daaaa')
         const isPasswordVaild = await bcrypt.compare(password, adminMatch.password);
+        console.log(isPasswordVaild,'valid')
         if (!isPasswordVaild){
             return res.status(401).json({message:"Password does not match"})
         }
+        console.log(adminMatch,'dflsdfjdslfjsdofjsldjf')
         req.session.name = adminMatch.name;
         req.session.admin=adminMatch._id;
         req.session.adminEmail=adminMatch.email;

@@ -29,8 +29,11 @@
                                             <hr class="my-4" />
 
                                             <div id="cartItems">
+                                                 
                                                 <% if (cartdata && cartdata.product.length > 0) { %>
+                                                   
                                                 <% cartdata.product.forEach((item, index) => { %>
+                                                    <%= console.log("heyyy")%>
                                                 <div class="card mb-3" data-product-id="<%= item.productId._id %>">
                                                     <div class="row g-0 align-items-center">
                                                         <div class="col-md-3 text-center">
@@ -393,6 +396,7 @@
                 // Initialize quantity buttons state
                 document.querySelectorAll('[data-product-id]').forEach((item) => {
                     const productId = item.getAttribute('data-product-id');
+                    console.log(productId,'fdlfjl')
                     const quantityElement = item.querySelector('.quantity-display');
                     if (!quantityElement) {
                         console.warn(`No quantity-display found for product ID: ${productId}`);

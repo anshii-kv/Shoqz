@@ -239,7 +239,7 @@ const loadUpdatePage = async (req, res) => {
         }
 
         const category = await Category.find({});
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId).populate('category')
 
         if (!product) {
             return res.status(404).send("Product not found");

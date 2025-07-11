@@ -6,6 +6,7 @@ const orderController = require("../controllers/user/orderController")
 const {userAuth} = require ('../middlewares/userAuth')
 const passport = require('../config/passport');
 const orderSchema = require('../model/orderSchema');
+router.use(express.json());
 
 router.set("views","./views/user")
 
@@ -102,6 +103,8 @@ router.get('/checkout',usercontroller.loadCheckout);
 
 
 
+
+
 router.get('/profile',usercontroller.loadProfile);
 
 router.post('/update-profile',usercontroller.updateProfile)
@@ -123,8 +126,9 @@ router.patch('/editAddress',addressController.editAddress)
 
 router.delete('/deleteAddress',addressController.deleteAddress)
 
-router.get('/thankyou',usercontroller.loadThankyou)
+router.get('/thankyou/:orderId',usercontroller.loadThankyou)
 
 router.get('/order',orderController.loadOrder)
 
+router.post('/submitOrder',orderController.placeOrder)
 module.exports=router;

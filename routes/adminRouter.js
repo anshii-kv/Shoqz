@@ -9,7 +9,7 @@ const categoryController =require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController')
 const path = require("path");
 const { adminAuth } = require('../middlewares/userAuth');
-
+const orderController=require("../controllers/admin/orderController")
 
 router.get("/adminLogin",admincontroller.loadLogin);
 
@@ -109,7 +109,7 @@ router.post('/updateProduct',adminAuth,uploads.array("croppedImages", 4),product
 
 
 
-
+router.get('/orderDetails',orderController.loadOrder)
 
 
 

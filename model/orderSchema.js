@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 
-const OrderModel = new mongoose.Schema({
+const OrderSchema = new mongoose.Schema({
   
     deliveryDetails: {
       fname: {
@@ -60,10 +60,7 @@ const OrderModel = new mongoose.Schema({
         type: Number,
         required: true,
       },
-      brand: {
-        type: String,
-        required: true,
-      },
+      
       category: {
         type:mongoose.Types.ObjectId ,
         ref:"Category",
@@ -83,9 +80,9 @@ const OrderModel = new mongoose.Schema({
   status: {
     type: String,
   },
-  paymentId: {
-    type: String,
-  },
+  // paymentId: {
+  //   type: String,
+  // },
 });
 
-module.exports = mongoose.model("order", OrderModel);
+module.exports = mongoose.model("order", OrderSchema);

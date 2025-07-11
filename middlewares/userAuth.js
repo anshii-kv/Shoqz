@@ -1,31 +1,103 @@
-const User = require("../model/userSchema");
+const User = require('../model/userSchema');
 
-
-const userAuth = async (req, res, next) => {
+const userAuth = (req, res, next) => {
     if (req.session.user) {
-        try {
-            const user = await User.findById(req.session.user);
-            if (user && !user.isBlocked) {
-                next();
-            } else {
-                res.redirect("/login");
-            }
-        } catch (error) {
-            console.log("Error in user auth middleware");
-            res.status(500).send("Internal Server Error");
-        }
+        User.findById(req.session.user)
+            .then(data => {
+                if (data && !data.isBlocked) {
+                    req.user = data;
+                    next();
+                } else {
+                    req.session.user = null;
+                    req.session.save((err) => {
+                        if (err) console.log('Session save error:', err);
+                        res.redirect('/user-login');
+                    });
+                }
+            }).catch(error => {
+                console.log('Error in user auth middleware', error);
+                res.status(500).send("internal server error");
+            });
     } else {
-        res.redirect("/login");
+        res.redirect('/user-login');
     }
 };
 
-const adminAuth = (req, res, next) => {
-    if (req.session.admin) {
-        next();
-    } else {
-        res.redirect("/admin/login");
+const adminAuth = async (req, res, next) => {
+    try {
+        if (!req.session.name || !req.session.admin || !req.session.adminEmail) {
+            return res.redirect('/admin/adminLogin');
+        }
+
+        const admin = await User.findOne({
+            _id: req.session.admin,
+            isAdmin: true
+        }).select('email isAdmin');
+
+        if (!admin) {
+            req.session.admin = null;
+            return res.redirect('/admin/adminLogin');
+        }
+
+        req.session.admin = {
+            _id: admin._id,
+            email: admin.email,
+            isAdmin: admin.isAdmin
+        };
+
+        req.session.save((err) => {
+            if (err) {
+                console.log('Session save error in adminAuth:', err);
+                return res.redirect('/admin/admin-login');
+            }
+            next();
+        });
+
+    } catch (error) {
+        console.log('Unexpected error in adminAuth:', error);
+        req.session.admin = null;
+        return res.redirect('/admin/admin-login');
     }
 };
+
+
+
+
+
+module.exports = {
+    userAuth,
+    adminAuth,
+   
+};
+
+// / const User = require("../model/userSchema");
+
+
+// const userAuth = async (req, res, next) => {
+//     if (req.session.user) {
+//         try {
+//             const user = await User.findById(req.session.user);
+//             if (user && !user.isBlocked) {
+//                 next();
+//             } else {
+//                 res.redirect("/login");
+//             }
+//         } catch (error) {
+//             console.log("Error in user auth middleware");
+//             res.status(500).send("Internal Server Error");
+//         }
+//     } else {
+//         res.redirect("/login");
+//     }
+// };
+
+// const adminAuth = (req, res, next) => {
+//     if (req.session.admin) {
+//         next();
+//     } else {
+//         res.redirect("/admin/login");
+//     }
+// };
 
 
 

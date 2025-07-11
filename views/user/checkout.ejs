@@ -2,69 +2,81 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Checkout - Complete Your Order</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Checkout</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
         <style>
-            .checkout-step {
-                border: 2px solid #e9ecef;
-                border-radius: 10px;
-                transition: all 0.3s ease;
-            }
-            .checkout-step.active {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.05);
-            }
-            .step-header {
+            .default-address-container {
                 background-color: #f8f9fa;
-                border-radius: 8px 8px 0 0;
-                padding: 15px 20px;
-                margin: -1px -1px 0 -1px;
-                border-bottom: 1px solid #e9ecef;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
             }
-            .step-content {
-                padding: 20px;
+            .address-item {
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .address-item:hover {
+                background-color: #f0f0f0;
+            }
+            .address-item.selected {
+                border-color: #007bff;
+                background-color: #e7f1ff;
+            }
+            .default-badge {
+                background-color: #28a745;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                margin-left: 10px;
             }
             .payment-option {
-                border: 2px solid #e9ecef;
-                border-radius: 8px;
-                padding: 15px;
-                cursor: pointer;
-                transition: all 0.3s ease;
+                padding: 10px;
+                border-radius: 5px;
+                transition: background-color 0.2s;
             }
             .payment-option:hover {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.05);
+                background-color: #f0f0f0;
             }
             .payment-option.selected {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.1);
+                background-color: #e7f1ff;
+                border: 1px solid #007bff;
             }
-            .order-item {
-                border-bottom: 1px solid #e9ecef;
-                padding: 15px 0;
+            .order-item img {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
             }
-            .order-item:last-child {
-                border-bottom: none;
+            .progress-steps .col-4 {
+                flex: 1 0 33.33%;
+                max-width: 33.33%;
             }
-            .form-control:focus {
-                border-color: #0d6efd;
-                box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            @media (max-width: 576px) {
+                .progress-steps .col-4 {
+                    flex: 1 0 100%;
+                    max-width: 100%;
+                    margin-bottom: 10px;
+                }
             }
-            .btn-primary {
-                background-color: #0d6efd;
-                border-color: #0d6efd;
+            .is-invalid {
+                border-color: #dc3545 !important;
             }
-            .btn-primary:hover {
-                background-color: #0b5ed7;
-                border-color: #0a58ca;
+            .invalid-feedback {
+                display: none;
+                font-size: 0.875rem;
+                color: #dc3545;
+            }
+            .is-invalid ~ .invalid-feedback {
+                display: block;
             }
         </style>
     </head>
     <body>
-        <!-- Toast Container for notifications -->
-        <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1050"></div>
-
         <section style="background-color: #bddbeb; min-height: 100vh">
             <div class="container py-5">
                 <div class="row">
@@ -82,7 +94,7 @@
                                     </div>
 
                                     <!-- Progress Steps -->
-                                    <div class="row mb-4">
+                                    <div class="row mb-4 progress-steps">
                                         <div class="col-4">
                                             <div class="text-center">
                                                 <div
@@ -99,26 +111,26 @@
                                         <div class="col-4">
                                             <div class="text-center">
                                                 <div
-                                                    class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
+                                                    class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
                                                     style="width: 40px; height: 40px"
                                                 >
                                                     <i class="fas fa-credit-card"></i>
                                                 </div>
                                                 <div class="mt-2">
-                                                    <small class="text-muted">Payment</small>
+                                                    <small class="text-primary fw-bold">Payment</small>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-4">
                                             <div class="text-center">
                                                 <div
-                                                    class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
+                                                    class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
                                                     style="width: 40px; height: 40px"
                                                 >
                                                     <i class="fas fa-check"></i>
                                                 </div>
                                                 <div class="mt-2">
-                                                    <small class="text-muted">Confirm</small>
+                                                    <small class="text-primary fw-bold">Confirm</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -126,35 +138,71 @@
 
                                     <!-- Checkout Form -->
                                     <form id="checkoutForm">
-                                        <!-- Step 1: Shipping Information -->
-                                        <div class="checkout-step active mb-4" id="shippingStep">
-                                            <div class="step-header">
-                                                <h4 class="mb-0">
-                                                    <i class="fas fa-truck me-2"></i>
-                                                    Shipping Information
-                                                </h4>
+                                        <!-- Shipping Information -->
+                                        <div class="mb-4">
+                                            <h4 class="mb-3"><i class="fas fa-truck me-2"></i>Shipping Information</h4>
+
+                                            <!-- Default Address Display -->
+                                            <div class="default-address-container">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="fw-bold">Selected Shipping Address</h6>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#selectAddressModal"
+                                                    >
+                                                        Change Address
+                                                    </button>
+                                                </div>
+                                                <div id="selectedAddressDisplay">
+                                                    <% if (defaultAddress) { %>
+                                                    <input
+                                                        type="hidden"
+                                                        name="selectedAddress"
+                                                        value="<%- JSON.stringify(defaultAddress) %>"
+                                                    />
+                                                    <p class="mb-1">
+                                                        <strong
+                                                            ><%= defaultAddress.fname %> <%= defaultAddress.sname %></strong
+                                                        >
+                                                    </p>
+                                                    <p class="mb-1"><%= defaultAddress.email %></p>
+                                                    <p class="mb-1"><%= defaultAddress.mobile %></p>
+                                                    <p class="mb-1"><%= defaultAddress.address %></p>
+                                                    <p class="mb-0">
+                                                        <%= defaultAddress.city %> - <%= defaultAddress.pin %>
+                                                    </p>
+                                                    <% } else { %>
+                                                    <p class="text-muted">No address selected. Please select an address.</p>
+                                                    <% } %>
+                                                </div>
                                             </div>
-                                            <div class="step-content">
+
+                                            <!-- Manual Address Input -->
+                                            <div id="manualAddressInput" style="display: none">
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="firstName" class="form-label">First Name *</label>
+                                                        <label for="fname" class="form-label">First Name *</label>
                                                         <input
                                                             type="text"
                                                             class="form-control"
-                                                            id="firstName"
-                                                            name="firstName"
+                                                            id="fname"
+                                                            name="fname"
                                                             required
                                                         />
+                                                        <div class="invalid-feedback">First name is required.</div>
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="lastName" class="form-label">Last Name *</label>
+                                                        <label for="sname" class="form-label">Last Name *</label>
                                                         <input
                                                             type="text"
                                                             class="form-control"
-                                                            id="lastName"
-                                                            name="lastName"
+                                                            id="sname"
+                                                            name="sname"
                                                             required
                                                         />
+                                                        <div class="invalid-feedback">Last name is required.</div>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
@@ -166,32 +214,44 @@
                                                         name="email"
                                                         required
                                                     />
+                                                    <div class="invalid-feedback">Please enter a valid email address.</div>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="phone" class="form-label">Phone Number *</label>
+                                                    <label for="mobile" class="form-label">Mobile Number *</label>
                                                     <input
                                                         type="tel"
                                                         class="form-control"
-                                                        id="phone"
-                                                        name="phone"
+                                                        id="mobile"
+                                                        name="mobile"
                                                         required
                                                     />
+                                                    <div class="invalid-feedback">Mobile number is required.</div>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="address" class="form-label">Street Address *</label>
-                                                    <input
-                                                        type="text"
+                                                    <label for="addressType" class="form-label">Address Type *</label>
+                                                    <select
+                                                        class="form-control"
+                                                        id="addressType"
+                                                        name="addressType"
+                                                        required
+                                                    >
+                                                        <option value="">Select Type</option>
+                                                        <option value="home">Home</option>
+                                                        <option value="work">Work</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                    <div class="invalid-feedback">Please select an address type.</div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="address" class="form-label">Full Address *</label>
+                                                    <textarea
                                                         class="form-control"
                                                         id="address"
                                                         name="address"
+                                                        rows="3"
                                                         required
-                                                    />
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="address2" class="form-label"
-                                                        >Apartment, Suite, etc. (optional)</label
-                                                    >
-                                                    <input type="text" class="form-control" id="address2" name="address2" />
+                                                    ></textarea>
+                                                    <div class="invalid-feedback">Full address is required.</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
@@ -203,302 +263,97 @@
                                                             name="city"
                                                             required
                                                         />
+                                                        <div class="invalid-feedback">City is required.</div>
                                                     </div>
-                                                    <div class="col-md-3 mb-3">
-                                                        <label for="state" class="form-label">State *</label>
-                                                        <select class="form-select" id="state" name="state" required>
-                                                            <option value="">Select State</option>
-                                                            <option value="Kerala">Kerala</option>
-                                                            <option value="Tamil Nadu">Tamil Nadu</option>
-                                                            <option value="Karnataka">Karnataka</option>
-                                                            <option value="Maharashtra">Maharashtra</option>
-                                                            <option value="Delhi">Delhi</option>
-                                                            <option value="Gujarat">Gujarat</option>
-                                                            <option value="Rajasthan">Rajasthan</option>
-                                                            <option value="Punjab">Punjab</option>
-                                                            <option value="Haryana">Haryana</option>
-                                                            <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                                            <option value="West Bengal">West Bengal</option>
-                                                            <option value="Odisha">Odisha</option>
-                                                            <option value="Andhra Pradesh">Andhra Pradesh</option>
-                                                            <option value="Telangana">Telangana</option>
-                                                            <option value="Assam">Assam</option>
-                                                            <option value="Bihar">Bihar</option>
-                                                            <option value="Chhattisgarh">Chhattisgarh</option>
-                                                            <option value="Goa">Goa</option>
-                                                            <option value="Himachal Pradesh">Himachal Pradesh</option>
-                                                            <option value="Jharkhand">Jharkhand</option>
-                                                            <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                                            <option value="Manipur">Manipur</option>
-                                                            <option value="Meghalaya">Meghalaya</option>
-                                                            <option value="Mizoram">Mizoram</option>
-                                                            <option value="Nagaland">Nagaland</option>
-                                                            <option value="Sikkim">Sikkim</option>
-                                                            <option value="Tripura">Tripura</option>
-                                                            <option value="Uttarakhand">Uttarakhand</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-3 mb-3">
-                                                        <label for="pincode" class="form-label">Pincode *</label>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="pin" class="form-label">Pincode *</label>
                                                         <input
                                                             type="text"
                                                             class="form-control"
-                                                            id="pincode"
-                                                            name="pincode"
+                                                            id="pin"
+                                                            name="pin"
                                                             required
                                                             maxlength="6"
                                                         />
-                                                    </div>
-                                                </div>
-                                                <div class="form-check mb-3">
-                                                    <input
-                                                        class="form-check-input"
-                                                        type="checkbox"
-                                                        id="saveAddress"
-                                                        name="saveAddress"
-                                                    />
-                                                    <label class="form-check-label" for="saveAddress">
-                                                        Save this address for future orders
-                                                    </label>
-                                                </div>
-                                                <button type="button" class="btn btn-primary" onclick="nextStep()">
-                                                    Continue to Payment
-                                                    <i class="fas fa-arrow-right ms-2"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 2: Payment Information -->
-                                        <div class="checkout-step mb-4" id="paymentStep" style="display: none">
-                                            <div class="step-header">
-                                                <h4 class="mb-0">
-                                                    <i class="fas fa-credit-card me-2"></i>
-                                                    Payment Method
-                                                </h4>
-                                            </div>
-                                            <div class="step-content">
-                                                <!-- Payment Options -->
-                                                <div class="row mb-4">
-                                                    <div class="col-md-6 mb-3">
-                                                        <div class="payment-option" onclick="selectPayment('card')">
-                                                            <div class="form-check">
-                                                                <input
-                                                                    class="form-check-input"
-                                                                    type="radio"
-                                                                    name="paymentMethod"
-                                                                    id="cardPayment"
-                                                                    value="card"
-                                                                />
-                                                                <label class="form-check-label" for="cardPayment">
-                                                                    <i class="fas fa-credit-card me-2"></i>
-                                                                    Credit/Debit Card
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <div class="payment-option" onclick="selectPayment('upi')">
-                                                            <div class="form-check">
-                                                                <input
-                                                                    class="form-check-input"
-                                                                    type="radio"
-                                                                    name="paymentMethod"
-                                                                    id="upiPayment"
-                                                                    value="upi"
-                                                                />
-                                                                <label class="form-check-label" for="upiPayment">
-                                                                    <i class="fas fa-mobile-alt me-2"></i>
-                                                                    UPI Payment
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <div class="payment-option" onclick="selectPayment('netbanking')">
-                                                            <div class="form-check">
-                                                                <input
-                                                                    class="form-check-input"
-                                                                    type="radio"
-                                                                    name="paymentMethod"
-                                                                    id="netbankingPayment"
-                                                                    value="netbanking"
-                                                                />
-                                                                <label class="form-check-label" for="netbankingPayment">
-                                                                    <i class="fas fa-university me-2"></i>
-                                                                    Net Banking
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <div class="payment-option" onclick="selectPayment('cod')">
-                                                            <div class="form-check">
-                                                                <input
-                                                                    class="form-check-input"
-                                                                    type="radio"
-                                                                    name="paymentMethod"
-                                                                    id="codPayment"
-                                                                    value="cod"
-                                                                />
-                                                                <label class="form-check-label" for="codPayment">
-                                                                    <i class="fas fa-money-bill-wave me-2"></i>
-                                                                    Cash on Delivery
-                                                                </label>
-                                                            </div>
+                                                        <div class="invalid-feedback">
+                                                            Please enter a valid 6-digit pincode.
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Card Details (shown when card is selected) -->
-                                                <div id="cardDetails" style="display: none">
-                                                    <div class="row">
-                                                        <div class="col-12 mb-3">
-                                                            <label for="cardNumber" class="form-label">Card Number *</label>
-                                                            <input
-                                                                type="text"
-                                                                class="form-control"
-                                                                id="cardNumber"
-                                                                name="cardNumber"
-                                                                placeholder="1234 5678 9012 3456"
-                                                                maxlength="19"
-                                                            />
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="expiryDate" class="form-label">Expiry Date *</label>
-                                                            <input
-                                                                type="text"
-                                                                class="form-control"
-                                                                id="expiryDate"
-                                                                name="expiryDate"
-                                                                placeholder="MM/YY"
-                                                                maxlength="5"
-                                                            />
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="cvv" class="form-label">CVV *</label>
-                                                            <input
-                                                                type="text"
-                                                                class="form-control"
-                                                                id="cvv"
-                                                                name="cvv"
-                                                                placeholder="123"
-                                                                maxlength="4"
-                                                            />
-                                                        </div>
-                                                        <div class="col-12 mb-3">
-                                                            <label for="cardholderName" class="form-label"
-                                                                >Cardholder Name *</label
-                                                            >
-                                                            <input
-                                                                type="text"
-                                                                class="form-control"
-                                                                id="cardholderName"
-                                                                name="cardholderName"
-                                                                placeholder="Name on card"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- UPI Details (shown when UPI is selected) -->
-                                                <div id="upiDetails" style="display: none">
-                                                    <div class="mb-3">
-                                                        <label for="upiId" class="form-label">UPI ID *</label>
-                                                        <input
-                                                            type="text"
-                                                            class="form-control"
-                                                            id="upiId"
-                                                            name="upiId"
-                                                            placeholder="yourname@upi"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <!-- Net Banking Details (shown when Net Banking is selected) -->
-                                                <div id="netbankingDetails" style="display: none">
-                                                    <div class="mb-3">
-                                                        <label for="bankSelect" class="form-label">Select Bank *</label>
-                                                        <select class="form-select" id="bankSelect" name="bankSelect">
-                                                            <option value="">Choose your bank</option>
-                                                            <option value="SBI">State Bank of India</option>
-                                                            <option value="HDFC">HDFC Bank</option>
-                                                            <option value="ICICI">ICICI Bank</option>
-                                                            <option value="AXIS">Axis Bank</option>
-                                                            <option value="KOTAK">Kotak Mahindra Bank</option>
-                                                            <option value="PNB">Punjab National Bank</option>
-                                                            <option value="BOB">Bank of Baroda</option>
-                                                            <option value="CANARA">Canara Bank</option>
-                                                            <option value="UNION">Union Bank of India</option>
-                                                            <option value="FEDERAL">Federal Bank</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between">
+                                                <div class="mb-3">
                                                     <button
                                                         type="button"
-                                                        class="btn btn-outline-secondary"
-                                                        onclick="previousStep()"
+                                                        class="btn btn-primary"
+                                                        onclick="handleAddressSubmit(true)"
                                                     >
-                                                        <i class="fas fa-arrow-left me-2"></i>
-                                                        Back to Shipping
-                                                    </button>
-                                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
-                                                        Review Order
-                                                        <i class="fas fa-arrow-right ms-2"></i>
+                                                        Save This Address
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Step 3: Order Review -->
-                                        <div class="checkout-step mb-4" id="reviewStep" style="display: none">
-                                            <div class="step-header">
-                                                <h4 class="mb-0">
-                                                    <i class="fas fa-check me-2"></i>
-                                                    Review Your Order
-                                                </h4>
-                                            </div>
-                                            <div class="step-content">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold">Shipping Address</h6>
-                                                        <div id="shippingReview" class="mb-3"></div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold">Payment Method</h6>
-                                                        <div id="paymentReview" class="mb-3"></div>
+                                        <!-- Payment Method -->
+                                        <div class="mb-4">
+                                            <h4 class="mb-3"><i class="fas fa-credit-card me-2"></i>Payment Method</h4>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="payment-option" onclick="selectPayment('card')">
+                                                        <div class="form-check">
+                                                            <input
+                                                                class="form-check-input"
+                                                                type="radio"
+                                                                name="paymentMethod"
+                                                                id="cardPayment"
+                                                                value="card"
+                                                            />
+                                                            <label class="form-check-label" for="cardPayment">
+                                                                <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-check mb-3">
-                                                    <input
-                                                        class="form-check-input"
-                                                        type="checkbox"
-                                                        id="termsAccepted"
-                                                        required
-                                                    />
-                                                    <label class="form-check-label" for="termsAccepted">
-                                                        I agree to the
-                                                        <a href="#" class="text-decoration-none">Terms and Conditions</a>
-                                                        and <a href="#" class="text-decoration-none">Privacy Policy</a>
-                                                    </label>
-                                                </div>
-                                                <div class="d-flex justify-content-between">
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-outline-secondary"
-                                                        onclick="previousStep()"
-                                                    >
-                                                        <i class="fas fa-arrow-left me-2"></i>
-                                                        Back to Payment
-                                                    </button>
-                                                    <button type="submit" class="btn btn-success btn-lg">
-                                                        <i class="fas fa-lock me-2"></i>
-                                                        Place Order
-                                                    </button>
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="payment-option" onclick="selectPayment('cod')">
+                                                        <div class="form-check">
+                                                            <input
+                                                                class="form-check-input"
+                                                                type="radio"
+                                                                name="paymentMethod"
+                                                                id="codPayment"
+                                                                value="cod"
+                                                            />
+                                                            <label class="form-check-label" for="codPayment">
+                                                                <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery
+                                                                (+₹60)
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Terms and Conditions -->
+                                        <div class="mb-4">
+                                            <div class="form-check">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="termsAccepted"
+                                                    required
+                                                />
+                                                <label class="form-check-label" for="termsAccepted">
+                                                    I agree to the
+                                                    <a href="#" class="text-decoration-none">Terms and Conditions</a> and
+                                                    <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                        <button type="button" class="btn btn-success btn-lg w-100" onclick="orderSubmit()">
+                                            <i class="fas fa-lock me-2"></i>Place Order
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -510,20 +365,10 @@
                         <div class="card sticky-top" style="border-radius: 15px; top: 20px">
                             <div class="card-body">
                                 <h4 class="fw-bold mb-4">Order Summary</h4>
-
-                                <!-- Sample Order Items (you can populate this from your cart data) -->
                                 <div id="orderItems">
                                     <% cartItems.forEach(item => { %>
                                     <div class="order-item mb-3">
                                         <div class="row align-items-center">
-                                            <div class="col-3">
-                                                <!-- Replace with dynamic image if you store image -->
-                                                <img
-                                                    src="<%= item.image || 'https://via.placeholder.com/80x80' %>"
-                                                    alt="<%= item.name %>"
-                                                    class="img-fluid rounded"
-                                                />
-                                            </div>
                                             <div class="col-6">
                                                 <h6 class="mb-1"><%= item.name %></h6>
                                                 <small class="text-muted">Qty: <%= item.quantity %></small><br />
@@ -536,17 +381,14 @@
                                     </div>
                                     <% }) %>
                                 </div>
-
                                 <hr class="my-4" />
-
-                                <!-- Order Totals -->
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Subtotal</span>
                                     <span id="subtotalAmount">₹<%= subtotal %></span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span>Shipping</span>
-                                    <span id="shippingAmount">₹<%= shippingCharge %></span>
+                                    <span>Delivery Charge</span>
+                                    <span id="deliveryAmount">₹<%= shippingCharge %></span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Discount</span>
@@ -559,15 +401,13 @@
                                         ₹<%= subtotal + shippingCharge - coupondiscount %>
                                     </h5>
                                 </div>
-
-                                <!-- Estimated Delivery -->
                                 <div class="bg-light p-3 rounded">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-truck text-primary me-2"></i>
                                         <div>
                                             <small class="fw-bold">Estimated Delivery</small>
                                             <br />
-                                            <small class="text-muted" id="deliveryDate">5-7 business days</small>
+                                            <small class="text-muted">5-7 business days</small>
                                         </div>
                                     </div>
                                 </div>
@@ -578,455 +418,253 @@
             </div>
         </section>
 
-        <script>
-            let currentStep = 1;
-            const totalSteps = 3;
-
-            // Utility function to show notifications
-            function showToast(message, type = "info") {
-                const toastContainer = document.getElementById("toastContainer");
-                const toastId = "toast-" + Date.now();
-
-                const toastHtml = `
-                    <div class="alert alert-${type} alert-dismissible fade show" role="alert" id="${toastId}">
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Select Address Modal -->
+        <div
+            class="modal fade"
+            id="selectAddressModal"
+            tabindex="-1"
+            aria-labelledby="selectAddressModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="selectAddressModalLabel">
+                            <i class="fas fa-map-marker-alt me-2"></i>Select Shipping Address
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                `;
+                    <div class="modal-body">
+                        <div id="addressList">
+                            <% if (userAddresses && userAddresses.length > 0) { %> <% userAddresses.forEach((addr, index) =>
+                            { %>
+                            <div
+                                class="address-item <%= addr.isDefault ? 'default' : '' %>"
+                                data-id="<%= addr._id %>"
+                                onclick="selectAddress('<%= addr._id %>')"
+                            >
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="address-type text-capitalize"><%= addr.type %></div>
+                                    <% if (addr.isDefault) { %>
+                                    <span class="default-badge">Default</span>
+                                    <% } %>
+                                </div>
+                                <div class="address-content">
+                                    <div class="address-name fw-bold"><%= addr.fname %> <%= addr.sname %></div>
+                                    <div class="address-details">
+                                        <div><strong>Mobile:</strong> <%= addr.mobile %></div>
+                                        <div><strong>Email:</strong> <%= addr.email %></div>
+                                        <div><strong>Address:</strong> <%= addr.address %></div>
+                                        <div><strong>City:</strong> <%= addr.city %> - <%= addr.pin %></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %> <% } else { %>
+                            <div class="text-muted text-center">
+                                <p>No saved addresses found. Please add a new address.</p>
+                            </div>
+                            <% } %>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-outline-primary" onclick="showManualAddressForm()">
+                                Add New Address
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="confirmAddressSelection()">
+                            Confirm Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+        <script>
+            // Global variables
+            let addressesData = <%- JSON.stringify(userAddresses) %>;
+            let selectedAddressId = '<%= defaultAddress ? defaultAddress._id : "" %>';
+            let cartItems = <%- JSON.stringify(cartItems) %>;
+            let subtotal = <%= subtotal %>;
+            let currentDeliveryCharge = <%= shippingCharge %>;
+            let discount = <%= coupondiscount %>;
 
-                setTimeout(() => {
-                    const toast = document.getElementById(toastId);
-                    if (toast) {
-                        toast.remove();
-                    }
-                }, 4000);
-            }
+            // Handle address submission
+            function handleAddressSubmit(save = false) {
+                const formData = {
+                    fname: document.getElementById('fname').value,
+                    sname: document.getElementById('sname').value,
+                    mobile: document.getElementById('mobile').value,
+                    email: document.getElementById('email').value,
+                    addressType: document.getElementById('addressType').value,
+                    pin: document.getElementById('pin').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    isDefault: save
+                };
 
-            // Format card number input
-            function formatCardNumber(input) {
-                let value = input.value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-                let formattedValue = value.match(/.{1,4}/g)?.join(" ") || value;
-                if (formattedValue !== input.value) {
-                    input.value = formattedValue;
-                }
-            }
-
-            // Format expiry date input
-            function formatExpiryDate(input) {
-                let value = input.value.replace(/\D/g, "");
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + "/" + value.substring(2, 4);
-                }
-                input.value = value;
-            }
-
-            // Select payment method
-            function selectPayment(method) {
-                // Clear all selections
-                document.querySelectorAll(".payment-option").forEach((option) => {
-                    option.classList.remove("selected");
-                });
-
-                // Hide all payment details
-                document.getElementById("cardDetails").style.display = "none";
-                document.getElementById("upiDetails").style.display = "none";
-                document.getElementById("netbankingDetails").style.display = "none";
-
-                // Select the clicked option
-                const selectedOption = document.querySelector(`input[value="${method}"]`).closest(".payment-option");
-                selectedOption.classList.add("selected");
-
-                // Check the radio button
-                document.querySelector(`input[value="${method}"]`).checked = true;
-
-                // Show relevant payment details
-                if (method === "card") {
-                    document.getElementById("cardDetails").style.display = "block";
-                } else if (method === "upi") {
-                    document.getElementById("upiDetails").style.display = "block";
-                } else if (method === "netbanking") {
-                    document.getElementById("netbankingDetails").style.display = "block";
-                }
-            }
-
-            // Validate shipping form
-            function validateShipping() {
-                const requiredFields = ["firstName", "lastName", "email", "phone", "address", "city", "state", "pincode"];
-                let isValid = true;
-
-                requiredFields.forEach((fieldId) => {
-                    const field = document.getElementById(fieldId);
-                    if (!field.value.trim()) {
-                        field.classList.add("is-invalid");
-                        isValid = false;
+                fetch('/addAddress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert("Address added successfully!");
+                        setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        field.classList.remove("is-invalid");
+                        alert(result.message || "Failed to add address");
                     }
-                });
-
-                // Validate email format
-                const emailField = document.getElementById("email");
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (emailField.value && !emailRegex.test(emailField.value)) {
-                    emailField.classList.add("is-invalid");
-                    isValid = false;
-                }
-
-                // Validate pincode
-                const pincodeField = document.getElementById("pincode");
-                const pincodeRegex = /^[0-9]{6}$/;
-                if (pincodeField.value && !pincodeRegex.test(pincodeField.value)) {
-                    pincodeField.classList.add("is-invalid");
-                    isValid = false;
-                }
-
-                return isValid;
-            }
-
-            // Validate payment form
-            function validatePayment() {
-                const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
-
-                if (!selectedPayment) {
-                    showToast("Please select a payment method", "warning");
-                    return false;
-                }
-
-                if (selectedPayment.value === "card") {
-                    const cardFields = ["cardNumber", "expiryDate", "cvv", "cardholderName"];
-                    let isValid = true;
-
-                    cardFields.forEach((fieldId) => {
-                        const field = document.getElementById(fieldId);
-                        if (!field.value.trim()) {
-                            field.classList.add("is-invalid");
-                            isValid = false;
-                        } else {
-                            field.classList.remove("is-invalid");
-                        }
-                    });
-
-                    return isValid;
-                } else if (selectedPayment.value === "upi") {
-                    const upiField = document.getElementById("upiId");
-                    if (!upiField.value.trim()) {
-                        upiField.classList.add("is-invalid");
-                        return false;
-                    } else {
-                        upiField.classList.remove("is-invalid");
-                    }
-                } else if (selectedPayment.value === "netbanking") {
-                    const bankField = document.getElementById("bankSelect");
-                    if (!bankField.value) {
-                        bankField.classList.add("is-invalid");
-                        return false;
-                    } else {
-                        bankField.classList.remove("is-invalid");
-                    }
-                }
-
-                return true;
-            }
-
-            // Update progress steps
-            function updateProgressSteps() {
-                const steps = document.querySelectorAll(".progress-step");
-                steps.forEach((step, index) => {
-                    const stepNumber = index + 1;
-                    const stepElement = step.querySelector(".rounded-circle");
-                    const stepText = step.querySelector("small");
-
-                    if (stepNumber <= currentStep) {
-                        stepElement.classList.remove("bg-secondary");
-                        stepElement.classList.add("bg-primary");
-                        stepText.classList.remove("text-muted");
-                        stepText.classList.add("text-primary", "fw-bold");
-                    } else {
-                        stepElement.classList.remove("bg-primary");
-                        stepElement.classList.add("bg-secondary");
-                        stepText.classList.remove("text-primary", "fw-bold");
-                        stepText.classList.add("text-muted");
-                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alert("Server Error");
                 });
             }
 
-            // Update review section
-            function updateReview() {
-                // Update shipping review
-                const shippingReview = document.getElementById("shippingReview");
-                const firstName = document.getElementById("firstName").value;
-                const lastName = document.getElementById("lastName").value;
-                const email = document.getElementById("email").value;
-                const phone = document.getElementById("phone").value;
-                const address = document.getElementById("address").value;
-                const address2 = document.getElementById("address2").value;
-                const city = document.getElementById("city").value;
-                const state = document.getElementById("state").value;
-                const pincode = document.getElementById("pincode").value;
-
-                shippingReview.innerHTML = `
-                    <p class="mb-1"><strong>${firstName} ${lastName}</strong></p>
-                    <p class="mb-1">${email}</p>
-                    <p class="mb-1">${phone}</p>
-                    <p class="mb-1">${address}${address2 ? ", " + address2 : ""}</p>
-                    <p class="mb-0">${city}, ${state} ${pincode}</p>
-                `;
-
-                // Update payment review
-                const paymentReview = document.getElementById("paymentReview");
-                const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
-
-                if (selectedPayment) {
-                    let paymentText = "";
-                    switch (selectedPayment.value) {
-                        case "card":
-                            const cardNumber = document.getElementById("cardNumber").value;
-                            const maskedCard = cardNumber ? "**** **** **** " + cardNumber.slice(-4) : "";
-                            paymentText = `<i class="fas fa-credit-card me-2"></i>Credit/Debit Card<br><small class="text-muted">${maskedCard}</small>`;
-                            break;
-                        case "upi":
-                            const upiId = document.getElementById("upiId").value;
-                            paymentText = `<i class="fas fa-mobile-alt me-2"></i>UPI Payment<br><small class="text-muted">${upiId}</small>`;
-                            break;
-                        case "netbanking":
-                            const bank = document.getElementById("bankSelect").value;
-                            paymentText = `<i class="fas fa-university me-2"></i>Net Banking<br><small class="text-muted">${bank}</small>`;
-                            break;
-                        case "cod":
-                            paymentText = `<i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery`;
-                            break;
-                    }
-                    paymentReview.innerHTML = paymentText;
-                }
+            // Modal functions
+            function showManualAddressForm() {
+                document.getElementById('selectedAddressDisplay').style.display = 'none';
+                document.getElementById('manualAddressInput').style.display = 'block';
+                selectedAddressId = '';
+                const modal = bootstrap.Modal.getInstance(document.getElementById('selectAddressModal'));
+                modal.hide();
             }
 
-            // Next step function
-            function 
-            nextStep() {
-                if (currentStep === 1) {
-                    if (!validateShipping()) {
-                        showToast("Please fill in all required shipping information", "warning");
-                        return;
-                    }
-                } else if (currentStep === 2) {
-                    if (!validatePayment()) {
-                        showToast("Please complete payment information", "warning");
-                        return;
-                    }
-                    updateReview();
-                }
-
-                if (currentStep < totalSteps) {
-                    // Hide current step
-                    const currentStepElement = document.getElementById(getStepId(currentStep));
-                    currentStepElement.style.display = "none";
-                    currentStepElement.classList.remove("active");
-
-                    // Show next step
-                    currentStep++;
-                    const nextStepElement = document.getElementById(getStepId(currentStep));
-                    nextStepElement.style.display = "block";
-                    nextStepElement.classList.add("active");
-
-                    updateProgressSteps();
-                }
+            function selectAddress(addressId) {
+                document.querySelectorAll('.address-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                const selectedItem = document.querySelector(`.address-item[data-id="${addressId}"]`);
+                selectedItem.classList.add('selected');
+                selectedAddressId = addressId;
             }
 
-            // Previous step function
-            function previousStep() {
-                if (currentStep > 1) {
-                    // Hide current step
-                    const currentStepElement = document.getElementById(getStepId(currentStep));
-                    currentStepElement.style.display = "none";
-                    currentStepElement.classList.remove("active");
-
-                    // Show previous step
-                    currentStep--;
-                    const prevStepElement = document.getElementById(getStepId(currentStep));
-                    prevStepElement.style.display = "block";
-                    prevStepElement.classList.add("active");
-
-                    updateProgressSteps();
-                }
-            }
-
-            // Get step ID by number
-            function getStepId(stepNumber) {
-                const stepIds = ["", "shippingStep", "paymentStep", "reviewStep"];
-                return stepIds[stepNumber];
-            }
-
-            // Handle form submission
-            document.getElementById("checkoutForm").addEventListener("submit", async function (e) {
-                e.preventDefault();
-
-                if (!document.getElementById("termsAccepted").checked) {
-                    showToast("Please accept the terms and conditions", "warning");
+            function confirmAddressSelection() {
+                if (!selectedAddressId) {
+                    alert('Please select an address or add a new one.');
                     return;
                 }
 
-                const submitButton = document.querySelector('button[type="submit"]');
-                const originalText = submitButton.innerHTML;
-
-                // Show loading state
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                submitButton.disabled = true;
-
-                try {
-                    // Collect form data
-                    const formData = new FormData(this);
-                    const orderData = Object.fromEntries(formData.entries());
-
-                    // Simulate API call (replace with your actual checkout endpoint)
-                    const response = await fetch("/process-checkout", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        credentials: "include",
-                        body: JSON.stringify(orderData),
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast("Order placed successfully!", "success");
-                        setTimeout(() => {
-                            window.location.href = "/order-confirmation/" + result.orderId;
-                        }, 2000);
-                    } else {
-                        throw new Error(result.error || "Failed to process order");
-                    }
-                } catch (error) {
-                    console.error("Checkout error:", error);
-                    showToast(error.message || "Failed to process order. Please try again.", "danger");
-                } finally {
-                    // Reset button state
-                    submitButton.innerHTML = originalText;
-                    submitButton.disabled = false;
-                }
-            });
-
-            // Initialize page
-            document.addEventListener("DOMContentLoaded", function () {
-                console.log("Checkout page loaded");
-
-                // Add input formatting
-                const cardNumberInput = document.getElementById("cardNumber");
-                if (cardNumberInput) {
-                    cardNumberInput.addEventListener("input", function () {
-                        formatCardNumber(this);
-                    });
+                const selectedAddress = addressesData.find(addr => addr._id === selectedAddressId);
+                if (selectedAddress) {
+                    document.getElementById('selectedAddressDisplay').innerHTML = `
+                        <p class="mb-1"><strong>${selectedAddress.fname} ${selectedAddress.sname}</strong></p>
+                        <p class="mb-1">${selectedAddress.email}</p>
+                        <p class="mb-1">${selectedAddress.mobile}</p>
+                        <p class="mb-1">${selectedAddress.address}</p>
+                        <p class="mb-0">${selectedAddress.city} - ${selectedAddress.pin}</p>
+                    `;
+                    document.getElementById('manualAddressInput').style.display = 'none';
+                    document.getElementById('selectedAddressDisplay').style.display = 'block';
                 }
 
-                const expiryDateInput = document.getElementById("expiryDate");
-                if (expiryDateInput) {
-                    expiryDateInput.addEventListener("input", function () {
-                        formatExpiryDate(this);
-                    });
-                }
+                const modal = bootstrap.Modal.getInstance(document.getElementById('selectAddressModal'));
+                modal.hide();
+            }
 
-                const cvvInput = document.getElementById("cvv");
-                if (cvvInput) {
-                    cvvInput.addEventListener("input", function () {
-                        this.value = this.value.replace(/\D/g, "");
-                    });
-                }
-
-                const pincodeInput = document.getElementById("pincode");
-                if (pincodeInput) {
-                    pincodeInput.addEventListener("input", function () {
-                        this.value = this.value.replace(/\D/g, "");
-                    });
-                }
-
-                // Remove validation classes on input
-                document.querySelectorAll("input, select").forEach((input) => {
-                    input.addEventListener("input", function () {
-                        this.classList.remove("is-invalid");
-                    });
+            // Payment selection
+            function selectPayment(method) {
+                document.querySelectorAll('.payment-option').forEach(option => {
+                    option.classList.remove('selected');
                 });
 
-                // Calculate estimated delivery date
-                const deliveryDate = new Date();
-                deliveryDate.setDate(deliveryDate.getDate() + 7);
-                const options = {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                const selectedOption = document.querySelector(`input[value="${method}"]`).closest('.payment-option');
+                selectedOption.classList.add('selected');
+                document.querySelector(`input[value="${method}"]`).checked = true;
+
+                // Update delivery charge based on payment method
+                if (method === 'cod') {
+                    currentDeliveryCharge = 60;
+                } else {
+                    currentDeliveryCharge = <%= shippingCharge %>;
+                }
+
+                updateOrderSummary();
+            }
+
+            // Update order summary
+            function updateOrderSummary() {
+                document.getElementById('deliveryAmount').textContent = `₹${currentDeliveryCharge}`;
+                const total = subtotal + currentDeliveryCharge - discount;
+                document.getElementById('totalAmount').textContent = `₹${total}`;
+            }
+
+            // Order submission
+            async function orderSubmit() {
+                // Validation
+                if (!selectedAddressId && !document.getElementById('fname').value) {
+                    alert('Please select an address or fill in address details.');
+                    return;
+                }
+
+                const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+                if (!selectedPayment) {
+                    alert('Please select a payment method.');
+                    return;
+                }
+
+                if (!document.getElementById('termsAccepted').checked) {
+                    alert('Please accept the terms and conditions.');
+                    return;
+                }
+
+                console.log(selectedAddressId, selectedPayment.value, cartItems, subtotal);
+                console.log(cartItems, 'cart');
+                let selectedAddressObject = <%- JSON.stringify(defaultAddress || {}) %>;
+
+
+console.log("Selected address from form:", selectedAddressObject);
+// You can now use selectedAddress.fname, selectedAddress.city, etc.
+
+                // console.log(address,'addfs')
+                // Prepare order data
+                const orderData = {
+                    address: selectedAddressObject,
+                    paymentMethod: selectedPayment.value,
+                    products: cartItems.map(item => ({
+                        productId: item.productId?._id,
+                        productName: item.name,
+                        quantity: item.quantity,
+                        size: item.size,
+                        price: item.total
+                    })),
+                    subtotal: subtotal,
+                    deliveryCharge: currentDeliveryCharge,
+                    discount: discount,
+                    total: subtotal + currentDeliveryCharge - discount
                 };
-                document.getElementById("deliveryDate").textContent = `By ${deliveryDate.toLocaleDateString(
-                    "en-IN",
-                    options
-                )}`;
 
-                updateProgressSteps();
-            });
+                console.log(orderData, 'heyyyyyy');
 
-            // Load cart data and populate order summary
-            async function loadOrderSummary() {
+                // Submit order
                 try {
-                    const response = await fetch("/api/cart-summary", {
-                        method: "GET",
-                        credentials: "include",
+                    const response = await fetch('/submitOrder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
                     });
-
-                    if (response.ok) {
-                        const cartData = await response.json();
-
-                        if (cartData.success && cartData.items && cartData.items.length > 0) {
-                            const orderItemsContainer = document.getElementById("orderItems");
-                            orderItemsContainer.innerHTML = "";
-
-                            cartData.items.forEach((item) => {
-                                const itemHtml = `
-                                    <div class="order-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-3">
-                                                <img src="/Uploads/product-images/${item.productId.productImage[0]}"    
-                                                     alt="${item.productId.productName}" 
-                                                     class="img-fluid rounded"
-                                                     style="width: 60px; height: 60px; object-fit: cover;">
-                                            </div>
-                                            <div class="col-6">
-                                                <h6 class="mb-1">${item.productId.productName}</h6>
-                                                <small class="text-muted">Qty: ${item.quantity}</small>
-                                            </div>
-                                            <div class="col-3 text-end">
-                                                <span class="fw-bold">₹${(
-                                                    item.quantity *
-                                                    (item.productId.salePrice || item.productId.regularPrice)
-                                                ).toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                                orderItemsContainer.insertAdjacentHTML("beforeend", itemHtml);
-                            });
-
-                            // Update totals
-                            document.getElementById("subtotalAmount").textContent = `₹${cartData.subtotal.toFixed(2)}`;
-                            const shipping = cartData.subtotal >= 500 ? 0 : 100;
-                            const tax = Math.round(cartData.subtotal * 0.18);
-                            const total = cartData.subtotal + shipping + tax;
-
-                            document.getElementById("shippingAmount").textContent =
-                                shipping === 0 ? "Free" : `₹${shipping}`;
-                            document.getElementById("taxAmount").textContent = `₹${tax}`;
-                            document.getElementById("totalAmount").textContent = `₹${total.toFixed(2)}`;
-                        }
+                    console.log(response, 'response');
+                    const result = await response.json();
+                    console.log(result,'dsfds')
+                    if (result.message==='Order Successful') {
+                        alert('Order placed successfully!');
+                       window.location.href = `/thankyou?orderId=${result.orderId}`;
+                    } else {
+                        alert(result.message || 'Failed to place order');
                     }
-                } catch (error) {
-                    console.error("Error loading cart summary:", error);
-                    // Keep the sample data if cart loading fails
+                } catch (err) {
+                    console.error('Error:', err);
+                    alert('Server Error');
                 }
             }
 
-            // Load order summary on page load
-            loadOrderSummary();
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                updateOrderSummary();
+            });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>

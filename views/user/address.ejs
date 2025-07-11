@@ -785,7 +785,8 @@
                 swal("Server Error", { icon: "error" });
             });
         }
-        function deleteAddress(addressId) {
+         async function  deleteAddress(addressId) {
+          
             swal({
                 title: "Are you sure?",
                 text: "This address will be permanently deleted!",
@@ -802,7 +803,7 @@
             }).then((willDelete) => {
                 if (willDelete) {
                     fetch('/deleteAddress', {
-                        method: 'POST',
+                        method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ addressId: addressId })
                     })

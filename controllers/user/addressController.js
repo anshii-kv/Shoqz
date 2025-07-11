@@ -200,8 +200,8 @@ const editAddress = async (req, res) => {
 };
 const deleteAddress= async (req, res) => {
   try {
-    const Id = req.query.id;
-    console.log(req.query, Id);
+    const Id = req.body.addressId;
+    
     const Deletedaddress = await Address.updateOne(
       {
         user: req.session.userId,

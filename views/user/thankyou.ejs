@@ -336,19 +336,22 @@
                     <h5><i class="fas fa-receipt me-2"></i>Order Details</h5>
                     <div class="order-detail">
                         <span>Order ID:</span>
-                        <span id="orderId">#ORD-2024-001</span>
+                        <span id="orderId"><%= order._id %></span>
+
                     </div>
                     <div class="order-detail">
                         <span>Order Date:</span>
-                        <span id="orderDate">July 9, 2025</span>
+                       <span id="orderDate"><%= new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+
                     </div>
                     <div class="order-detail">
                         <span>Total Amount:</span>
-                        <span id="totalAmount">₹2,499.00</span>
+                        <span id="totalAmount">₹<%= order.subtotal.toFixed(2) %></span>
+
                     </div>
                     <div class="order-detail">
                         <span>Payment Method:</span>
-                        <span id="paymentMethod">Credit Card</span>
+                      <span id="paymentMethod"><%= order.paymentMethod %></span>
                     </div>
                 </div>
 

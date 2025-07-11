@@ -719,7 +719,6 @@ const loadCart = async (req, res) => {
 
     const cartData = await Cart.findOne({ userId: userId }).populate("product.productId");
 
-    console.log(cartData, "the products in cartdata");
 
     if (!cartData || cartData.product.length === 0) {
       return res.render("cart", {
@@ -730,9 +729,11 @@ const loadCart = async (req, res) => {
         messages: { message: "Your cart is empty." },
       });
     }
-
     // Filter out invalid cart items
-    cartData.product = cartData.product.filter(item => item.productId && item.quantity > 0);
+    cartData.product = cartData.product.filter(item => item.productId &&( item.quantity > 0));
+console.log(cartData, "HEYYYYYY");
+     
+
 
     if (cartData.product.length === 0) {
       return res.render("cart", {
@@ -760,12 +761,13 @@ const loadCart = async (req, res) => {
 
     console.log("Subtotal:", subtotal);
     console.log("Total:", total);
-
+    console.log("anshi",cartData)
     res.render("cart", {
       cartdata: cartData,
       subtotal,
       total,
       user: userId,
+
     });
   } catch (err) {
     console.error("Error in loadCart:", err);
@@ -873,7 +875,7 @@ const removeFromCart = async (req, res) => {
       populatedCart.product.forEach((item) => {
         const product = item.productId;
         const quantity = item.quantity;
-        const price = product.salePrice || product.regularPrice;
+        const price = Product.salePrice || Product.regularPrice;
         subtotal += price * quantity;
       });
     }
@@ -895,36 +897,47 @@ const removeFromCart = async (req, res) => {
 
 
 
+
+
 const loadCheckout = async (req, res) => {
   try {
-    // ✅ Ensure user is logged in
-    // if (!req.session || !req.session.user) {
-    //   return res.redirect('/login');
-    // }
+    // Ensure user is logged in
+    if (!req.session || !req.session.userId) {
+      return res.redirect('/login');
+    }
 
     const userId = req.session.userId;
 
-    // ✅ Find cart
-    const cartData = await Cart.findOne({ userId });
+    // Find cart and populate productId inside the product array
+    const cartData = await Cart.findOne({ userId }).populate('product.productId');
 
     if (!cartData || !cartData.product || cartData.product.length === 0) {
       return res.render('checkout', {
         cartItems: [],
         shippingCharge: 0,
         coupondiscount: 0,
-        subtotal: 0
+        subtotal: 0,
+        userAddresses: [],
+        defaultAddress: null
       });
     }
 
-    // ✅ Calculate subtotal
+    // Calculate subtotal
     const subtotal = cartData.product.reduce((sum, item) => sum + item.total, 0);
 
-    // ✅ Render with all required values
+    // Fetch user addresses
+    const addressData = await Address.findOne({ user: userId });
+    const userAddresses = addressData ? addressData.address : [];
+    const defaultAddress = userAddresses.find(addr => addr.isDefault) || null;
+
+    // Render checkout page with necessary data
     res.render('checkout', {
       cartItems: cartData.product,
       shippingCharge: cartData.shippingCharge || 0,
       coupondiscount: cartData.coupondiscount || 0,
-      subtotal
+      subtotal,
+      userAddresses,
+      defaultAddress
     });
 
   } catch (error) {
@@ -932,6 +945,10 @@ const loadCheckout = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+
 
 
 const loadProfile = async (req,res)=>{
@@ -1025,13 +1042,20 @@ if (!user) {
 };
 
 
-const loadThankyou = async(req,res)=>{
+const loadThankyou = async (req, res) => {
   try {
-    res.render('thankyou')
+    const id = req.query.orderId;
+    const orderData = await Order.findById(id); // .find() returns array; use findById
+    if (!orderData) {
+      return res.status(404).send("Order not found");
+    }
+
+    res.render('thankyou', { order: orderData }); // pass as object with key order
   } catch (error) {
-    
+    console.error(error);
+    res.status(500).send("Server Error");
   }
-}
+};
 
 module.exports = {
     loadHomepage,
@@ -1062,6 +1086,7 @@ module.exports = {
     updateQuantity,
      removeFromCart,
      loadCheckout,
+     
      loadProfile,
      loadEditProfile,
      updateProfile,

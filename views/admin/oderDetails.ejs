@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoqz - Order Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .search-filter-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .search-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        .search-group input,
+        .search-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: #0095ff;
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .orders-table th,
+        .orders-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .orders-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .orders-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .status-shipped {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        
+        .status-out-for-delivery {
+            background-color: #fd7e14;
+            color: #fff;
+        }
+        
+        .status-delivered {
+            background-color: #28a745;
+            color: #fff;
+        }
+        
+        .status-cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .pagination button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .pagination button.active {
+            background-color: #0095ff;
+            color: #fff;
+            border-color: #0095ff;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .order-details {
+            margin-bottom: 20px;
+        }
+        
+        .order-details h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .return-request {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .return-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .search-row {
+                flex-direction: column;
+            }
+            
+            .orders-table {
+                font-size: 12px;
+            }
+            
+            .orders-table th,
+            .orders-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Order Management</h2>
+            <p>Manage all customer orders</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section">
+            <div class="search-row">
+                <div class="search-group">
+                    <label for="searchOrder">Search Order ID</label>
+                    <input type="text" id="searchOrder" placeholder="Enter order ID">
+                </div>
+                <div class="search-group">
+                    <label for="searchCustomer">Search Customer</label>
+                    <input type="text" id="searchCustomer" placeholder="Enter customer name/email">
+                </div>
+                <div class="search-group">
+                    <label for="filterStatus">Filter by Status</label>
+                    <select id="filterStatus">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="out-for-delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label for="dateFrom">Date From</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="search-group">
+                    <label for="dateTo">Date To</label>
+                    <input type="date" id="dateTo">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="searchOrders()">Search</button>
+                <button class="btn btn-secondary" onclick="clearSearch()">Clear Search</button>
+                <button class="btn btn-info" onclick="exportOrders()">Export Orders</button>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div style="overflow-x: auto;">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('orderId')">Order ID <span id="sort-orderId">↕</span></th>
+                        <th onclick="sortTable('date')">Date <span id="sort-date">↕</span></th>
+                        <th onclick="sortTable('customer')">Customer <span id="sort-customer">↕</span></th>
+                        <th onclick="sortTable('total')">Total <span id="sort-total">↕</span></th>
+                        <th onclick="sortTable('status')">Status <span id="sort-status">↕</span></th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <!-- Orders will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button onclick="changePage(-1)" id="prevBtn">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button onclick="changePage(1)" id="nextBtn">Next</button>
+        </div>
+
+        <!-- Back to Dashboard -->
+        <a href="/admin/dashboard" style="display: block; text-align: center; margin-top: 20px; color: #0095ff; text-decoration: none; font-weight: 600;">Back to Dashboard</a>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="orderDetailsContent">
+                <!-- Order details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        // Sample order data
+        let orders = [
+            {
+                orderId: 'ORD-2024-001',
+                date: '2024-01-15',
+                customer: 'John Doe',
+                email: 'john@example.com',
+                phone: '+1234567890',
+                total: 299.99,
+                status: 'pending',
+                items: [
+                    { name: 'Wireless Headphones', price: 199.99, quantity: 1 },
+                    { name: 'Phone Case', price: 29.99, quantity: 1 }
+                ],
+                shippingAddress: '123 Main St, City, State 12345',
+                paymentMethod: 'Credit Card',
+                hasReturnRequest: false
+            },
+            {
+                orderId: 'ORD-2024-002',
+                date: '2024-01-14',
+                customer: 'Jane Smith',
+                email: 'jane@example.com',
+                phone: '+1234567891',
+                total: 159.99,
+                status: 'shipped',
+                items: [
+                    { name: 'Bluetooth Speaker', price: 159.99, quantity: 1 }
+                ],
+                shippingAddress: '456 Oak Ave, City, State 54321',
+                paymentMethod: 'PayPal',
+                hasReturnRequest: false
+            },
+            {
+                orderId: 'ORD-2024-003',
+                date: '2024-01-13',
+                customer: 'Bob Johnson',
+                email: 'bob@example.com',
+                phone: '+1234567892',
+                total: 79.99,
+                status: 'delivered',
+                items: [
+                    { name: 'USB Cable', price: 19.99, quantity: 2 },
+                    { name: 'Power Bank', price: 39.99, quantity: 1 }
+                ],
+                shippingAddress: '789 Pine Rd, City, State 98765',
+                paymentMethod: 'Credit Card',
+                hasReturnRequest: true,
+                returnReason: 'Product defective'
+            }
+        ];
+
+        let currentPage = 1;
+        const ordersPerPage = 10;
+        let filteredOrders = [...orders];
+        let sortDirection = {};
+
+        function displayOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            const startIndex = (currentPage - 1) * ordersPerPage;
+            const endIndex = startIndex + ordersPerPage;
+            const ordersToShow = filteredOrders.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+            
+            ordersToShow.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.orderId}</td>
+                    <td>${formatDate(order.date)}</td>
+                    <td>${order.customer}<br><small>${order.email}</small></td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td><span class="status-badge status-${order.status}">${order.status.replace('-', ' ')}</span></td>
+                    <td>
+                        <button class="btn btn-info" onclick="viewOrder('${order.orderId}')">View</button>
+                        <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="margin-left: 5px; padding: 5px;">
+                            <option value="">Change Status</option>
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="out-for-delivery" ${order.status === 'out-for-delivery' ? 'selected' : ''}>Out for Delivery</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            updatePaginationInfo();
+        }
+
+        function updatePaginationInfo() {
+            const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        }
+
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayOrders();
+            }
+        }
+
+        function searchOrders() {
+            const searchOrder = document.getElementById('searchOrder').value.toLowerCase();
+            const searchCustomer = document.getElementById('searchCustomer').value.toLowerCase();
+            const filterStatus = document.getElementById('filterStatus').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            filteredOrders = orders.filter(order => {
+                const matchesOrderId = !searchOrder || order.orderId.toLowerCase().includes(searchOrder);
+                const matchesCustomer = !searchCustomer || 
+                    order.customer.toLowerCase().includes(searchCustomer) ||
+                    order.email.toLowerCase().includes(searchCustomer);
+                const matchesStatus = !filterStatus || order.status === filterStatus;
+                const matchesDateFrom = !dateFrom || order.date >= dateFrom;
+                const matchesDateTo = !dateTo || order.date <= dateTo;
+
+                return matchesOrderId && matchesCustomer && matchesStatus && matchesDateFrom && matchesDateTo;
+            });
+
+            currentPage = 1;
+            displayOrders();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchOrder').value = '';
+            document.getElementById('searchCustomer').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            
+            filteredOrders = [...orders];
+            currentPage = 1;
+            displayOrders();
+        }
+
+        function sortTable(column) {
+            const isAsc = sortDirection[column] !== 'asc';
+            sortDirection[column] = isAsc ? 'asc' : 'desc';
+
+            // Reset all sort indicators
+            document.querySelectorAll('[id^="sort-"]').forEach(el => {
+                el.textContent = '↕';
+            });
+
+            // Set current sort indicator
+            document.getElementById(`sort-${column}`).textContent = isAsc ? '↑' : '↓';
+
+            filteredOrders.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(column) {
+                    case 'orderId':
+                        aVal = a.orderId;
+                        bVal = b.orderId;
+                        break;
+                    case 'date':
+                        aVal = new Date(a.date);
+                        bVal = new Date(b.date);
+                        break;
+                    case 'customer':
+                        aVal = a.customer;
+                        bVal = b.customer;
+                        break;
+                    case 'total':
+                        aVal = a.total;
+                        bVal = b.total;
+                        break;
+                    case 'status':
+                        aVal = a.status;
+                        bVal = b.status;
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (aVal < bVal) return isAsc ? -1 : 1;
+                if (aVal > bVal) return isAsc ? 1 : -1;
+                return 0;
+            });
+
+            displayOrders();
+        }
+
+        function viewOrder(orderId) {
+            const order = orders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            const content = `
+                <div class="order-details">
+                    <h4>Order Information</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Order ID:</span>
+                        <span>${order.orderId}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span>${formatDate(order.date)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="status-badge status-${order.status}">${order.status.replace('-', ' ')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Total:</span>
+                        <span>$${order.total.toFixed(2)}</span>
+                    </div>
+                </div>
+
+                <div class="order-details">
+                    <h4>Customer Information</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span>${order.customer}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span>${order.email}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span>${order.phone}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address:</span>
+                        <span>${order.shippingAddress}</span>
+                    </div>
+                </div>
+
+                <div class="order-details">
+                    <h4>Order Items</h4>
+                    ${order.items.map(item => `
+                        <div class="detail-row">
+                            <span>${item.name} (x${item.quantity})</span>
+                            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="order-details">
+                    <h4>Payment Information</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Method:</span>
+                        <span>${order.paymentMethod}</span>
+                    </div>
+                </div>
+
+                ${order.hasReturnRequest ? `
+                    <div class="return-request">
+                        <h4>Return Request</h4>
+                        <p><strong>Reason:</strong> ${order.returnReason}</p>
+                        <div class="return-actions">
+                            <button class="btn btn-success" onclick="approveReturn('${order.orderId}')">Approve Return</button>
+                            <button class="btn btn-danger" onclick="rejectReturn('${order.orderId}')">Reject Return</button>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('orderDetailsContent').innerHTML = content;
+            document.getElementById('orderModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            if (!newStatus) return;
+
+            const order = orders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            order.status = newStatus;
+            
+            swal({
+                title: "Status Updated!",
+                text: `Order ${orderId} status changed to ${newStatus.replace('-', ' ')}`,
+                icon: "success",
+                button: "OK"
+            });
+
+            displayOrders();
+        }
+
+        function approveReturn(orderId) {
+            const order = orders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            swal({
+                title: "Approve Return?",
+                text: `This will refund $${order.total.toFixed(2)} to the customer's wallet.`,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willApprove) => {
+                if (willApprove) {
+                    order.hasReturnRequest = false;
+                    order.status = 'cancelled';
+                    
+                    swal({
+                        title: "Return Approved!",
+                        text: `$${order.total.toFixed(2)} has been refunded to the customer's wallet.`,
+                        icon: "success",
+                        button: "OK"
+                    });
+
+                    closeModal();
+                    displayOrders();
+                }
+            });
+        }
+
+        function rejectReturn(orderId) {
+            const order = orders.find(o => o.orderId === orderId);
+            if (!order) return;
+
+            swal({
+                title: "Reject Return?",
+                text: "Are you sure you want to reject this return request?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willReject) => {
+                if (willReject) {
+                    order.hasReturnRequest = false;
+                    
+                    swal({
+                        title: "Return Rejected!",
+                        text: "The return request has been rejected.",
+                        icon: "success",
+                        button: "OK"
+                    });
+
+                    closeModal();
+                    displayOrders();
+                }
+            });
+        }
+
+        function exportOrders() {
+            swal({
+                title: "Export Orders",
+                text: "Orders exported successfully!",
+                icon: "success",
+                button: "OK"
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize page
+        displayOrders();
+        
+        // Sort by date descending by default
+        sortTable('date');
+    </script>
+</body>
+</html>
