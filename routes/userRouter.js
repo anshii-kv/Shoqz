@@ -126,9 +126,16 @@ router.patch('/editAddress',addressController.editAddress)
 
 router.delete('/deleteAddress',addressController.deleteAddress)
 
-router.get('/thankyou/:orderId',usercontroller.loadThankyou)
+router.get('/thankyou',usercontroller.loadThankyou)
 
-router.get('/order',orderController.loadOrder)
+router.get('/order',orderController.orderlist)
+
+router.post('/cancel-order',orderController.cancelOrder)
+
+router.get('/order-details/:id',orderController.orderdetails)
 
 router.post('/submitOrder',orderController.placeOrder)
+
+router.patch('/returnOrder',orderController.returnOrder)
+
 module.exports=router;

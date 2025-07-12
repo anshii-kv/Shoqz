@@ -394,7 +394,7 @@
     <section style="background-color: #f8f9fa; min-height: 100vh;">
         <div class="container py-5">
             <!-- Order Statistics -->
-            <div class="order-stats">
+            <!-- <div class="order-stats">
                 <div class="stat-card">
                     <div class="stat-number">25</div>
                     <div class="stat-label">Total Orders</div>
@@ -411,7 +411,7 @@
                     <div class="stat-number">4</div>
                     <div class="stat-label">Pending</div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Search and Filter Section -->
             <div class="search-filter-section">
@@ -472,150 +472,70 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="ordersTableBody">
-                                    <tr>
-                                        <td>1</td>
-                                        <td>
-                                            <div class="product-info">
-                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Premium Cotton T-Shirt</div>
-                                                    <div class="product-category">Men's Clothing</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="price">₹1,299</td>
-                                        <td>2024-01-15</td>
-                                        <td>2024-02-15</td>
-                                        <td><span class="status-badge status-delivered">Delivered</span></td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn btn-info" onclick="viewOrder(1)">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn btn-warning" onclick="returnOrder(1)">
-                                                    <i class="fas fa-undo"></i> Return
-                                                </button>
-                                                <button class="action-btn btn-success" onclick="downloadInvoice(1)">
-                                                    <i class="fas fa-download"></i> Invoice
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>
-                                            <div class="product-info">
-                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Wireless Bluetooth Headphones</div>
-                                                    <div class="product-category">Electronics</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="price">₹2,499</td>
-                                        <td>2024-01-18</td>
-                                        <td>2024-02-18</td>
-                                        <td><span class="status-badge status-processing">Processing</span></td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn btn-info" onclick="viewOrder(2)">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn btn-primary" onclick="trackOrder(2)">
-                                                    <i class="fas fa-truck"></i> Track
-                                                </button>
-                                                <button class="action-btn btn-danger" onclick="cancelOrder(2)">
-                                                    <i class="fas fa-times"></i> Cancel
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>
-                                            <div class="product-info">
-                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Designer Handbag</div>
-                                                    <div class="product-category">Women's Accessories</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="price">₹3,799</td>
-                                        <td>2024-01-20</td>
-                                        <td>2024-02-20</td>
-                                        <td><span class="status-badge status-shipped">Shipped</span></td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn btn-info" onclick="viewOrder(3)">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn btn-primary" onclick="trackOrder(3)">
-                                                    <i class="fas fa-truck"></i> Track
-                                                </button>
-                                                <button class="action-btn btn-danger" onclick="cancelOrder(3)">
-                                                    <i class="fas fa-times"></i> Cancel
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>
-                                            <div class="product-info">
-                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Smart Watch Series 5</div>
-                                                    <div class="product-category">Electronics</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="price">₹8,999</td>
-                                        <td>2024-01-22</td>
-                                        <td>2024-02-22</td>
-                                        <td><span class="status-badge status-pending">Pending</span></td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn btn-info" onclick="viewOrder(4)">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn btn-success" onclick="payNow(4)">
-                                                    <i class="fas fa-credit-card"></i> Pay Now
-                                                </button>
-                                                <button class="action-btn btn-danger" onclick="cancelOrder(4)">
-                                                    <i class="fas fa-times"></i> Cancel
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>5</td>
-                                        <td>
-                                            <div class="product-info">
-                                                <img src="https://via.placeholder.com/50" alt="Product" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Running Shoes</div>
-                                                    <div class="product-category">Sports & Fitness</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="price">₹4,299</td>
-                                        <td>2024-01-10</td>
-                                        <td>2024-02-10</td>
-                                        <td><span class="status-badge status-cancelled">Cancelled</span></td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn btn-info" onclick="viewOrder(5)">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="action-btn btn-primary" onclick="reorder(5)">
-                                                    <i class="fas fa-redo"></i> Reorder
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                             <tbody id="ordersTableBody">
+  <% if (orders.length === 0) { %>
+    <tr>
+      <td colspan="7" class="text-center">No orders found.</td>
+    </tr>
+  <% } else { %>
+    <% orders.forEach((order, index) => { %>
+      <% order.product.forEach((item, i) => { %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td>
+            <div class="product-info">
+              <img src="/product-images/<%= item.productId %>.jpg" alt="Product" class="product-image">
+              <div class="product-details">
+                <div class="product-name"><%= item.name %></div>
+                <div class="product-category"><%= item.category.name %></div>
+              </div>
+            </div>
+          </td>
+          <td class="price">₹<%= item.price %></td>
+          <td><%= order.Date ? order.Date.toDateString() : '' %></td>
+          <td><%= order.exprdate ? order.exprdate.toDateString() : '' %></td>
+          <td>
+            <span class="status-badge status-<%= order.status.toLowerCase() %>"><%= order.status %></span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn btn-info" onclick="viewOrder('<%= order._id %>')">
+                <i class="fas fa-eye"></i> View
+              </button>
+              <% if(order.status === 'Delivered') { %>
+                <button class="action-btn btn-warning" onclick="returnOrder('<%= order._id %>')">
+                  <i class="fas fa-undo"></i> Return
+                </button>
+                <button class="action-btn btn-success" onclick="downloadInvoice('<%= order._id %>')">
+                  <i class="fas fa-download"></i> Invoice
+                </button>
+              <% } else if(order.status === 'Pending') { %>
+                <!-- <button class="action-btn btn-success" onclick="payNow('<%= order._id %>')">
+                  <i class="fas fa-credit-card"></i> Pay Now
+                </button> -->
+                <button class="action-btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              <% } else if(order.status === 'Processing' || order.status === 'Shipped') { %>
+                <button class="action-btn btn-primary" onclick="trackOrder('<%= order._id %>')">
+                  <i class="fas fa-truck"></i> Track
+                </button>
+                <button class="action-btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              <% } else if(order.status === 'Cancelled') { %>
+                <button class="action-btn btn-primary" onclick="reorder('<%= order._id %>')">
+                  <i class="fas fa-redo"></i> Reorder
+                </button>
+              <% } %>
+            </div>
+          </td>
+        </tr>
+      <% }) %>
+    <% }) %>
+  <% } %>
+</tbody>
+                              </tbody>
                             </table>
                         </div>
                     </div>
@@ -651,23 +571,10 @@
 
     <script>
         // View Order Function
-        function viewOrder(orderId) {
-            Swal.fire({
-                title: 'Order Details',
-                html: `
-                    <div class="text-start">
-                        <h5>Order #${orderId}</h5>
-                        <p><strong>Status:</strong> Processing</p>
-                        <p><strong>Order Date:</strong> 2024-01-15</p>
-                        <p><strong>Delivery Address:</strong> 123 Main Street, City</p>
-                        <p><strong>Payment Method:</strong> Credit Card</p>
-                        <p><strong>Total Amount:</strong> ₹1,299</p>
-                    </div>
-                `,
-                confirmButtonText: 'Close',
-                confirmButtonColor: '#bdd5eb'
-            });
-        }
+       function viewOrder(orderId) {
+  window.location.href = `/order-details/${orderId}`;
+}
+
 
         // Track Order Function
         function trackOrder(orderId) {
@@ -699,25 +606,46 @@
 
         // Cancel Order Function
         function cancelOrder(orderId) {
-            Swal.fire({
-                title: 'Cancel Order',
-                text: `Are you sure you want to cancel order #${orderId}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Cancel Order'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Cancelled!',
-                        text: 'Your order has been cancelled.',
-                        icon: 'success',
-                        confirmButtonColor: '#bdd5eb'
-                    });
-                }
-            });
+  Swal.fire({
+    title: 'Cancel Order',
+    text: `Are you sure you want to cancel order #${orderId}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, Cancel Order'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch('/cancel-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderId: orderId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: 'Cancelled!',
+            text: 'Your order has been cancelled.',
+            icon: 'success',
+            confirmButtonColor: '#bdd5eb'
+          }).then(() => {
+            window.location.reload(); // Reload to update UI
+          });
+        } else {
+          Swal.fire('Error', data.message || 'Something went wrong.', 'error');
         }
+      })
+      .catch(err => {
+        Swal.fire('Error', 'Server error occurred.', 'error');
+        console.error(err);
+      });
+    }
+  });
+}
+
 
         // Return Order Function
         function returnOrder(orderId) {

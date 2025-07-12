@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - ZENVOGUE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+            border-radius: 10px 10px 0 0;
+            padding: 20px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            border: none;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(189, 213, 235, 0.3);
+            background: linear-gradient(45deg, #a9c1d6, #bdd5eb);
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-return {
+            background: linear-gradient(45deg, #ff6b6b, #ff8787);
+            border: none;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-return:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            background: linear-gradient(45deg, #ff8787, #ff6b6b);
+            color: white;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-processing {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-shipped {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-waiting {
+            background-color: #ffeaa7;
+            color: #2d3436;
+        }
+
+        .product-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .product-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #bdd5eb;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        .return-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .breadcrumb {
+            background: none;
+            padding: 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #bdd5eb;
+        }
+
+        .breadcrumb-item a {
+            color: #bdd5eb;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: #666;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #bdd5eb;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #bdd5eb;
+        }
+
+        .timeline-item.completed::before {
+            background: #28a745;
+        }
+
+        .timeline-item.current::before {
+            background: #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 15px;
+            }
+            
+            .product-item {
+                padding: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <section style="background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4><i class="fas fa-receipt me-2"></i>Order Details</h4>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="/profile">Profile</a></li>
+                                    <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Order Details</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div>
+                            <a href="/order" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section style="background-color: #f8f9fa; min-height: 100vh;">
+        <div class="container py-5">
+            <div class="row">
+                <!-- Order Information -->
+                <div class="col-lg-8">
+                    <!-- Order Summary Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Order #<%= order._id %></h5>
+                                <span class="status-badge status-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                                    <%= order.status %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Order Date:</span>
+                                        <span class="info-value"><%= order.Date ? order.Date.toDateString() : 'N/A' %></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Return Deadline:</span>
+                                        <span class="info-value"><%= order.exprdate ? order.exprdate.toDateString() : 'N/A' %></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Payment Method:</span>
+                                        <span class="info-value"><%= order.paymentMethod || 'N/A' %></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Total Amount:</span>
+                                        <span class="info-value price">₹<%= order.subtotal %></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Items:</span>
+                                        <span class="info-value"><%= order.product.length %> item(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ordered Items</h5>
+                        </div>
+                        <div class="card-body">
+                            <% order.product.forEach((item, index) => { %>
+                            <div class="product-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="/product-images/<%= item.productId %>.jpg" 
+                                             alt="<%= item.name %>" 
+                                             class="product-image w-100">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1"><%= item.name %></h6>
+                                        <p class="text-muted mb-1">Category: <%= item.category.name || 'N/A' %></p>
+                                        <small class="text-muted">Product ID: <%= item.productId %></small>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <span class="badge bg-secondary">Qty: <%= item.quantity %></span>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <span class="price">₹<%= item.price %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+
+                    <!-- Return Form (Only show if order is delivered and within return period) -->
+                     <%=console.log(order.status,'Status')%>
+                    <% if (order.status === 'delivered') { %>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Return Request</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="returnForm">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="returnReason" class="form-label">Reason for Return *</label>
+                                            <select class="form-select" id="returnReason" required>
+                                                <option value="">Select a reason</option>
+                                                <option value="defective">Product is Defective</option>
+                                                <option value="wrong_item">Wrong Item Received</option>
+                                                <option value="size_issue">Size Issue</option>
+                                                <option value="not_as_described">Not as Described</option>
+                                                <option value="damaged">Damaged During Shipping</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="returnComments" class="form-label">Additional Comments</label>
+                                            <textarea class="form-control" id="returnComments" rows="3" 
+                                                      placeholder="Please provide additional details about your return request..."></textarea>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="returnImages" class="form-label">Upload Images (Optional)</label>
+                                            <input type="file" class="form-control" id="returnImages" 
+                                                   multiple accept="image/*">
+                                            <small class="text-muted">Upload photos of the product to support your return request</small>
+                                        </div> -->
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-undo me-2"></i>Submit Return Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <% } else if (order.status === 'Delivered' && new Date() > order.exprdate) { %>
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <i class="fas fa-exclamation-triangle text-warning fa-3x mb-3"></i>
+                            <h5>Return Period Expired</h5>
+                            <p class="text-muted">The return period for this order has expired. Returns are only accepted within the specified timeframe.</p>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Delivery Information -->
+                <div class="col-lg-4">
+                    <!-- Delivery Details Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Delivery Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-item">
+                                <span class="info-label">Name:</span>
+                                <span class="info-value"><%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Mobile:</span>
+                                <span class="info-value"><%= order.deliveryDetails.mobile %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value"><%= order.deliveryDetails.email %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Address:</span>
+                                <span class="info-value">
+                                    <%= order.deliveryDetails.address %><br>
+                                    <%= order.deliveryDetails.city %><br>
+                                    Pin: <%= order.deliveryDetails.pin %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Tracking -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Tracking</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item completed">
+                                    <strong>Order Placed</strong><br>
+                                    <small class="text-muted"><%= order.Date ? order.Date.toDateString() : 'N/A' %></small>
+                                </div>
+                                <div class="timeline-item <%= order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : '' %>">
+                                    <strong>Processing</strong><br>
+                                    <small class="text-muted">Order is being prepared</small>
+                                </div>
+                                <div class="timeline-item <%= order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : order.status === 'Processing' ? 'current' : '' %>">
+                                    <strong>Shipped</strong><br>
+                                    <small class="text-muted">Order has been shipped</small>
+                                </div>
+                                <div class="timeline-item <%= order.status === 'Delivered' ? 'completed' : order.status === 'Shipped' ? 'current' : '' %>">
+                                    <strong>Delivered</strong><br>
+                                    <small class="text-muted">Order delivered successfully</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <% if (order.status === 'Delivered') { %>
+                                    <button class="btn btn-success" onclick="downloadInvoice('<%= order._id %>')">
+                                        <i class="fas fa-download me-2"></i>Download Invoice
+                                    </button>
+                                    <button class="btn btn-return" onclick="requestReturn('<%= order._id %>')">
+                                        <i class="fas fa-undo me-2"></i>Request Return
+                                    </button>
+                                <% } else if (order.status === 'Pending') { %>
+                                    <!-- <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                                        <i class="fas fa-times me-2"></i>Cancel Order
+                                    </button> -->
+                                <% } else if (order.status === 'Processing' || order.status === 'Shipped') { %>
+                                    <button class="btn btn-primary" onclick="trackOrder('<%= order._id %>')">
+                                        <i class="fas fa-truck me-2"></i>Track Order
+                                    </button>
+                                    <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                                        <i class="fas fa-times me-2"></i>Cancel Order
+                                    </button>
+                                <% } else if (order.status === 'Cancelled') { %>
+                                    <button class="btn btn-primary" onclick="reorder('<%= order._id %>')">
+                                        <i class="fas fa-redo me-2"></i>Reorder
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+    <script>
+        // Return Form Submit Handler
+        document.getElementById('returnForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const reason = document.getElementById('returnReason').value;
+            const comments = document.getElementById('returnComments').value;
+           
+            
+            if (!reason) {
+                Swal.fire('Error', 'Please select a reason for return', 'error');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Confirm Return Request',
+                text: 'Are you sure you want to submit this return request?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Submit Request'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Create FormData for file upload
+                    const formData = new FormData();
+                    formData.append('orderId', '<%= order._id %>');
+                    formData.append('reason', reason);
+                    formData.append('comments', comments);
+                    
+                    for (let [key, value] of formData.entries()) {
+  console.log(`${key}:`, value);
+}
+                    
+                    fetch('/returnOrder', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    orderId: '<%= order._id %>',
+    reason,
+    comments
+  })
+})
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.return) {
+                            Swal.fire({
+                                title: 'Return Request Submitted!',
+                                text: 'Your return request has been submitted successfully. We will review it and get back to you soon.',
+                                icon: 'success',
+                                confirmButtonColor: '#bdd5eb'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else if (data.datelimit) {
+                            Swal.fire({
+                                title: 'Return Period Expired',
+                                text: 'The return period for this order has expired.',
+                                icon: 'error',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire('Error', 'Server error occurred.', 'error');
+                    });
+                }
+            });
+        });
+
+        // Request Return Function
+        function requestReturn(orderId) {
+            Swal.fire({
+                title: 'Request Return',
+                text: 'Do you want to return this order?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ff6b6b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Request Return'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Scroll to return form if it exists
+                    const returnForm = document.getElementById('returnForm');
+                    if (returnForm) {
+                        returnForm.scrollIntoView({ behavior: 'smooth' });
+                        Swal.fire({
+                            title: 'Fill Return Form',
+                            text: 'Please fill out the return form below.',
+                            icon: 'info',
+                            confirmButtonColor: '#bdd5eb'
+                        });
+                    } else {
+                        // If no return form, redirect to return page or show message
+                        window.location.href = `/return-order/${orderId}`;
+                    }
+                }
+            });
+        }
+
+        // Cancel Order Function
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: 'Cancel Order',
+                text: 'Are you sure you want to cancel this order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Cancel Order'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/cancel-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ orderId: orderId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Cancelled!',
+                                text: 'Your order has been cancelled.',
+                                icon: 'success',
+                                confirmButtonColor: '#bdd5eb'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire('Error', 'Server error occurred.', 'error');
+                    });
+                }
+            });
+        }
+
+        // Download Invoice Function
+        function downloadInvoice(orderId) {
+            window.location.href = `/download-invoice/${orderId}`;
+        }
+
+        // Track Order Function
+        function trackOrder(orderId) {
+            Swal.fire({
+                title: 'Order Tracking',
+                text: 'Redirecting to tracking page...',
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = `/track-order/${orderId}`;
+            });
+        }
+
+        // Reorder Function
+        function reorder(orderId) {
+            Swal.fire({
+                title: 'Reorder',
+                text: 'Adding items to cart...',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = `/reorder/${orderId}`;
+            });
+        }
+    </script>
+</body>
+</html>

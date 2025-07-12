@@ -553,7 +553,7 @@ const addToCart = async (req, res) => {
    try {
        let responseData;
     const { userId } = req.session;
-     console.log(userId);
+    //  console.log(userId);
    
     if (!userId) {
       responseData = { session: false, error: "Please login first" };
@@ -564,8 +564,7 @@ const addToCart = async (req, res) => {
       } else {
         const { productId, size, quantity } = req.body;
         console.log(req.body);
-        
-        // Validate required fields
+      
         if (!productId || !size || !quantity) {
           responseData = { 
             success: false, 
@@ -574,7 +573,7 @@ const addToCart = async (req, res) => {
         } else {
           const requestedQuantity = parseInt(quantity, 10);
           
-          // Validate quantity range
+          
           if (requestedQuantity < 1 || requestedQuantity > 4) {
             responseData = {
               success: false,
@@ -589,7 +588,7 @@ const addToCart = async (req, res) => {
                 error: "Product not found or unavailable",
               };
             } else {
-              // Check size availability and stock
+            
               const sizeInfo = productdata.sizes.find(s => s.size === size);
               if (!sizeInfo || sizeInfo.quantity === 0) {
                 responseData = {
@@ -597,7 +596,7 @@ const addToCart = async (req, res) => {
                   error: `Size ${size} is out of stock`,
                 };
               } else {
-                // Check if product with same size already exists in cart
+                
                 const existingproduct = await Cart.findOne({
                   userId: userId,
                   "product.productId": productId,
@@ -605,14 +604,14 @@ const addToCart = async (req, res) => {
                 });
                 
                 if (existingproduct) {
-                  // Find the specific product with matching size
+                  
                   const currentProduct = existingproduct.product.find(
                     (p) => p.productId == productId && p.size === size
                   );
                   
                   const newQuantity = currentProduct.quantity + requestedQuantity;
                   
-                  // Check quantity limits
+                  
                   if (newQuantity > 4) {
                     responseData = {
                       success: false,
@@ -624,7 +623,7 @@ const addToCart = async (req, res) => {
                       error: `Only ${sizeInfo.quantity} items available in stock for size ${size}`,
                     };
                   } else {
-                    // Calculate new price (use sale price if available)
+                   
                     const currentPrice = productdata.salePrice || productdata.regularPrice;
  
                     const updatedCart = await Cart.findOneAndUpdate(
@@ -651,14 +650,14 @@ const addToCart = async (req, res) => {
                     };
                   }
                 } else {
-                  // Check if requested quantity is available
+                 
                   if (requestedQuantity > sizeInfo.quantity) {
                     responseData = {
                       success: false,
                       error: `Only ${sizeInfo.quantity} items available in stock for size ${size}`,
                     };
                   } else {
-                    // Calculate price (use sale price if available)
+                    
                     const currentPrice = productdata.salePrice || productdata.regularPrice;
                     
                     const cartdata = await Cart.findOneAndUpdate(
@@ -729,7 +728,7 @@ const loadCart = async (req, res) => {
         messages: { message: "Your cart is empty." },
       });
     }
-    // Filter out invalid cart items
+ 
     cartData.product = cartData.product.filter(item => item.productId &&( item.quantity > 0));
 console.log(cartData, "HEYYYYYY");
      
@@ -745,7 +744,7 @@ console.log(cartData, "HEYYYYYY");
       });
     }
 
-    // Calculate subtotal and total
+    
     let subtotal = 0;
     let total = 0;
 
@@ -784,7 +783,7 @@ const updateQuantity = async (req, res) => {
 
     const { productId, count } = req.body;
 
-    // Validate inputs
+    
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.json({ success: false, error: "Invalid product ID" });
     }
@@ -792,45 +791,45 @@ const updateQuantity = async (req, res) => {
       return res.json({ success: false, error: "Invalid count value" });
     }
 
-    // Find the user's cart
+    
     const cart = await Cart.findOne({ userId });
     if (!cart) {
       return res.json({ success: false, error: "Cart not found" });
     }
 
-    // Find the cart item
+ 
     const cartItem = cart.product.find(item => item.productId.toString() === productId);
     if (!cartItem) {
       return res.json({ success: false, error: "Item not found in cart" });
     }
 
-    // Find the product
+   
     const product = await Product.findById(productId);
     if (!product) {
       return res.json({ success: false, error: "Product not found" });
     }
 
-    // Validate size availability
+  
     const selectedSize = product.sizes.find(s => s.size === cartItem.size);
     if (!selectedSize) {
       return res.json({ success: false, error: "Selected size not available" });
     }
 
-    // Check if quantity can be decreased
+   
     if (count === -1 && cartItem.quantity <= 1) {
       return res.json({ success: false, error: "Quantity cannot be decreased further." });
     }
 
-    // Check if quantity increase exceeds stock
+   
     if (count === 1 && cartItem.quantity + 1 > selectedSize.quantity) {
       return res.json({ success: false, error: `Only ${selectedSize.quantity} items in stock.` });
     }
 
-    // Update quantity and total
+   
     cartItem.quantity += count;
     cartItem.total = cartItem.price * cartItem.quantity;
 
-    // Save the cart
+  
     await cart.save();
 
     return res.json({
@@ -853,7 +852,7 @@ const removeFromCart = async (req, res) => {
 
     const { productId } = req.body;
 
-    // Validate productId
+   
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.json({ success: false, error: "Invalid product ID" });
     }
@@ -868,7 +867,7 @@ const removeFromCart = async (req, res) => {
       return res.json({ success: false, error: "Cart or item not found" });
     }
 
-    // Calculate updated totals
+  
     let subtotal = 0;
     if (result.product.length > 0) {
       const populatedCart = await Cart.findOne({ userId }).populate("product.productId");
@@ -901,14 +900,14 @@ const removeFromCart = async (req, res) => {
 
 const loadCheckout = async (req, res) => {
   try {
-    // Ensure user is logged in
+ 
     if (!req.session || !req.session.userId) {
       return res.redirect('/login');
     }
 
     const userId = req.session.userId;
 
-    // Find cart and populate productId inside the product array
+    
     const cartData = await Cart.findOne({ userId }).populate('product.productId');
 
     if (!cartData || !cartData.product || cartData.product.length === 0) {
@@ -922,15 +921,15 @@ const loadCheckout = async (req, res) => {
       });
     }
 
-    // Calculate subtotal
+  
     const subtotal = cartData.product.reduce((sum, item) => sum + item.total, 0);
 
-    // Fetch user addresses
+   
     const addressData = await Address.findOne({ user: userId });
     const userAddresses = addressData ? addressData.address : [];
     const defaultAddress = userAddresses.find(addr => addr.isDefault) || null;
 
-    // Render checkout page with necessary data
+   
     res.render('checkout', {
       cartItems: cartData.product,
       shippingCharge: cartData.shippingCharge || 0,
@@ -1018,18 +1017,17 @@ const postChangePass = async (req, res) => {
 if (!user) {
   return res.status(404).json({ success: false, message: "User not found" });
 }
-    // Check current password
+   
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
 
-    // Check new and confirm password match
+    
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: "New passwords do not match" });
     }
 
-    // Hash and update password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
@@ -1045,12 +1043,14 @@ if (!user) {
 const loadThankyou = async (req, res) => {
   try {
     const id = req.query.orderId;
-    const orderData = await Order.findById(id); // .find() returns array; use findById
+    const orderData = await Order.findById(id); 
+    console.log(id);
+    
     if (!orderData) {
       return res.status(404).send("Order not found");
     }
 
-    res.render('thankyou', { order: orderData }); // pass as object with key order
+    res.render('thankyou', { order: orderData }); 
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

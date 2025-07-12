@@ -409,8 +409,7 @@
 
                 // Generate random order ID
                 const randomId = Math.floor(Math.random() * 900000) + 100000;
-                document.getElementById('orderId').textContent = `#ORD-2025-${randomId}`;
-
+                const orderId = "<%= order._id %>";
                 // Add click handlers for buttons
                 document.querySelector('.btn-primary-custom').addEventListener('click', function(e) {
                     e.preventDefault();
@@ -419,7 +418,7 @@
                     
                     // Simulate redirect delay
                     setTimeout(() => {
-                        window.location.href = '/order-details';
+                        window.location.href = `/order-details/${orderId}`;
                     }, 1000);
                 });
 

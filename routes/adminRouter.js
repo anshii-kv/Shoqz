@@ -110,9 +110,9 @@ router.post('/updateProduct',adminAuth,uploads.array("croppedImages", 4),product
 
 
 router.get('/orderDetails',orderController.loadOrder)
+router.post('/changeStatus',orderController.changeStatus)
 
 
-
-
+router.post('/approveOrder',orderController.approveOrder)
 
 module.exports = router;

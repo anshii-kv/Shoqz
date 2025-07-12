@@ -4,10 +4,22 @@ const Product = require("../../model/productSchema");
 const Category = require("../../model/categorySchema");
 const Cart = require('../../model/cartSchema')
 
-const loadOrder = async (req, res) => {
-    try {
-        res.render("myOrde");
-    } catch (error) {}
+const orderlist = async (req, res) => {
+  try {
+    const user = req.session.userId;
+    const userdata = await User.findOne({ _id: user });
+console.log(userdata);
+
+    // const orders = await Order.find({ user: user }).sort({ Date: -1 });
+const orders = await Order.find({ user })
+  .populate('product.productId')
+  .populate('product.category')
+  .sort({ Date: -1 });
+
+    res.render("myOrde", { orders, userdata, user });
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 const placeOrder = async (req, res) => {
@@ -90,7 +102,87 @@ const placeOrder = async (req, res) => {
 };
 
 
+const cancelOrder = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const orderId = req.body.orderId;
+    const orders = await Order.findById({ _id: orderId })
+    
+    const WalletAmount = orders.subtotal
+    const WalletData = {
+      amount:WalletAmount,
+      date:Date.now(),
+      discription:"Refund for order Cancelling order "
+    }
+
+    const data = await Order.findOneAndUpdate(
+      { _id: orderId, user: userId },
+      { $set: { status: "cancelled" } },
+      { new: true }
+    );
+
+    if (data) {
+      await User.findOneAndUpdate({_id:userId},
+        {$inc:{wallet:WalletAmount},$push:{walletHistory:WalletData}})
+
+      res.json({ success: true });
+    } else {
+      res.json({
+        success: false,
+        message: "Order not found or not owned by the user",
+      });
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 
+const orderdetails = async(req,res)=>{
+  try {
+    console.log(req.params.id,'idsd')
+    let id = req.params.id
+    console.log(id,'dfls')
+    const order =  await Order.findOne({_id:id})
+    console.log(order,'sdfghj');
+    
+    res.render('orderDetail',{order})
+  } catch (error) {
+    
+  }
+}
+const returnOrder = async (req, res) => {
+  try {
+    console.log("hrlo");
+    console.log(req.body);
+    
+    const userId = req.session.userId;
 
-module.exports = { loadOrder, placeOrder };
+    const orderId = req.body.orderId;
+console.log(orderId);
+
+    const orders = await Order.findById({ _id: orderId });
+
+
+    console.log("hiiii");
+    
+
+    if (Date.now() > orders.exprdate) {
+
+      res.json({ datelimit: true });
+    } else {
+      await Order.findByIdAndUpdate(
+        { _id: orderId },
+        { $set: { status: "waiting for approval" } }
+      );
+       
+      
+      res.json({ return: true });
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+module.exports = { orderlist, placeOrder ,cancelOrder,orderdetails,returnOrder};

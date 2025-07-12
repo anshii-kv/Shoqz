@@ -358,9 +358,55 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="ordersTableBody">
-                    <!-- Orders will be populated here -->
-                </tbody>
+               <tbody>
+  <% if (orders.length > 0) { %>
+    <% orders.forEach((order) => { %>
+      <tr>
+        <td><%= order._id %></td>
+        <td><%= order.Date?.toDateString() %></td>
+        <td>
+          <%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %><br>
+          <small><%= order.deliveryDetails.email %></small>
+        </td>
+        <td>₹<%= order.subtotal.toFixed(2) %></td>
+        <%=console.log(order.status,'statusssss')%>
+        <td><span class="status-badge status-<%= order.status %>"><%= order.status.replace('-', ' ') %></span></td>
+        
+        <td>
+  <% if (order.status === 'return') { %>
+    Return
+  <% } else if (order.status === 'waiting for approval') { %>
+    <form method="POST" action="/admin/approveOrder" style="display:inline;">
+      <input type="hidden" name="orderId" value="<%= order._id %>">
+      <button type="submit" class="btn btn-success btn-sm">Approve</button>
+    </form>
+  <% } else { %>
+    <a href="/admin/orders/<%= order._id %>" class="btn btn-info btn-sm">View</a>
+    <form method="POST" action="/admin/changeStatus" style="display:inline;">
+      <input type="hidden" name="orderId" value="<%= order._id %>">
+      <select name="status" onchange="this.form.submit()" style="margin-left: 5px; padding: 5px;">
+        <option value="">Change Status</option>
+        <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+        <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+        <option value="out-for-delivery" <%= order.status === 'out-for-delivery' ? 'selected' : '' %>>Out for Delivery</option>
+        <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+        <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+      </select>
+    </form>
+  <% } %>
+</td>
+
+</td>
+
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="6" class="text-center">No orders found</td>
+    </tr>
+  <% } %>
+</tbody>
+
             </table>
         </div>
 
