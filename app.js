@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Serve static folders
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ Serve image folder
+app.use('/Uploads', express.static(path.join(__dirname, 'Uploads'))); // ✅ Serve image folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session

@@ -32,7 +32,7 @@ const user = async (req, res) => {
     const data = await User.find(query)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }); 
+      .sort({ name: 1 }); 
     
    
     res.render('admin/customer', {

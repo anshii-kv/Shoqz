@@ -144,12 +144,28 @@ const orderdetails = async(req,res)=>{
     console.log(req.params.id,'idsd')
     let id = req.params.id
     console.log(id,'dfls')
-    const order =  await Order.findOne({_id:id})
-    console.log(order,'sdfghj');
+    
+   
+    const order = await Order.findOne({_id:id})
+      .populate({
+        path: "product.productId",
+        populate: {
+          path: "category",
+          model: "Category"
+        }
+      })
+      .populate("user");
+    
+    if (!order) {
+      return res.status(404).render('error', { message: 'Order not found' });
+    }
+    
+    console.log(order,'ammu');
     
     res.render('orderDetail',{order})
   } catch (error) {
-    
+    console.error('Error fetching order details:', error);
+    res.status(500).render('error', { message: 'Internal server error' });
   }
 }
 const returnOrder = async (req, res) => {

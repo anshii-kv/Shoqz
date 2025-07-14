@@ -398,7 +398,7 @@
                             <% } else { %>
                                 <button class="toggle-button list-button" onclick="toggleStatus('<%= product._id %>', false)">List</button>
                             <% } %>
-                            <a href="/admin/updateProduct/<%= product._id %>" class="action-icon edit-icon">✏️</a>
+                            <a href="/admin/updateProduct?productId=<%= product._id %>" class="action-icon edit-icon">✏️</a>
                             <a href="#" class="action-icon delete-icon" onclick="confirmDelete('<%= product._id %>')">🗑️</a>
                         </td>
                     </tr>

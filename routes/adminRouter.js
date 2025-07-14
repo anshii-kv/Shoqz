@@ -63,11 +63,11 @@ router.get('/addProduct',adminAuth,productController.loadProductAddPage)
 
 router.get("/products",adminAuth,productController.loadProducts)
 
-router.patch('/products/toggle-status/:id', productController.toggleProductStatus);
+router.patch('/products/toggle-status', productController.toggleProductStatus);
 
 router.delete('/products/delete/:id', productController.deleteProduct);
 
-router.get('/updateProduct/:id',adminAuth,productController.loadUpdatePage);
+router.get('/updateProduct',adminAuth,productController.loadUpdatePage);
 
 router.patch("/products/toggle-status/:id",productController.toggleProductStatus);
 

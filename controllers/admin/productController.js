@@ -41,7 +41,7 @@ const loadProducts = async (req, res) => {
 
 const toggleProductStatus = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const productId = req.query.id;
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({
@@ -106,9 +106,7 @@ const loadProductAddPage = async (req, res) => {
 
 const addProducts = async (req, res) => {
     try {
-        console.log("Request body:", req.body);
-        
-
+       
         if (!req.body.name || !req.body.description || !req.body.price || !req.body.originalPrice || !req.body.category) {
             return res.json({
                 ok: false,
@@ -116,8 +114,6 @@ const addProducts = async (req, res) => {
             });
         }
 
-        console.log(req.files, "Files");
-        console.log(req.files.length, "Length");
         if (!req.files || req.files.length < 3) {
             return res.json({
                 ok: false,
@@ -127,8 +123,7 @@ const addProducts = async (req, res) => {
 
         const {
             name,
-
-            color,
+             color,
             description,
             price,
             originalPrice,
@@ -168,11 +163,9 @@ const addProducts = async (req, res) => {
 
             try {
                 await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-
                 images.push(file.filename);
-                console.log(`Successfully processed image ${i + 1}: ${file.filename}`);
+                
             } catch (imageError) {
-                console.error(`Error processing image ${i + 1}:`, imageError);
                 return res.json({
                     ok: false,
                     msg: `Error processing image ${i + 1}: ${imageError.message}`,
@@ -200,7 +193,6 @@ const addProducts = async (req, res) => {
         const newProduct = new Product({
             productName: name,
             description: description,
-
             regularPrice: parseFloat(originalPrice),
             salePrice: parseFloat(price),
             finalamount: finalAmount,
@@ -231,7 +223,7 @@ const addProducts = async (req, res) => {
 
 const loadUpdatePage = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const productId = req.query.productId;
         const findAdmin = req.session.admin;
 
         if (!findAdmin) {
@@ -240,6 +232,7 @@ const loadUpdatePage = async (req, res) => {
 
         const category = await Category.find({});
         const product = await Product.findById(productId).populate('category')
+console.log(product.productImage[0],"nice to meeet you");
 
         if (!product) {
             return res.status(404).send("Product not found");
@@ -261,6 +254,8 @@ const updateProduct = async (req, res) => {
         }
 
         const product = await Product.findById(productId);
+        console.log(produtId,"image is nokjhfkjhsrkjfhkj");
+        
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
@@ -278,6 +273,7 @@ const updateProduct = async (req, res) => {
             existingImages = [],
             croppedImages = [],
         } = req.body;
+console.log(req.body);
 
         if (!productName || !description || !regularPrice || !salePrice || !category || !status) {
             return res.status(400).json({ success: false, message: "All required fields must be provided" });
