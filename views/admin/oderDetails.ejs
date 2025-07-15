@@ -678,10 +678,10 @@
                     <label for="searchOrder">Search Order ID</label>
                     <input type="text" id="searchOrder" placeholder="Enter order ID">
                 </div>
-                <div class="search-group">
+                <!-- <div class="search-group">
                     <label for="searchCustomer">Search Customer</label>
                     <input type="text" id="searchCustomer" placeholder="Enter customer name/email">
-                </div>
+                </div> -->
                 <div class="search-group">
                     <label for="filterStatus">Filter by Status</label>
                     <select id="filterStatus">
@@ -704,8 +704,8 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-primary" onclick="searchOrders()">Search</button>
-                <button class="btn btn-secondary" onclick="clearSearch()">Clear Search</button>
-                <button class="btn btn-info" onclick="exportOrders()">Export Orders</button>
+                <!-- <button class="btn btn-secondary" onclick="clearSearch()">Clear Search</button>
+                <button class="btn btn-info" onclick="exportOrders()">Export Orders</button> -->
             </div>
         </div>
 
@@ -745,7 +745,7 @@
                                     <% } else if (order.status === 'waiting for approval') { %>
                                         <form method="POST" action="/admin/approveOrder" style="display:inline;">
                                             <input type="hidden" name="orderId" value="<%= order._id %>">
-                                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+<button type="submit" class="btn btn-success btn-sm" onclick="approvefn('<%= order._id %>')">Approve</button>
                                         </form>
                                     <% } else { %>
                                         <a href="/admin/orders/<%= order._id %>" class="btn btn-info btn-sm">View</a>
@@ -971,6 +971,26 @@
                 day: 'numeric'
             });
         }
+       async function approvefn(orderId) {
+    try {
+        const response = await fetch('/admin/approveOrder', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ orderId })
+        });
+
+        const result = await response.text();
+        console.log("Success:", result);
+        if (response.ok) {
+            location.reload(); // or redirect if needed
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
     </script>
 </body>
 </html>

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Category = require("../../model/categorySchema");
 const Product = require("../../model/productSchema");
 const Order=require("../../model/orderSchema")
-
+const User = require('../../model/userSchema');
 
 const loadOrder=  async (req, res) => {
   try {
@@ -36,15 +36,40 @@ const changeStatus = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-const approveOrder = async(req,res)=>{
-    try {
-        console.log(req.body);
-        const updated = await Order.updateOne({_id:req.body.orderId},{$set:{status:'return'}})
-        res.redirect('/admin/orderDetails')
+const approveOrder = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+console.log(userId,'anshiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
+console.log,(req.body.orderId,'chakiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
 
-        
-    } catch (error) {
-        
-    }
-}
+    const order = await Order.findById(req.body.orderId);
+
+    if (!order) return res.status(404).send("Order not found");
+
+    const amount = order.subtotal;
+    const reason = `Return amount of order ${order._id}`;
+    const date = new Date();
+
+    await Order.updateOne({ _id: req.body.orderId }, { $set: { status: 'return' } });
+
+    await User.updateOne(
+      { _id: userId },
+      {
+        $inc: { wallet: amount },
+        $push: {
+          walletHistory: {
+            date: date,
+            amount: amount,
+            description: reason
+          }
+        }
+      }
+    );
+
+    res.redirect('/admin/orderDetails');
+  } catch (error) {
+    console.error("Error approving order return:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
 module.exports={loadOrder,changeStatus,approveOrder}

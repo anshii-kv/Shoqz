@@ -42,10 +42,22 @@ const userSchema = new Schema({
         ref:"Cart"
         }
     }],
-    wallet:{
-        type:Number,
-        default:0
+   wallet: {
+    type: Number,
+    default: 0,
+},
+
+walletHistory: [{
+    date: {
+        type: Date
     },
+    amount: {
+        type: Number,
+    },
+    description:{
+      type:String,
+    }
+}],
     wishlist:[{
         type:Schema.Types.ObjectId,
         ref:"Wishlist"

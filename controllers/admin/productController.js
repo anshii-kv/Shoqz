@@ -12,18 +12,21 @@ const loadProducts = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 2;
         const skip = (page - 1) * limit;
-        const query = {};
 
+        const query = {};
         if (search.trim()) {
             query.productName = { $regex: search, $options: "i" };
         }
 
         const categories = await Category.find({});
-
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        const products = await Product.find(query).populate("category").skip(skip).limit(limit).sort({ createdAt: -1 });
+        const products = await Product.find(query)
+            .populate("category")
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
 
         res.render("admin/products", {
             products,
@@ -41,16 +44,14 @@ const loadProducts = async (req, res) => {
 
 const toggleProductStatus = async (req, res) => {
     try {
-        const productId = req.query.id;
+        const productId = req.params.id;
         const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found",
-            });
-        }
-       product.isBlocked = !product.isBlocked;
 
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        product.isBlocked = !product.isBlocked;
         await product.save();
 
         const statusMessage = product.isBlocked ? "unlisted" : "listed";
@@ -62,20 +63,9 @@ const toggleProductStatus = async (req, res) => {
         });
     } catch (error) {
         console.error("Error toggling product status:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to update product status",
-            error: error.message,
-        });
+        return res.status(500).json({ success: false, message: "Failed to update product status" });
     }
 };
-
-
-
-
-
-
-
 
 const deleteProduct = async (req, res) => {
     try {
@@ -88,17 +78,13 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-
-
-
 const loadProductAddPage = async (req, res) => {
     try {
         const admin = req.session.admin;
-        if (!admin) {
-            return res.redirect("/admin/addProduct");
-        }
+        if (!admin) return res.redirect("/admin/addProduct");
+
         const category = await Category.find({ isListed: true });
-        return res.render("admin/addProduct", { cat: category });
+        res.render("admin/addProduct", { cat: category });
     } catch (error) {
         console.log(error);
     }
@@ -106,7 +92,9 @@ const loadProductAddPage = async (req, res) => {
 
 const addProducts = async (req, res) => {
     try {
-       
+        console.log("Request body:", req.body);
+        
+
         if (!req.body.name || !req.body.description || !req.body.price || !req.body.originalPrice || !req.body.category) {
             return res.json({
                 ok: false,
@@ -114,6 +102,8 @@ const addProducts = async (req, res) => {
             });
         }
 
+        console.log(req.files, "Files");
+        console.log(req.files.length, "Length");
         if (!req.files || req.files.length < 3) {
             return res.json({
                 ok: false,
@@ -123,7 +113,8 @@ const addProducts = async (req, res) => {
 
         const {
             name,
-             color,
+
+            color,
             description,
             price,
             originalPrice,
@@ -163,9 +154,11 @@ const addProducts = async (req, res) => {
 
             try {
                 await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
+
                 images.push(file.filename);
-                
+                console.log(`Successfully processed image ${i + 1}: ${file.filename}`);
             } catch (imageError) {
+                console.error(`Error processing image ${i + 1}:`, imageError);
                 return res.json({
                     ok: false,
                     msg: `Error processing image ${i + 1}: ${imageError.message}`,
@@ -193,6 +186,7 @@ const addProducts = async (req, res) => {
         const newProduct = new Product({
             productName: name,
             description: description,
+
             regularPrice: parseFloat(originalPrice),
             salePrice: parseFloat(price),
             finalamount: finalAmount,
@@ -221,41 +215,32 @@ const addProducts = async (req, res) => {
     }
 };
 
+
 const loadUpdatePage = async (req, res) => {
     try {
-        const productId = req.query.productId;
+        const productId = req.params.id;
         const findAdmin = req.session.admin;
-
-        if (!findAdmin) {
-            return res.redirect("/admin/adminLogin");
-        }
+        if (!findAdmin) return res.redirect("/admin/adminLogin");
 
         const category = await Category.find({});
-        const product = await Product.findById(productId).populate('category')
-console.log(product.productImage[0],"nice to meeet you");
+        const product = await Product.findById(productId).populate("category");
+        if (!product) return res.status(404).send("Product not found");
 
-        if (!product) {
-            return res.status(404).send("Product not found");
-        }
-
-        return res.render("admin/update", { product, category });
+        res.render("admin/update", { product, category });
     } catch (error) {
         console.error("Error loading update page:", error);
-        return res.status(500).send("Server error");
+        res.status(500).send("Server error");
     }
 };
 
 const updateProduct = async (req, res) => {
     try {
-        console.log(req.body, "hee");
         const productId = req.body.productId;
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return res.status(400).json({ success: false, message: "Invalid product ID" });
         }
 
         const product = await Product.findById(productId);
-        console.log(produtId,"image is nokjhfkjhsrkjfhkj");
-        
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
@@ -273,7 +258,6 @@ const updateProduct = async (req, res) => {
             existingImages = [],
             croppedImages = [],
         } = req.body;
-console.log(req.body);
 
         if (!productName || !description || !regularPrice || !salePrice || !category || !status) {
             return res.status(400).json({ success: false, message: "All required fields must be provided" });
@@ -282,6 +266,7 @@ console.log(req.body);
         if (!mongoose.Types.ObjectId.isValid(category)) {
             return res.status(400).json({ success: false, message: "Invalid category ID" });
         }
+
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
             return res.status(400).json({ success: false, message: "Category not found" });
@@ -289,14 +274,8 @@ console.log(req.body);
 
         const regPrice = parseFloat(regularPrice);
         const salPrice = parseFloat(salePrice);
-        if (isNaN(regPrice) || regPrice <= 0) {
-            return res.status(400).json({ success: false, message: "Regular price must be a positive number" });
-        }
-        if (isNaN(salPrice) || salPrice <= 0) {
-            return res.status(400).json({ success: false, message: "Sale price must be a positive number" });
-        }
-        if (salPrice > regPrice) {
-            return res.status(400).json({ success: false, message: "Sale price cannot be greater than regular price" });
+        if (isNaN(regPrice) || regPrice <= 0 || isNaN(salPrice) || salPrice <= 0 || salPrice > regPrice) {
+            return res.status(400).json({ success: false, message: "Invalid price values" });
         }
 
         const offer = parseFloat(productOffer) || 0;
@@ -310,7 +289,7 @@ console.log(req.body);
         }
 
         if (!sizes || !quantities || sizes.length !== quantities.length || sizes.length === 0) {
-            return res.status(400).json({ success: false, message: "At least one size variant with stock is required" });
+            return res.status(400).json({ success: false, message: "At least one size with quantity required" });
         }
 
         const sizeVariants = [];
@@ -321,11 +300,12 @@ console.log(req.body);
             const size = sizes[i].trim();
             const quantity = parseInt(quantities[i]) || 0;
 
-            if (uniqueSizes.includes(size)) {
-                return res.status(400).json({ success: false, message: "Duplicate sizes are not allowed" });
+            if (uniqueSizes.has(size)) {
+                return res.status(400).json({ success: false, message: "Duplicate sizes not allowed" });
             }
+
             if (quantity < 0) {
-                return res.status(400).json({ success: false, message: "Stock quantity cannot be negative" });
+                return res.status(400).json({ success: false, message: "Negative stock not allowed" });
             }
 
             uniqueSizes.add(size);
@@ -366,7 +346,7 @@ console.log(req.body);
         }
 
         if (productImages.length === 0) {
-            return res.status(400).json({ success: false, message: "At least one product image is required" });
+            return res.status(400).json({ success: false, message: "At least one image is required" });
         }
 
         product.productName = productName.trim();
@@ -396,3 +376,4 @@ module.exports = {
     loadUpdatePage,
     updateProduct,
 };
+

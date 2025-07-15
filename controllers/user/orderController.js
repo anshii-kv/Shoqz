@@ -201,4 +201,58 @@ console.log(orderId);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-module.exports = { orderlist, placeOrder ,cancelOrder,orderdetails,returnOrder};
+
+
+// const returnOrder = async (req, res) => {
+//   try {
+//     const { orderId, reason, comments } = req.body;
+//     const userId = req.session.userId;
+
+//     const order = await Order.findById(orderId);
+
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
+
+//     if (Date.now() > order.exprdate) {
+//       return res.json({ datelimit: true });
+//     }
+
+//     // Update order status to "waiting for approval"
+//     await Order.findByIdAndUpdate(
+//       orderId,
+//       { $set: { status: "waiting for approval" } },
+//       { new: true }
+//     );
+
+//     // Add refund amount to user's wallet
+//     const refundAmount = order.subtotal;
+//     await User.findByIdAndUpdate(
+//       userId,
+//       {
+//         $inc: { wallet: refundAmount }, // Increment wallet balance
+//         $push: {
+//           walletHistory: {
+//             amount: refundAmount,
+//             description: `Refund for Order #${orderId}`,
+//             date: new Date(),
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     res.json({ return: true });
+//   } catch (error) {
+//     console.error(error.message);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+const downloadInvoice = async(req,res)=>{
+  try {
+    const { orderId } = req.params;
+  } catch (error) {
+    
+  }
+}
+module.exports = { orderlist, placeOrder ,cancelOrder,orderdetails,returnOrder,downloadInvoice};

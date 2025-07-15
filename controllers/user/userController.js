@@ -15,7 +15,9 @@ function generateOtp() {
 
 const loadHomepage = async (req, res) => {
     try {
-        return res.render("home");
+       const products = await Product.find({ isDeleted: false }).limit(16);
+        return res.render("home", { products });
+       
     } catch (error) {
         console.error("Error loading homepage:", error);
         res.status(500).send("Server error");
@@ -950,13 +952,17 @@ const loadCheckout = async (req, res) => {
 
 
 
-const loadProfile = async (req,res)=>{
+const loadProfile = async (req, res) => {
   try {
-    res.render('profile')
+    const userId = req.session.userId;
+    const user = await User.findById(userId).lean();
+    res.render("profile", { user });
   } catch (error) {
-    
+    console.error(error);
+    res.redirect("/error");
   }
-}
+};
+
 
 const updateProfile = async (req, res) => {
   try {
@@ -1057,6 +1063,13 @@ const loadThankyou = async (req, res) => {
   }
 };
 
+const transactionHistory = async(req,res)=>{
+  try {
+    res.render('transactionHistory')
+  } catch (error) {
+    
+  }
+}
 module.exports = {
     loadHomepage,
     loadContact,
@@ -1094,5 +1107,6 @@ module.exports = {
      changePassword,
      postChangePass,
      loadThankyou,
+     transactionHistory,
      
 };

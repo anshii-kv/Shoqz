@@ -138,4 +138,9 @@ router.post('/submitOrder',orderController.placeOrder)
 
 router.patch('/returnOrder',orderController.returnOrder)
 
+
+router.get('/download-invoice/:orderId', orderController.downloadInvoice);
+
+router.get('/transactionHistory',usercontroller.transactionHistory)
+
 module.exports=router;
