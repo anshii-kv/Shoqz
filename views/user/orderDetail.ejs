@@ -344,13 +344,18 @@
                             <h5 class="mb-0">Ordered Items</h5>
                         </div>
                         <div class="card-body">
+                           
+                            
                             <% order.product.forEach((item, index) => { %>
+                                
                             <div class="product-item">
                                 <div class="row align-items-center">
                                     <div class="col-md-2">
-                              <img src="<%= item.productId.productImage[0] %>" alt="Product" class="product-image">
-                                             alt="<%= item.name %>" 
-                                             class="product-image w-100">
+<img
+  src="/uploads/product-images/<%= item.productId.productImage[0] %>"
+  alt="<%= item.name %>"
+  class="product-image w-100"
+/>
                                     </div>
                                     <div class="col-md-6">
                                         <h6 class="mb-1"><%= item.name %></h6>
@@ -372,7 +377,7 @@
                     </div>
 
                     <!-- Return Form (Only show if order is delivered and within return period) -->
-                     <%=console.log(order.status,'Status')%>
+                    
                     <% if (order.status === 'delivered') { %>
                     <div class="card">
                         <div class="card-header">
@@ -486,7 +491,7 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <% if (order.status === 'Delivered') { %>
+                                <% if (order.status === 'D') { %>
                                     <button class="btn btn-success" onclick="downloadInvoice('<%= order._id %>')">
                                         <i class="fas fa-download me-2"></i>Download Invoice
                                     </button>
@@ -553,7 +558,7 @@
                     formData.append('comments', comments);
                     
                     for (let [key, value] of formData.entries()) {
-  console.log(`${key}:`, value);
+  
 }
                     
                     fetch('/returnOrder', {

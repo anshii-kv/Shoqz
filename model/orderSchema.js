@@ -83,6 +83,10 @@ const OrderSchema = new mongoose.Schema({
   // paymentId: {
   //   type: String,
   // },
+  productImage: {
+      type: [String],
+      required: true,
+    },
 });
 
 module.exports = mongoose.model("order", OrderSchema);

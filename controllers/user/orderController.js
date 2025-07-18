@@ -2,206 +2,195 @@ const User = require("../../model/userSchema");
 const Order = require("../../model/orderSchema");
 const Product = require("../../model/productSchema");
 const Category = require("../../model/categorySchema");
-const Cart = require('../../model/cartSchema')
+const Cart = require("../../model/cartSchema");
 
 const orderlist = async (req, res) => {
-  try {
-    const user = req.session.userId;
-    const userdata = await User.findOne({ _id: user });
-console.log(userdata);
+    try {
+        const user = req.session.userId;
+        const userdata = await User.findOne({ _id: user });
+        console.log(userdata);
 
-    // const orders = await Order.find({ user: user }).sort({ Date: -1 });
-const orders = await Order.find({ user })
-  .populate('product.productId')
-  .populate('product.category')
-  .sort({ Date: -1 });
-
-    res.render("myOrde", { orders, userdata, user });
-  } catch (error) {
-    console.log(error.message);
-  }
+        // const orders = await Order.find({ user: user }).sort({ Date: -1 });
+        const orders = await Order.find({ user })
+            .populate("product.productId")
+            .populate("product.category")
+            .sort({ Date: -1 });
+        console.log(orders, "dfdlfdlfdslf");
+        res.render("myOrde", { orders, userdata, user });
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
 const placeOrder = async (req, res) => {
-  try {
-    const orderData = req.body;
-    const userId = req.session.userId;
-    const productList = [];
+    try {
+        const orderData = req.body;
+        const userId = req.session.userId;
+        const productList = [];
+        let productImage = [];
+        for (let item of orderData.products) {
+            const product = await Product.findOne({ _id: item.productId });
+            if (Array.isArray(product.productImage)) {
+                productImage.push(...product.productImage);
+            } else if (typeof product.productImage === "string") {
+                productImage.push(product.productImage);
+            }
+            if (!product) {
+                return res.status(404).json({ message: "Product not found" });
+            }
 
-    for (let item of orderData.products) {
-      const product = await Product.findOne({ _id: item.productId });
+            let sizeFound = false;
 
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
+            for (let size of product.sizes) {
+                if (item.size === size.size) {
+                    sizeFound = true;
 
-      let sizeFound = false;
+                    if (item.quantity > size.quantity) {
+                        return res.status(400).json({ message: "Stock unavailable for size " + item.size });
+                    }
 
-      for (let size of product.sizes) {
-        if (item.size === size.size) {
-          sizeFound = true;
+                    size.quantity -= item.quantity;
+                }
+            }
 
-          if (item.quantity > size.quantity) {
-            return res.status(400).json({ message: "Stock unavailable for size " + item.size });
-          }
+            if (!sizeFound) {
+                return res.status(400).json({ message: `Size ${item.size} not found for product` });
+            }
 
-         
-          size.quantity -= item.quantity;
+            await product.save();
+
+            productList.push({
+                productId: item.productId,
+                name: item.productName,
+                quantity: item.quantity,
+                price: item.price,
+                category: product.category,
+            });
         }
-      }
 
-      if (!sizeFound) {
-        return res.status(400).json({ message: `Size ${item.size} not found for product` });
-      }
+        const newOrder = new Order({
+            user: userId,
+            deliveryDetails: {
+                fname: orderData.address.fname,
+                sname: orderData.address.sname,
+                mobile: orderData.address.mobile,
+                email: orderData.address.email,
+                address: orderData.address.address,
+                city: orderData.address.city,
+                pin: orderData.address.pin,
+            },
+            paymentMethod: orderData.paymentMethod,
+            product: productList,
+            subtotal: orderData.subtotal,
+            Date: new Date(),
+            exprdate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+            status: "Pending",
+            productImage: productImage,
+        });
 
-      await product.save();
+        await newOrder.save();
 
-    
-      productList.push({
-        productId: item.productId,
-        name: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        category: product.category,
-      });
+        await Cart.deleteOne({ userId: userId });
+
+        res.status(200).json({ message: "Order Successful", orderId: newOrder._id });
+    } catch (error) {
+        console.error("Order placement error:", error);
+        res.status(500).send("Internal Server Error");
     }
-
-   
-    const newOrder = new Order({
-      user: userId,
-      deliveryDetails: {
-        fname: orderData.address.fname,
-        sname: orderData.address.sname,
-        mobile: orderData.address.mobile,
-        email: orderData.address.email,
-        address: orderData.address.address,
-        city: orderData.address.city,
-        pin: orderData.address.pin,
-      },
-      paymentMethod: orderData.paymentMethod,
-      product: productList,
-      subtotal: orderData.subtotal,
-      Date: new Date(),
-      exprdate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), 
-      status: "Pending",
-    });
-
-  
-    await newOrder.save();
-
-    
-    await Cart.deleteOne({ userId: userId });
-
-   
-    res.status(200).json({ message: "Order Successful",orderId:newOrder._id });
-
-  } catch (error) {
-    console.error("Order placement error:", error);
-    res.status(500).send("Internal Server Error");
-  }
 };
-
 
 const cancelOrder = async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const orderId = req.body.orderId;
-    const orders = await Order.findById({ _id: orderId })
-    
-    const WalletAmount = orders.subtotal
-    const WalletData = {
-      amount:WalletAmount,
-      date:Date.now(),
-      discription:"Refund for order Cancelling order "
-    }
+    try {
+        const userId = req.session.userId;
+        const orderId = req.body.orderId;
+        const orders = await Order.findById({ _id: orderId });
 
-    const data = await Order.findOneAndUpdate(
-      { _id: orderId, user: userId },
-      { $set: { status: "cancelled" } },
-      { new: true }
-    );
+        const WalletAmount = orders.subtotal;
+        const WalletData = {
+            amount: WalletAmount,
+            date: Date.now(),
+            discription: "Refund for order Cancelling order ",
+        };
 
-    if (data) {
-      await User.findOneAndUpdate({_id:userId},
-        {$inc:{wallet:WalletAmount},$push:{walletHistory:WalletData}})
+        const data = await Order.findOneAndUpdate(
+            { _id: orderId, user: userId },
+            { $set: { status: "cancelled" } },
+            { new: true }
+        );
 
-      res.json({ success: true });
-    } else {
-      res.json({
-        success: false,
-        message: "Order not found or not owned by the user",
-      });
-    }
-  } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
-  }
-};
+        if (data) {
+            await User.findOneAndUpdate(
+                { _id: userId },
+                { $inc: { wallet: WalletAmount }, $push: { walletHistory: WalletData } }
+            );
 
-
-const orderdetails = async(req,res)=>{
-  try {
-    console.log(req.params.id,'idsd')
-    let id = req.params.id
-    console.log(id,'dfls')
-    
-   
-    const order = await Order.findOne({_id:id})
-      .populate({
-        path: "product.productId",
-        populate: {
-          path: "category",
-          model: "Category"
+            res.json({ success: true });
+        } else {
+            res.json({
+                success: false,
+                message: "Order not found or not owned by the user",
+            });
         }
-      })
-      .populate("user");
-    
-    if (!order) {
-      return res.status(404).render('error', { message: 'Order not found' });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
     }
-    
-    console.log(order,'ammu');
-    
-    res.render('orderDetail',{order})
-  } catch (error) {
-    console.error('Error fetching order details:', error);
-    res.status(500).render('error', { message: 'Internal server error' });
-  }
-}
-const returnOrder = async (req, res) => {
-  try {
-    console.log("hrlo");
-    console.log(req.body);
-    
-    const userId = req.session.userId;
-
-    const orderId = req.body.orderId;
-console.log(orderId);
-
-    const orders = await Order.findById({ _id: orderId });
-
-
-    console.log("hiiii");
-    
-
-    if (Date.now() > orders.exprdate) {
-
-      res.json({ datelimit: true });
-    } else {
-      await Order.findByIdAndUpdate(
-        { _id: orderId },
-        { $set: { status: "waiting for approval" } }
-      );
-       
-      
-      res.json({ return: true });
-    }
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
 };
 
+const orderdetails = async (req, res) => {
+    try {
+        console.log(req.params.id, "idsd");
+        let id = req.params.id;
+        console.log(id, "dfls");
+
+        const order = await Order.findOne({ _id: id })
+            .populate({
+                path: "product.productId",
+                populate: {
+                    path: "category",
+                    model: "Category",
+                },
+            })
+            .populate("user");
+
+        if (!order) {
+            return res.status(404).render("error", { message: "Order not found" });
+        }
+
+        console.log(order, "ammu");
+
+        res.render("orderDetail", { order });
+    } catch (error) {
+        console.error("Error fetching order details:", error);
+        res.status(500).render("error", { message: "Internal server error" });
+    }
+};
+const returnOrder = async (req, res) => {
+    try {
+        console.log("hrlo");
+        console.log(req.body);
+
+        const userId = req.session.userId;
+
+        const orderId = req.body.orderId;
+        console.log(orderId);
+
+        const orders = await Order.findById({ _id: orderId });
+
+        console.log("hiiii");
+
+        if (Date.now() > orders.exprdate) {
+            res.json({ datelimit: true });
+        } else {
+            await Order.findByIdAndUpdate({ _id: orderId }, { $set: { status: "waiting for approval" } });
+
+            res.json({ return: true });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 // const returnOrder = async (req, res) => {
 //   try {
@@ -248,11 +237,9 @@ console.log(orderId);
 //     res.status(500).json({ error: "Internal Server Error" });
 //   }
 // };
-const downloadInvoice = async(req,res)=>{
-  try {
-    const { orderId } = req.params;
-  } catch (error) {
-    
-  }
-}
-module.exports = { orderlist, placeOrder ,cancelOrder,orderdetails,returnOrder,downloadInvoice};
+const downloadInvoice = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+    } catch (error) {}
+};
+module.exports = { orderlist, placeOrder, cancelOrder, orderdetails, returnOrder, downloadInvoice };

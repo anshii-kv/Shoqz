@@ -58,10 +58,10 @@ const loadSignuppage = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
-        console.log("heyyy", req.body);
+       
         const { name, email, phone, password, cpassword } = req.body;
-        console.log(req.body);
-            const profileImage = req.file; // File info will be in req.file
+        
+            // const profileImage = req.file; 
 
         if (!name || !email || !password || !cpassword) {
             return res.status(400).json({ message: "All fields are required" });
@@ -71,7 +71,7 @@ const signup = async (req, res) => {
             return res.status(400).json({ message: "Passwords don't match" });
         }
         const existUser = await User.findOne({ email });
-        console.log(existUser);
+       
 
         if (existUser) {
             console.log("user already exist");
@@ -127,6 +127,39 @@ const loadVerifyOtp = async (req, res) => {
     }
 };
 
+
+
+
+const verifiedOtp = async (req, res) => {
+    try {
+        const otp = Number(req?.body?.otp);
+        const email = req.session.email;
+        const name = req.session.name;
+        const password = req.session.password;
+        const phone = req.session.phone;
+        const existOtp = await Otp.findOne({ email });
+      
+
+        if (existOtp?.otp === otp) {
+            const savedata = new User({
+                name: name,
+                email: email,
+                phone: phone,
+                password: password,
+            });
+
+            await savedata.save();
+            console.log("added user");
+            return res.status(200).json({ message: "otp verified" });
+        } else {
+            return res.status(400).json({ message: "otp not valid" });
+        }
+    } catch (error) {
+        console.log("error on verify otp", error);
+    }
+};
+
+
 const loadloginpage = async (req, res) => {
     try {
         return res.render("login");
@@ -140,36 +173,30 @@ const login = async (req, res) => {
         console.log(req.body);
         const { email, password } = req.body;
         const userMatch = await User.findOne({ email, isAdmin: false });
-        console.log(userMatch);
-
         if (!userMatch) {
-            console.log("hey");
-            return res.status(200).json({ message: "User not found" });
+          return res.status(200).json({ message: "User not found" });
         }
-        console.log("Helll");
-        console.log(password);
-        console.log(userMatch.password);
         const isPasswordVaild = await bcrypt.compare(password, userMatch.password);
-        console.log(isPasswordVaild, "Value");
-        if (!isPasswordVaild) {
+       if (!isPasswordVaild) {
             return res.status(200).json({ message: "Password does not match" });
         }
         if (userMatch.isBlocked) {
             return res.status(200).json({ message: "User blocked by admin" });
         }
-
         req.session.name = userMatch.name;
         console.log("Usermathc", userMatch);
         req.session.userId = userMatch._id;
         console.log(req.session.userId, "Iddlfsd");
         req.session.email = userMatch.email;
         console.log(req.session.name, "name");
-
         return res.status(200).json({ message: "Login Succesfully" });
     } catch (error) {
         console.log("error");
     }
-};
+  };
+       
+
+       
 
 
 const verifyOtp = async (req, res) => {
@@ -201,34 +228,7 @@ const verifyOtp = async (req, res) => {
     }
 };
 
-const verifiedOtp = async (req, res) => {
-    try {
-        const otp = Number(req?.body?.otp);
-        const email = req.session.email;
-        const name = req.session.name;
-        const password = req.session.password;
-        const phone = req.session.phone;
-        const existOtp = await Otp.findOne({ email });
-        console.log("1111111111111111");
 
-        if (existOtp?.otp === otp) {
-            const savedata = new User({
-                name: name,
-                email: email,
-                phone: phone,
-                password: password,
-            });
-
-            await savedata.save();
-            console.log("added user");
-            return res.status(200).json({ message: "otp verified" });
-        } else {
-            return res.status(400).json({ message: "otp not valid" });
-        }
-    } catch (error) {
-        console.log("error on verify otp", error);
-    }
-};
 
 const resendOtp = async (req, res) => {
     try {

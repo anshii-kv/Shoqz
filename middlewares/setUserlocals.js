@@ -1,4 +1,4 @@
-const User = require('../model/userSchema'); // Adjust path if needed
+const User = require('../model/userSchema'); 
 
 const setUserLocals = async (req, res, next) => {
   try {
@@ -6,7 +6,7 @@ const setUserLocals = async (req, res, next) => {
       const user = await User.findOne({ email: req.session.email });
 
       res.locals.isLoggedIn = true;
-      res.locals.user = user; // This will be available as 'user' in all EJS views
+      res.locals.user = user; 
     } else {
       res.locals.isLoggedIn = false;
       res.locals.user = null;
