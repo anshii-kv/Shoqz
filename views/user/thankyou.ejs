@@ -336,7 +336,7 @@
                     <h5><i class="fas fa-receipt me-2"></i>Order Details</h5>
                     <div class="order-detail">
                         <span>Order ID:</span>
-                        <span id="orderId"><%= order._id %></span>
+                        <span id="orderId"><%= order.displayOrderId %></span>
 
                     </div>
                     <div class="order-detail">
@@ -410,6 +410,7 @@
                 // Generate random order ID
                 const randomId = Math.floor(Math.random() * 900000) + 100000;
                 const orderId = "<%= order._id %>";
+                const productId = "<%= order.product[0].productId%>"
                 // Add click handlers for buttons
                 document.querySelector('.btn-primary-custom').addEventListener('click', function(e) {
                     e.preventDefault();
@@ -418,7 +419,7 @@
                     
                     // Simulate redirect delay
                     setTimeout(() => {
-                        window.location.href = `/order-details/${orderId}`;
+                        window.location.href = `/order-details/${orderId}/${productId}`;
                     }, 1000);
                 });
 

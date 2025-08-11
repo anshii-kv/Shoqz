@@ -11,22 +11,22 @@ const path = require("path");
 const { adminAuth } = require('../middlewares/userAuth');
 const orderController=require("../controllers/admin/orderController")
 const couponController=require("../controllers/admin/couponController")
-
-router.get("/adminLogin",admincontroller.loadLogin);
+const auth=require('../middlewares/auth')
+router.get("/adminLogin",auth.admin,admincontroller.loadLogin);
 
 router.post("/login",admincontroller.adminLogin);
 
-router.get('/',adminAuth,dashboard.loadDashboard);
+router.get('/',dashboard.loadDashboard);
 
-router.get('/adminError',adminAuth,admincontroller.error);
+router.get('/adminError',admincontroller.error);
 
-router.post('/logout',admincontroller.logout)
-
-
+router.post('/logout',auth.isAdmin,admincontroller.logout)
 
 
 
-router.get('/user',adminAuth,customerController.user)
+
+
+router.get('/user',auth.isAdmin,customerController.user)
 
 router.patch('/blockCustomer',customerController.blockCustomer )
 
@@ -36,17 +36,17 @@ router.patch('/unblockCustomer',customerController.unblockCustomer)
 
 
 
-router.get("/category",adminAuth,categoryController.loadCategory)
+router.get("/category",auth.adminLogin,categoryController.loadCategory)
 
-router.get('/addingCategory',adminAuth,categoryController.categoryAdd)
+router.get('/addingCategory',auth.adminLogin,categoryController.categoryAdd)
 
 router.post("/addCategory",categoryController.addCategory);
 
-router.get("/listCategory",adminAuth,categoryController.getListCategory)
+router.get("/listCategory",auth.adminLogin,categoryController.getListCategory)
 
-router.get('/unlistCategory',adminAuth,categoryController.getUnlistCategory)
+router.get('/unlistCategory',auth.adminLogin,categoryController.getUnlistCategory)
 
-router.get('/editCategory',adminAuth,categoryController.getEditCategory);
+router.get('/editCategory',auth.adminLogin,categoryController.getEditCategory);
 
 router.put('/category/:id',categoryController.editCategory)
 
@@ -60,17 +60,15 @@ router.delete('/removeCategoryOffer',adminAuth,categoryController.removeCategory
 
 
 
-router.get('/addProduct',adminAuth,productController.loadProductAddPage)
+router.get('/addProduct',auth.adminLogin,productController.loadProductAddPage)
 
-router.get("/products",adminAuth,productController.loadProducts)
+router.get("/products",auth.adminLogin,productController.loadProducts)
 
 router.patch('/products/toggle-status/:id', productController.toggleProductStatus);
 
 router.delete('/products/delete/:id', productController.deleteProduct);
 
-
-
-router.get('/updateProduct/:id',adminAuth,productController.loadUpdatePage);
+router.get('/updateProduct',auth.adminLogin,productController.loadUpdatePage);
 
 router.patch("/products/toggle-status/:id",productController.toggleProductStatus);
 
@@ -105,22 +103,23 @@ const uploads = multer({
 
 
 router.post('/products/add-products', uploads.array("croppedImages", 4), productController.addProducts);
-router.post('/updateProduct',adminAuth,uploads.array("croppedImages", 4),productController.updateProduct)
+router.post('/updateProduct',uploads.array("croppedImages", 4),productController.updateProduct)
 
 
 
 
-router.get('/orderDetails',orderController.loadOrder)
+router.get('/orderDetails',auth.adminLogin,orderController.loadOrder)
 router.post('/changeStatus',orderController.changeStatus)
 
 
 router.post('/approveOrder',orderController.approveOrder)
 
+router.get('/viewOrder/:orderId',orderController.loadviewOrder)
 
-router.get('/coupon',couponController.loadCoupon)
+router.get('/coupon',auth.adminLogin,couponController.loadCoupon)
 
 
-router.get('/addcoupons',couponController.loadaddCoupon)
+router.get('/addcoupons',auth.adminLogin,couponController.loadaddCoupon)
 
 router.post('/addCoupon',couponController.addCoupon)
 
@@ -128,8 +127,11 @@ router.delete('/coupon/:id',couponController.deleteCoupon);
 
 router.patch('/coupon/:id/status',couponController.toggleCouponStatus);
 
-// router.patch('/coupons/edit/:id',couponController.editCoupon)
 
-router.get('/editcoupon/:couponId',couponController.editCoupon)
+
+router.get('/editcoupon/:couponId',auth.adminLogin,couponController.editCoupon)
+
+router.post('/editCoupon/:id',couponController.editedCoupon)
+
 module.exports = router;
 

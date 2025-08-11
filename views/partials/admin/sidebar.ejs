@@ -266,23 +266,25 @@
             <span>Users</span>
         </a>
         
-        <a href="orderDetails" class="menu-item">
-            <div class="icon icon-orders">🛒</div>
-            <span>Orders</span>
-        </a>
+        <a href="/admin/orderDetails?page=1&limit=5" class="menu-item">
+    <div class="icon icon-orders">🛒</div>
+    <span>Orders</span>
+</a>
         
         <a href="/admin/coupon" class="menu-item">
             <div class="icon icon-coupons">🏷️</div>
             <span>Coupons</span>
         </a>
         
-        <a href="#" class="menu-item">
+        <!-- <a href="#" class="menu-item">
             <div class="icon icon-banners">🖼️</div>
             <span>Banners</span>
         </a>
-        
-        <a href="/admin/logout" class="menu-item">
-            <div class="icon icon-logout">🚪</div>
-            <span>Logout</span>
-        </a>
+         -->
+        <form action="/admin/logout" method="POST" style="margin:0;">
+    <button type="submit" class="menu-item" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+        <div class="icon icon-logout">🚪</div>
+        <span>Logout</span>
+    </button>
+</form>
     </div>

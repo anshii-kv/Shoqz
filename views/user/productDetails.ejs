@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= product.productName %> - Product Details</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Reset and Base Styles */
         * {
@@ -292,6 +293,14 @@
             font-size: 16px;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
         .add-to-cart {
             background-color: #2f4f4f;
             color: white;
@@ -299,9 +308,13 @@
             padding: 12px 20px;
             cursor: pointer;
             font-weight: bold;
-            width: 200px;
             border-radius: 4px;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 200px;
+            justify-content: center;
         }
 
         .add-to-cart:hover {
@@ -315,27 +328,68 @@
 
         .wishlist-button {
             background: none;
-            border: none;
+            border: 2px solid #e91e63;
             cursor: pointer;
-            padding: 10px 0;
-            color: #2f4f4f;
+            padding: 12px 20px;
+            color: #e91e63;
             font-size: 16px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 180px;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .wishlist-button:hover {
+            background-color: #e91e63;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .wishlist-button.active {
+            background-color: #e91e63;
+            color: white;
         }
 
         .wishlist-button i {
-            margin-right: 5px;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .wishlist-button .far {
+            color: #e91e63;
+        }
+
+        .wishlist-button .fas {
+            color: #e91e63;
+        }
+
+        .wishlist-button:hover .far,
+        .wishlist-button:hover .fas,
+        .wishlist-button.active .far,
+        .wishlist-button.active .fas {
+            color: white;
         }
 
         .reviews {
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             flex-direction: column;
             gap: 5px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
 
         .stars {
             color: #ffc107;
+            font-size: 16px;
+        }
+
+        .review-info {
+            color: #666;
             font-size: 14px;
         }
 
@@ -454,6 +508,13 @@
             .size-select, .add-to-cart { 
                 width: 100%; 
             }
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .wishlist-button {
+                min-width: auto;
+            }
         }
 
         @media (max-width: 768px) {
@@ -543,84 +604,75 @@
                 <div class="zoom-container" id="zoomContainer"></div>
             </div>
 
-          <form action="/cart" method="GET" id="addToCartForm">
-  <!-- Hidden Product ID -->
-  <input type="hidden"name="productId" value="<%= product._id %>">
+            <!-- Product Info -->
+            <div class="product-info">
+                <h1 class="product-title"><%= product.productName %></h1>
 
-  <!-- Product Info -->
-  <div class="product-info">
-    <h1 class="product-title"><%= product.productName %></h1>
+                <!-- Pricing -->
+                <div class="product-price">
+                    <span class="original-price" id="originalPrice">₹<%= (product.regularPrice || 0).toFixed(2) %></span>
+                    <span class="sale-price" id="salePrice">₹<%= (product.salePrice || product.regularPrice || 0).toFixed(2) %></span>
 
-    <!-- Pricing -->
-    <div class="product-price">
-      <span class="original-price" id="originalPrice">₹<%= (product.regularPrice || 0).toFixed(2) %></span>
-      <span class="sale-price" id="salePrice">₹<%= (product.salePrice || product.regularPrice || 0).toFixed(2) %></span>
+                    <% const maxDiscount = (product.categoryoffer && product.categoryoffer > (product.productOffer || 0)) 
+                        ? product.categoryoffer 
+                        : (product.productOffer || 0); %>
 
-      <% const maxDiscount = (product.categoryoffer && product.categoryoffer > (product.productOffer || 0)) 
-        ? product.categoryoffer 
-        : (product.productOffer || 0); %>
+                    <% if (maxDiscount > 0) { %>
+                        <span class="discount-label">
+                            <%= maxDiscount %>% OFF (<%= maxDiscount === product.productOffer ? 'Product' : 'Category' %>)
+                        </span>
+                    <% } %>
+                </div>
 
-      <% if (maxDiscount > 0) { %>
-        <span class="discount-label">
-          <%= maxDiscount %>% OFF (<%= maxDiscount === product.productOffer ? 'Product' : 'Category' %>)
-        </span>
-      <% } %>
-    </div>
+                <!-- Description -->
+                <p class="product-description"><%= product.description %></p>
 
-    <!-- Description -->
-    <p class="product-description"><%= product.description %></p>
-
-    <!-- Size -->
-    <label class="option-label">Size</label>
-   <select
-  class="size-select"
-  name="size"
-  required
-  onchange="onSizeChange(this)"
->
-  <option value="">Choose an option</option>
-  <% product.sizes.forEach(size => { %>
-    <option
-      value="<%= size.size %>"
-      data-stock="<%= size.quantity || 0 %>"
-    >
-      <%= size.size %> <%= size.quantity > 0 ? `(${size.quantity} in stock)` : '(Out of stock)' %>
-    </option>
-  <% }) %>
-</select>
-
-
-    <!-- Quantity -->
-    <label class="option-label">Quantity</label>
-    <div class="quantity-selector">
-      <input type="number" name="quantity" min="1" class="quantity-input" id="quantityInput" disabled>
-    </div>
-
-    <!-- Add to Cart Button -->
-   <!-- Pass 'this' (the button), productId, and selectors for size and quantity -->
-<button
-  type="button"
-  onclick="addedCart(this, '<%= product._id %>')"
-  id="addToCartBtn"
-  disabled>
-  <i class="fas fa-shopping-cart"></i> Add to Cart
-</button>
-
-  </div>
-</form>
-
-
-
-                    <button class="wishlist-button" id="wishlistBtn" data-product-id="<%= product._id %>">
-                        <i class="fa fa-heart <%= user && user.wishlist && user.wishlist.includes(product._id) ? 'fas text-danger' : 'far' %>"></i>
-                        <span><%= user && user.wishlist && user.wishlist.includes(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist' %></span>
-                    </button>
-                    <div class="reviews">
+                <!-- Product Options Form -->
+                <form id="productForm">
+                    <input type="hidden" name="productId" value="<%= product._id %>">
+                    
+                    <div class="product-options">
+                        <!-- Size -->
                         <div>
-                            <span class="stars">★★★★★</span>
-                            <span><%= product.rating || '0.0' %></span>
+                            <label class="option-label">Size</label>
+                            <select class="size-select" name="size" required onchange="onSizeChange(this)">
+                                <option value="">Choose an option</option>
+                                <% product.sizes.forEach(size => { %>
+                                    <option value="<%= size.size %>" data-stock="<%= size.quantity || 0 %>">
+                                        <%= size.size %> <%= size.quantity > 0 ? `(${size.quantity} in stock)` : '(Out of stock)' %>
+                                    </option>
+                                <% }) %>
+                            </select>
                         </div>
-                        <div><%= product.reviews ? product.reviews.length : '0' %> reviews</div>
+
+                        <!-- Quantity -->
+                        <div>
+                            <label class="option-label">Quantity</label>
+                            <div class="quantity-selector">
+                                <input type="number" name="quantity" min="1" class="quantity-input" id="quantityInput" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button type="button" class="add-to-cart" onclick="addedCart(this, '<%= product._id %>')" id="addToCartBtn" disabled>
+                            <i class="fas fa-shopping-cart"></i>
+                            Add to Cart
+                        </button>
+
+                        <button type="button" class="wishlist-button" id="wishlistBtn" data-product-id="<%= product._id %>">
+                            <i class="<%= user && user.wishlist && user.wishlist.includes(product._id) ? 'fas' : 'far' %> fa-heart"></i>
+                            <span><%= user && user.wishlist && user.wishlist.includes(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist' %></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Reviews -->
+                <div class="reviews">
+                    <div>
+                        <span class="stars">★★★★★</span>
+                        <span class="review-info"><%= product.rating || '0.0' %> (<%= product.reviews ? product.reviews.length : '0' %> reviews)</span>
                     </div>
                 </div>
             </div>
@@ -824,7 +876,7 @@
                 const isInWishlist = this.querySelector('i').classList.contains('fas');
 
                 const endpoint = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-                const response = await fetch(endpoint, {
+                const response = await fetch('/wishlist', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ productId })
@@ -949,37 +1001,37 @@ function addedCart(btn, productId) {
 
 
             // Wishlist Logic
-            // const wishlistBtn = document.getElementById('wishlistBtn');
-            // wishlistBtn.addEventListener('click', async function() {
-            //     const productId = this.dataset.productId;
-            //     const isInWishlist = this.querySelector('i').classList.contains('fas');
+            const wishlistBtn = document.getElementById('wishlistBtn');
+            wishlistBtn.addEventListener('click', async function() {
+                const productId = this.dataset.productId;
+                const isInWishlist = this.querySelector('i').classList.contains('fas');
 
-            //     const endpoint = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-            //     const response = await fetch(endpoint, {
-            //         method: 'POST',
-            //         headers: { 'Content-Type': 'application/json' },
-            //         body: JSON.stringify({ productId })
-            //     });
-            //     const data = await response.json();
+                const endpoint = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId })
+                });
+                const data = await response.json();
 
-            //     if (data.success) {
-            //         Swal.fire('Success', data.message, 'success');
-            //         const heartIcoyn = this.querySelector('i');
-            //         const span = this.querySelector('span');
-            //         if (isInWishlist) {
-            //             heartIcon.classList.remove('fas', 'text-danger');
+                if (data.success) {
+                    Swal.fire('Success', data.message, 'success');
+                    const heartIcoyn = this.querySelector('i');
+                    const span = this.querySelector('span');
+                    if (isInWishlist) {
+                        heartIcon.classList.remove('fas', 'text-danger');
             
-            //             heartIcon.classList.add('far');
-            //             span.textContent = 'Add to Wishlist';
-            //         } else {
-            //             heartIcon.classList.remove('far');
-            //             heartIcon.classList.add('fas', 'text-danger');
-            //             span.textContent = 'Remove from Wishlist';
-            //         }
-            //     } else {
-            //         Swal.fire('Error', data.message, 'error');
-            //     }
-            // });
+                        heartIcon.classList.add('far');
+                        span.textContent = 'Add to Wishlist';
+                    } else {
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas', 'text-danger');
+                        span.textContent = 'Remove from Wishlist';
+                    }
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            });
       
     </script>
 </body>

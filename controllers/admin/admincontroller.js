@@ -11,7 +11,7 @@ const loadLogin =async(req,res)=>{
     try{
         console.log(req.session.admin,'dfsdfl')
     if(req.session.admin){
-        return res.redirect('/admin/dashboard')
+        return res.redirect('/admin/')
     }
     res.render("admin/admin-login",{message:null})
 }
@@ -25,7 +25,9 @@ catch(error){
 const adminLogin =async (req,res)=>{
     try {
         // console.log(req.body);
+        console.log('1')
         const {email,password}=req.body;
+        console.log('2')
         const adminMatch = await User.findOne({email,isAdmin:true});
         console.log(adminMatch);
         if(!adminMatch){

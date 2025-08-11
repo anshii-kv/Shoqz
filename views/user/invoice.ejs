@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - <%= invoice.orderId %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .invoice-header {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .company-logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .company-tagline {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .invoice-title {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            text-align: right;
+        }
+
+        .invoice-title h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .invoice-number {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .invoice-body {
+            padding: 40px;
+        }
+
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 30px;
+        }
+
+        .bill-to, .invoice-details {
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #bdd5eb;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-line {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .info-label {
+            font-weight: 600;
+            display: inline-block;
+            width: 120px;
+            color: #555;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .items-table thead {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .items-table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .items-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 2px solid #bdd5eb;
+        }
+
+        .product-details h6 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .product-category {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .quantity-badge {
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+
+        .totals-section {
+            float: right;
+            width: 300px;
+            margin-top: 20px;
+        }
+
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 10px 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .totals-table .total-label {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .totals-table .total-amount {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .grand-total {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .invoice-footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+            text-align: center;
+        }
+
+        .footer-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            text-align: left;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            color: #bdd5eb;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .footer-content {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .thank-you {
+            font-size: 1.1rem;
+            color: #bdd5eb;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin: 20px 0;
+            padding: 0 40px;
+        }
+
+        .btn-print,
+        .btn-download {
+            background: linear-gradient(45deg, #bdd5eb, #a9c1d6);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-print:hover,
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(189, 213, 235, 0.3);
+            background: linear-gradient(45deg, #a9c1d6, #bdd5eb);
+            color: white;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .status-paid {
+            background: rgba(40, 167, 69, 0.9);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.9);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.9);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .invoice-container {
+                box-shadow: none;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .action-buttons {
+                display: none;
+            }
+            
+            .invoice-body {
+                padding: 20px;
+            }
+            
+            .invoice-header {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .invoice-container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            
+            .invoice-header {
+                padding: 20px;
+            }
+            
+            .invoice-body {
+                padding: 20px;
+            }
+            
+            .invoice-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .invoice-title {
+                position: static;
+                text-align: center;
+                margin-top: 20px;
+            }
+            
+            .totals-section {
+                float: none;
+                width: 100%;
+                margin-top: 30px;
+            }
+            
+            .footer-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .items-table {
+                font-size: 0.9rem;
+            }
+            
+            .items-table th,
+            .items-table td {
+                padding: 10px 8px;
+            }
+            
+            .product-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 6rem;
+            color: rgba(189, 213, 235, 0.1);
+            font-weight: bold;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .invoice-content {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Action Buttons (visible only on screen) -->
+    <div class="action-buttons">
+        <button class="btn-print" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Print Invoice
+        </button>
+        <a href="#" class="btn-download" onclick="downloadPDF()">
+            <i class="fas fa-download me-2"></i>Download PDF
+        </a>
+    </div>
+
+    <div class="invoice-container">
+        <!-- Background Watermark -->
+        <div class="watermark">SHOQZ</div>
+        
+        <div class="invoice-content">
+            <!-- Invoice Header -->
+            <div class="invoice-header">
+                <div class="status-badge <%= invoice.paymentStatus === 'Paid' ? 'status-paid' : invoice.paymentStatus === 'Pending' ? 'status-pending' : 'status-cancelled' %>">
+                    <%= invoice.paymentStatus || 'PAID' %>
+                </div>
+                
+                <div class="invoice-title">
+                    <h2>INVOICE</h2>
+                    <div class="invoice-number">#INV-<%= invoice.orderId %></div>
+                </div>
+                
+                <div class="company-logo">SHOQZ</div>
+                <p class="company-tagline">Premium Fashion & Lifestyle</p>
+            </div>
+
+            <!-- Invoice Body -->
+            <div class="invoice-body">
+                <!-- Invoice Information -->
+                <div class="invoice-info">
+                    <!-- Bill To -->
+                    <div class="bill-to">
+                        <div class="section-title">Bill To</div>
+                        <div class="info-line"><strong><%= invoice.customerName %></strong></div>
+                        <div class="info-line"><%= invoice.customerAddress %></div>
+                        <div class="info-line"><%= invoice.customerCity %></div>
+                        <div class="info-line"><%= invoice.customerPin %></div>
+                        <div class="info-line">
+                            <span class="info-label">Phone:</span> <%= invoice.customerPhone %>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">Email:</span> <%= invoice.customerEmail %>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Details -->
+                    <div class="invoice-details">
+                        <div class="section-title">Invoice Details</div>
+                        <div class="info-line">
+                            <span class="info-label">Invoice Date:</span> <%= invoice.invoiceDate %>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">Order Date:</span> <%= invoice.orderDate %>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">Order ID:</span> <%= invoice.orderId %>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">Payment:</span> <%= invoice.paymentMethod %>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">Delivery:</span> <%= invoice.deliveryDate %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">Product Details</th>
+                            <th style="width: 15%" class="text-center">Quantity</th>
+                            <th style="width: 15%" class="text-right">Unit Price</th>
+                            <th style="width: 20%" class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% invoice.products.forEach(product => { %>
+                        <tr>
+                            <td>
+                                <div class="product-info">
+                                    <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image" onerror="this.src='https://via.placeholder.com/50x50/bdd5eb/ffffff?text=IMG'">
+                                    <div class="product-details">
+                                        <h6><%= product.name %></h6>
+                                        <div class="product-category"><%= product.category %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="quantity-badge"><%= product.quantity %></span>
+                            </td>
+                            <td class="text-right">₹<%= product.unitPrice %></td>
+                            <td class="text-right price">₹<%= product.total %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+
+                <!-- Totals Section -->
+                <div class="totals-section">
+                    <table class="totals-table">
+                        <tr>
+                            <td class="total-label">Subtotal:</td>
+                            <td class="total-amount">₹<%= invoice.subtotal %></td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">Shipping:</td>
+                            <td class="total-amount">₹<%= invoice.shipping %></td>
+                        </tr>
+                        <% if (invoice.discount && parseFloat(invoice.discount) > 0) { %>
+                        <tr>
+                            <td class="total-label">Discount:</td>
+                            <td class="total-amount text-success">-₹<%= invoice.discount %></td>
+                        </tr>
+                        <% } %>
+                        <tr>
+                            <td class="total-label">Tax (<%= invoice.taxRate %>% GST):</td>
+                            <td class="total-amount">₹<%= invoice.taxAmount %></td>
+                        </tr>
+                        <tr class="grand-total">
+                            <td class="total-label">Total Amount:</td>
+                            <td class="total-amount">₹<%= invoice.totalAmount %></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="clear: both;"></div>
+
+                <!-- Invoice Footer -->
+                <div class="invoice-footer">
+                    <div class="footer-info">
+                        <div class="footer-section">
+                            <div class="footer-title">Company Information</div>
+                            <div class="footer-content">
+                                SHOQZ PRIVATE LIMITED<br>
+                                123 Fashion Street<br>
+                                Kottayam, Kerala 686001<br>
+                                India
+                            </div>
+                        </div>
+                        
+                        <div class="footer-section">
+                            <div class="footer-title">Contact Details</div>
+                            <div class="footer-content">
+                                Phone: +91 481 123 4567<br>
+                                Email: support@Shoqz.com<br>
+                                Website: www.shoqz.com<br>
+                                GST: 32ABCDE1234F1Z5
+                            </div>
+                        </div>
+                        
+                        <div class="footer-section">
+                            <div class="footer-title">Return Policy</div>
+                            <div class="footer-content">
+                                Returns accepted within 30 days<br>
+                                Items must be in original condition<br>
+                                Return shipping charges apply<br>
+                                Refunds processed in 5-7 business days
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="thank-you">
+                        Thank you for choosing SHOQZ!
+                    </div>
+                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        This is a computer-generated invoice. No signature required.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function downloadPDF() {
+            // Hide action buttons before printing
+            const actionButtons = document.querySelector('.action-buttons');
+            actionButtons.style.display = 'none';
+            
+            // Use browser's print functionality to save as PDF
+            window.print();
+            
+            // Show action buttons after printing
+            setTimeout(() => {
+                actionButtons.style.display = 'block';
+            }, 1000);
+        }
+
+        // Auto-populate invoice data (replace with actual data from server)
+        function populateInvoiceData(orderData) {
+            // This function would be called with actual order data
+            // to populate the invoice fields dynamically
+            console.log('Invoice data would be populated here');
+        }
+    </script>
+</body>
+</html>

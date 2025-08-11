@@ -1,0 +1,709 @@
+
+<%- include("../partials/admin/sidebar") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h2 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header-left p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #0095ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0075cc;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-out-for-delivery {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-return {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .status-waiting-for-approval {
+            background: #ffeaa7;
+            color: #2d3436;
+        }
+
+        .detail-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .detail-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .detail-card h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 120px;
+        }
+
+        .detail-value {
+            color: #495057;
+            text-align: right;
+            flex: 1;
+        }
+
+        .order-items-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .order-items-section h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .items-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .items-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .product-details h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .product-details p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .timeline-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .timeline-section h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #0095ff;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #e0e0e0;
+        }
+
+        .timeline-item.completed::before {
+            background: #28a745;
+        }
+
+        .timeline-content h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .actions-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .actions-section h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-update-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .status-update-form select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #0095ff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .detail-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .detail-value {
+                text-align: left;
+            }
+
+            .product-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .status-update-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h2>Order Details</h2>
+                <p>Order ID: #ORD123456789</p>
+            </div>
+            <div class="header-right">
+                <span class="status-badge status-shipped">Shipped</span>
+                <a href="/admin/orders" class="btn btn-secondary">Back to Orders</a>
+            </div>
+        </div>
+
+        <!-- Detail Cards -->
+        <div class="detail-cards">
+            <!-- Order Information -->
+            <div class="detail-card">
+                <h3>Order Information</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span>
+                    <span class="detail-value"><%=order.displayOrderId%></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Order Date:</span>
+                    <span class="detail-value"><%=order.Date%></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value"><span class="status-badge status-shipped"><%=order.status%></span></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value"><span class="status-badge status-shipped"><%=order.paymentMethod%></span></span>
+                    <!-- <span class="detail-value">Credit Card</span> -->
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Status:</span>
+                    <span class="detail-value">Paid</span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Tracking Number:</span>
+                    <span class="detail-value">TRK987654321</span>
+                </div> -->
+            </div>
+
+            <!-- Customer Information -->
+            <div class="detail-card">
+                <h3>Customer Information</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value"><%=order.deliveryDetails.fname%></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value"><%=order.deliveryDetails.email%></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value"><%=order.deliveryDetails.mobile%></span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Customer ID:</span>
+                    <span class="detail-value"></span>
+                </div> -->
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="detail-card">
+                <h3>Delivery Address</h3>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Street:</span>
+                    <span class="detail-value">123 Main Street</span>
+                </div> -->
+                <div class="detail-row">
+                    <span class="detail-label">City:</span>
+                    <span class="detail-value"><%=order.deliveryDetails.city%></span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">State:</span>
+                    <span class="detail-value">NY</span>
+                </div> -->
+                <div class="detail-row">
+                    <span class="detail-label">ZIP Code:</span>
+                    <span class="detail-value"><%=order.deliveryDetails.pin%></span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Country:</span>
+                    <span class="detail-value">United States</span>
+                </div> -->
+            </div>
+
+            <!-- Order Summary -->
+            <div class="detail-card">
+                <h3>Order Summary</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Subtotal:</span>
+                    <span class="detail-value"><%=order.subtotal%></span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Shipping:</span>
+                    <span class="detail-value">₹99.00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tax:</span>
+                    <span class="detail-value">₹139.80</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Discount:</span>
+                    <span class="detail-value">-₹100.00</span>
+                </div> -->
+                <!-- <div class="detail-row" style="border-top: 2px solid #2c3e50; margin-top: 10px; padding-top: 15px; font-weight: bold;">
+                    <span class="detail-label">Total:</span>
+                    <span class="detail-value">₹1,437.80</span>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items-section">
+            <h3>Order Items</h3>
+            <div style="overflow-x: auto;">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%order.product.forEach(orders=>{%>
+                            <%=console.log(orders,"rrrr")%>
+                                <tr>
+                                     <td>
+                                        <div class="product-info">
+                                            <img src="/uploads/product-images/<%=orders.productImage[0]%>" alt="Product 1" class="product-image">
+                                            <div class="product-details">
+                                                <h4><%=orders.name%></h4>
+                                                <p><%=orders.quantity%></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>SKU001</td>
+                                    <td><%=orders.salePrice%></td>
+                                    <td><%=orders.quantity%></td>
+                                    <td><%=orders.salePrice*orders.quantity%></td>
+                                </tr>
+                           <% })%>
+        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Order Timeline -->
+        <!-- <div class="timeline-section">
+            <h3>Order Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-content">
+                        <h4>Order Placed</h4>
+                        <p>March 15, 2024 at 2:30 PM</p>
+                    </div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-content">
+                        <h4>Payment Confirmed</h4>
+                        <p>March 15, 2024 at 2:35 PM</p>
+                    </div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-content">
+                        <h4>Order Processing</h4>
+                        <p>March 15, 2024 at 4:00 PM</p>
+                    </div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-content">
+                        <h4>Order Shipped</h4>
+                        <p>March 16, 2024 at 10:00 AM</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>Out for Delivery</h4>
+                        <p>Estimated: March 18, 2024</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>Delivered</h4>
+                        <p>Estimated: March 18, 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Actions -->
+        <!-- <div class="actions-section">
+            <h3>Order Actions</h3>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="printOrder()">Print Order</button>
+                <button class="btn btn-success" onclick="sendEmail()">Send Email to Customer</button>
+                <button class="btn btn-warning" onclick="createRefund()">Process Refund</button>
+                <button class="btn btn-danger" onclick="cancelOrder()">Cancel Order</button>
+            </div>
+
+            <form class="status-update-form" method="POST" action="/admin/changeStatus">
+                <input type="hidden" name="orderId" value="ORD123456789">
+                <label for="statusSelect" class="detail-label">Update Status:</label>
+                <select name="status" id="statusSelect">
+                    <option value="">Select Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="shipped" selected>Shipped</option>
+                    <option value="out-for-delivery">Out for Delivery</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="return">Return</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Update Status</button>
+            </form>
+        </div> -->
+
+        <!-- Back Link -->
+        <a href="/admin/orderDetails" class="back-link">← Back to Order Management</a>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        function printOrder() {
+            window.print();
+        }
+
+        function sendEmail() {
+            swal({
+                title: "Send Email",
+                text: "Email sent to customer successfully!",
+                icon: "success",
+                button: "OK"
+            });
+        }
+
+        function createRefund() {
+            swal({
+                title: "Process Refund",
+                text: "Are you sure you want to process a refund for this order?",
+                icon: "warning",
+                buttons: ["Cancel", "Process Refund"],
+                dangerMode: true,
+            }).then((willRefund) => {
+                if (willRefund) {
+                    swal("Refund processed successfully!", {
+                        icon: "success",
+                    });
+                }
+            });
+        }
+
+        function cancelOrder() {
+            swal({
+                title: "Cancel Order",
+                text: "Are you sure you want to cancel this order? This action cannot be undone.",
+                icon: "warning",
+                buttons: ["No", "Yes, Cancel Order"],
+                dangerMode: true,
+            }).then((willCancel) => {
+                if (willCancel) {
+                    swal("Order has been cancelled!", {
+                        icon: "success",
+                    });
+                }
+            });
+        }
+
+        // Auto-submit form when status is changed
+        document.getElementById('statusSelect').addEventListener('change', function() {
+            if (this.value) {
+                swal({
+                    title: "Update Status",
+                    text: `Are you sure you want to change the status to "${this.options[this.selectedIndex].text}"?`,
+                    icon: "info",
+                    buttons: ["Cancel", "Update"],
+                }).then((willUpdate) => {
+                    if (willUpdate) {
+                        this.form.submit();
+                    } else {
+                        this.selectedIndex = 0; 
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

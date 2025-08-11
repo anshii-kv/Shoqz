@@ -556,7 +556,7 @@ async function savePersonalInfo(event) {
                 timer: 2000,
                 showConfirmButton: false
             }).then(() => {
-                location.reload();
+                window.location.href="/profile";
             });
         } else {
             Swal.fire("Failed!", result.message, "error");

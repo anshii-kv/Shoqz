@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>My Wishlist</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Toast Container for notifications -->
+        <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1050"></div>
+
+        <section style="background-color: #f8e6e6; min-height: 100vh">
+            <div class="container py-5 h-100">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12">
+                        <div class="card" style="border-radius: 15px">
+                            <div class="card-body p-0">
+                                <div class="row g-0">
+                                    <!-- Wishlist Left -->
+                                    <div class="col-lg-8">
+                                        <div class="p-5">
+                                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                                <h1 class="fw-bold mb-0">
+                                                    <i class="fas fa-heart text-danger me-3"></i>My Wishlist
+                                                </h1>
+                                                <h6 class="mb-0 text-muted" id="itemCount">
+                                                    <%= wishlistdata?.products.length || 0 %> items
+                                                </h6>
+                                            </div>
+                                            <hr class="my-4" />
+
+                                            <div id="wishlistItems">
+                                                <% if (wishlistdata && wishlistdata.products.length > 0) { %>
+                                                    <% wishlistdata.products.forEach((item, index) => { %>
+                                                    <div class="card mb-3" data-product-id="<%= item._id %>">
+                                                        <div class="row g-0 align-items-center">
+                                                            <div class="col-md-3 text-center">
+                                                                <img
+                                                                    src="/Uploads/product-images/<%= item.productImage[0] %>"
+                                                                    alt="<%= item.productName %>"
+                                                                    class="img-fluid rounded"
+                                                                    style="max-height: 150px; object-fit: cover"
+                                                                />
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="card-body">
+                                                                    <h5 class="card-title">
+                                                                        <%= item.productName %>
+                                                                    </h5>
+                                                                    <p class="card-text text-muted">
+                                                                        <% if (item.category) { %>
+                                                                        Category: <%= item.category.name %>
+                                                                        <% } %>
+                                                                    </p>
+                                                                    <p class="card-text">
+                                                                        <% if (item.salePrice && item.salePrice < item.regularPrice) { %>
+                                                                        <strong class="text-danger">
+                                                                            ₹<span class="item-price">
+                                                                                <%= item.salePrice %>
+                                                                            </span>
+                                                                        </strong>
+                                                                        <span class="text-muted text-decoration-line-through ms-2">
+                                                                            ₹<%= item.regularPrice %>
+                                                                        </span>
+                                                                        <% } else { %>
+                                                                        <strong>
+                                                                            ₹<span class="item-price">
+                                                                                <%= item.regularPrice %>
+                                                                            </span>
+                                                                        </strong>
+                                                                        <% } %>
+                                                                    </p>
+                                                                    <% if (item.stock <= 0) { %>
+                                                                    <span class="badge bg-danger">Out of Stock</span>
+                                                                    <% } else if (item.stock <= 5) { %>
+                                                                    <span class="badge bg-warning text-dark">Only <%= item.stock %> left</span>
+                                                                    <% } else { %>
+                                                                    <span class="badge bg-success">In Stock</span>
+                                                                    <% } %>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="card-body text-center">
+                                                                    <!-- Add to Cart Button -->
+                                                                    <button
+                                                                        class="btn btn-primary btn-sm mb-2 w-100"
+                                                                        onclick="addToCart('<%= item._id %>')"
+                                                                        <%= item.stock <= 0 ? 'disabled' : '' %>
+                                                                    >
+                                                                        <i class="fas fa-shopping-cart me-1"></i>
+                                                                        <%= item.stock <= 0 ? 'Out of Stock' : 'Add to Cart' %>
+                                                                    </button>
+
+                                                                    <!-- Remove from Wishlist Button -->
+                                                                    <button
+                                                                        class="btn btn-outline-danger btn-sm w-100"
+                                                                        onclick="removeFromWishlist('<%= item._id %>')"
+                                                                    >
+                                                                        <i class="fas fa-heart-broken me-1"></i>Remove
+                                                                    </button>
+
+                                                                    <!-- View Product Button -->
+                                                                    <a 
+                                                                        href="/product/<%= item._id %>" 
+                                                                        class="btn btn-outline-secondary btn-sm w-100 mt-2"
+                                                                    >
+                                                                        <i class="fas fa-eye me-1"></i>View Details
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                                <% } else { %>
+                                                <div class="text-center py-5" id="emptyWishlistMessage">
+                                                    <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                                                    <h4 class="text-muted">Your wishlist is empty</h4>
+                                                    <p class="text-muted">Save your favorite items to your wishlist and they'll appear here.</p>
+                                                    <a href="/shop" class="btn btn-primary">
+                                                        <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                                                    </a>
+                                                </div>
+                                                <% } %>
+                                            </div>
+
+                                            <div class="pt-5">
+                                                <h6 class="mb-0">
+                                                    <a href="/shop" class="text-body text-decoration-none">
+                                                        <i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop
+                                                    </a>
+                                                </h6>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Wishlist Actions Right -->
+                                    <div class="col-lg-4" style="background-color: #f8f9fa">
+                                        <div class="p-5">
+                                            <h3 class="fw-bold mb-5 mt-2 pt-1">Wishlist Summary</h3>
+                                            <hr class="my-4" />
+
+                                            <div class="d-flex justify-content-between mb-4">
+                                                <h5 class="text-uppercase">
+                                                    Total Items
+                                                </h5>
+                                                <h5 id="totalItemCount"><%= wishlistdata?.products.length || 0 %></h5>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between mb-4">
+                                                <h5 class="text-uppercase">
+                                                    In Stock
+                                                </h5>
+                                                <h5 id="inStockCount">
+                                                    <% 
+                                                    let inStockCount = 0;
+                                                    if (wishlistdata && wishlistdata.products) {
+                                                        inStockCount = wishlistdata.products.filter(item => item.stock > 0).length;
+                                                    }
+                                                    %>
+                                                    <%= inStockCount %>
+                                                </h5>
+                                            </div>
+
+                                            <hr class="my-4" />
+
+                                            <% if (wishlistdata && wishlistdata.products.length > 0) { %>
+                                            <button class="btn btn-success btn-lg w-100 mb-3" onclick="addAllToCart()">
+                                                <i class="fas fa-cart-plus me-2"></i>Add All to Cart
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-lg w-100" onclick="clearWishlist()">
+                                                <i class="fas fa-trash me-2"></i>Clear Wishlist
+                                            </button>
+                                            <% } else { %>
+                                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                                Wishlist is Empty
+                                            </button>
+                                            <% } %>
+
+                                            <div class="mt-4">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Items in your wishlist are saved for future reference. Prices and availability may change.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            // Utility function to show notifications
+            function showToast(message, type = "info") {
+                const toastContainer = document.getElementById("toastContainer");
+                const toastId = "toast-" + Date.now();
+
+                const toastHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert" id="${toastId}">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
+                // Auto remove after 4 seconds
+                setTimeout(() => {
+                    const toast = document.getElementById(toastId);
+                    if (toast) {
+                        toast.remove();
+                    }
+                }, 4000);
+            }
+
+            // Add item to cart from wishlist
+            async function addToCart(productId) {
+                try {
+                    const response = await fetch('/add-to-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            productId: productId,
+                            quantity: 1
+                        }),
+                    });
+
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        let errorText = 'Unexpected server response';
+                        if (response.status === 401) {
+                            errorText = 'Please log in to add items to cart';
+                            window.location.href = '/login';
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast('Item added to cart successfully!', 'success');
+                        
+                        // Optional: Ask if user wants to remove from wishlist
+                        setTimeout(() => {
+                            if (confirm('Item added to cart! Would you like to remove it from your wishlist?')) {
+                                removeFromWishlist(productId);
+                            }
+                        }, 1000);
+                    } else {
+                        showToast(data.error || 'Failed to add item to cart', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    showToast(error.message || 'Error adding to cart. Please try again.', 'danger');
+                }
+            }
+
+            // Remove item from wishlist
+            async function removeFromWishlist(productId) {
+                if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/remove-from-wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ productId: productId }),
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        let errorText = 'Unexpected server response';
+                        if (response.status === 401) {
+                            errorText = 'Please log in to update wishlist';
+                            window.location.href = '/login';
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Remove item from DOM with animation
+                        const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
+                        if (itemElement) {
+                            itemElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            itemElement.style.opacity = '0';
+                            itemElement.style.transform = 'translateX(-100%)';
+                            
+                            setTimeout(() => {
+                                itemElement.remove();
+                                updateWishlistSummary();
+                                if (data.wishlistEmpty) {
+                                    checkEmptyWishlist();
+                                }
+                            }, 300);
+                        }
+
+                        showToast(data.message || 'Item removed from wishlist', 'success');
+                    } else {
+                        showToast(data.error || 'Failed to remove item from wishlist', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error removing from wishlist:', error);
+                    showToast(error.message || 'Error removing item. Please try again.', 'danger');
+                }
+            }
+
+            // Add all in-stock items to cart
+            async function addAllToCart() {
+                const inStockItems = document.querySelectorAll('[data-product-id]');
+                const productIds = [];
+
+                inStockItems.forEach(item => {
+                    const stockBadge = item.querySelector('.badge');
+                    if (stockBadge && !stockBadge.classList.contains('bg-danger')) {
+                        productIds.push(item.getAttribute('data-product-id'));
+                    }
+                });
+
+                if (productIds.length === 0) {
+                    showToast('No items are available to add to cart', 'warning');
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to add ${productIds.length} items to your cart?`)) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/add-all-to-cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ productIds: productIds }),
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        let errorText = 'Unexpected server response';
+                        if (response.status === 401) {
+                            errorText = 'Please log in to add items to cart';
+                            window.location.href = '/login';
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast(`Successfully added ${data.addedCount} items to cart!`, 'success');
+                        
+                        if (data.failedCount > 0) {
+                            showToast(`${data.failedCount} items could not be added (out of stock or other issues)`, 'warning');
+                        }
+                    } else {
+                        showToast(data.error || 'Failed to add items to cart', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error adding all to cart:', error);
+                    showToast(error.message || 'Error adding items to cart. Please try again.', 'danger');
+                }
+            }
+
+            // Clear entire wishlist
+            async function clearWishlist() {
+                if (!confirm('Are you sure you want to clear your entire wishlist? This action cannot be undone.')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/clear-wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        let errorText = 'Unexpected server response';
+                        if (response.status === 401) {
+                            errorText = 'Please log in to clear wishlist';
+                            window.location.href = '/login';
+                        }
+                        throw new Error(errorText);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Clear all items with animation
+                        const allItems = document.querySelectorAll('[data-product-id]');
+                        allItems.forEach((item, index) => {
+                            setTimeout(() => {
+                                item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                item.style.opacity = '0';
+                                item.style.transform = 'translateX(-100%)';
+                                
+                                setTimeout(() => {
+                                    item.remove();
+                                    if (index === allItems.length - 1) {
+                                        checkEmptyWishlist();
+                                    }
+                                }, 300);
+                            }, index * 100);
+                        });
+
+                        showToast('Wishlist cleared successfully', 'success');
+                    } else {
+                        showToast(data.error || 'Failed to clear wishlist', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error clearing wishlist:', error);
+                    showToast(error.message || 'Error clearing wishlist. Please try again.', 'danger');
+                }
+            }
+
+            // Update wishlist summary counts
+            function updateWishlistSummary() {
+                const totalItems = document.querySelectorAll('[data-product-id]').length;
+                let inStockCount = 0;
+
+                document.querySelectorAll('[data-product-id]').forEach(item => {
+                    const stockBadge = item.querySelector('.badge');
+                    if (stockBadge && !stockBadge.classList.contains('bg-danger')) {
+                        inStockCount++;
+                    }
+                });
+
+                // Update displays
+                document.getElementById('totalItemCount').textContent = totalItems;
+                document.getElementById('inStockCount').textContent = inStockCount;
+                document.getElementById('itemCount').textContent = `${totalItems} items`;
+            }
+
+            // Check if wishlist is empty and show appropriate message
+            function checkEmptyWishlist() {
+                const wishlistItems = document.querySelectorAll('[data-product-id]');
+                const wishlistContainer = document.getElementById('wishlistItems');
+
+                if (wishlistItems.length === 0) {
+                    wishlistContainer.innerHTML = `
+                        <div class="text-center py-5" id="emptyWishlistMessage">
+                            <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Your wishlist is empty</h4>
+                            <p class="text-muted">Save your favorite items to your wishlist and they'll appear here.</p>
+                            <a href="/shop" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    `;
+
+                    // Update action buttons
+                    const actionButtons = document.querySelector('.col-lg-4 .p-5');
+                    if (actionButtons) {
+                        const buttonContainer = actionButtons.querySelector('hr').nextElementSibling.nextElementSibling.nextElementSibling;
+                        if (buttonContainer) {
+                            buttonContainer.innerHTML = `
+                                <button class="btn btn-secondary btn-lg w-100" disabled>
+                                    Wishlist is Empty
+                                </button>
+                            `;
+                        }
+                    }
+
+                    // Update summary displays
+                    document.getElementById('totalItemCount').textContent = '0';
+                    document.getElementById('inStockCount').textContent = '0';
+                    document.getElementById('itemCount').textContent = '0 items';
+                }
+            }
+
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log('Wishlist page loaded');
+
+                // Update summary on load
+                updateWishlistSummary();
+            });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

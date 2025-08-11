@@ -5,11 +5,9 @@
         <title>Shopping Cart</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     </head>
     <body>
-        <!-- Toast Container for notifications -->
-        <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1050"></div>
-
         <section style="background-color: #bddbeb; min-height: 100vh">
             <div class="container py-5 h-100">
                 <div class="row d-flex justify-content-center align-items-center h-100">
@@ -176,29 +174,6 @@
         </section>
 
         <script>
-            // Utility function to show notifications
-            function showToast(message, type = "info") {
-                const toastContainer = document.getElementById("toastContainer");
-                const toastId = "toast-" + Date.now();
-
-                const toastHtml = `
-                    <div class="alert alert-${type} alert-dismissible fade show" role="alert" id="${toastId}">
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `;
-
-                toastContainer.insertAdjacentHTML("beforeend", toastHtml);
-
-                // Auto remove after 4 seconds
-                setTimeout(() => {
-                    const toast = document.getElementById(toastId);
-                    if (toast) {
-                        toast.remove();
-                    }
-                }, 4000);
-            }
-
             // Update item quantity
             async function updateQuantity(productId, count) {
                 try {
@@ -220,7 +195,11 @@
                         let errorText = 'Unexpected server response';
                         if (response.status === 401) {
                             errorText = 'Please log in to update cart';
-                            window.location.href = '/login';
+                            swal("Authentication Required", "Please log in to update cart", "warning")
+                                .then(() => {
+                                    window.location.href = '/login';
+                                });
+                            return;
                         }
                         throw new Error(errorText);
                     }
@@ -246,70 +225,81 @@
                         // Update quantity buttons
                         updateQuantityButtons(productId, data.quantity);
 
-                        showToast('Cart updated successfully', 'success');
+                        swal("Success!", "Cart updated successfully", "success");
                     } else {
-                        showToast(data.error || 'Failed to update cart', 'danger');
+                        swal("Error!", data.error || 'Failed to update cart', "error");
                     }
                 } catch (error) {
                     console.error('Error updating quantity:', error);
-                    showToast(error.message || 'Error updating cart. Please try again.', 'danger');
+                    swal("Error!", error.message || 'Error updating cart. Please try again.', "error");
                 }
             }
 
             // Remove item from cart
             async function removeItem(productId) {
-                if (!confirm('Are you sure you want to remove this item from your cart?')) {
-                    return;
-                }
+                swal({
+                    title: "Are you sure?",
+                    text: "You want to remove this item from your cart?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then(async (willDelete) => {
+                    if (willDelete) {
+                        try {
+                            const response = await fetch('/remove-item', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({ productId: productId }),
+                            });
 
-                try {
-                    const response = await fetch('/remove-item', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ productId: productId }),
-                    });
-
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        let errorText = 'Unexpected server response';
-                        if (response.status === 401) {
-                            errorText = 'Please log in to update cart';
-                            window.location.href = '/login';
-                        }
-                        throw new Error(errorText);
-                    }
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Remove item from DOM
-                        const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
-                        if (itemElement) {
-                            itemElement.style.transition = 'opacity 0.3s ease';
-                            itemElement.style.opacity = '0';
-                            setTimeout(() => {
-                                itemElement.remove();
-                                if (data.cartEmpty) {
-                                    checkEmptyCart();
-                                } else {
-                                    document.getElementById('subtotalDisplay').textContent = `₹${data.subtotal}`;
-                                    document.getElementById('totalAmount').textContent = data.subtotal;
-                                    updateCartSummary();
+                            const contentType = response.headers.get('content-type');
+                            if (!contentType || !contentType.includes('application/json')) {
+                                let errorText = 'Unexpected server response';
+                                if (response.status === 401) {
+                                    errorText = 'Please log in to update cart';
+                                    swal("Authentication Required", "Please log in to update cart", "warning")
+                                        .then(() => {
+                                            window.location.href = '/login';
+                                        });
+                                    return;
                                 }
-                            }, 300);
-                        }
+                                throw new Error(errorText);
+                            }
 
-                        showToast(data.message || 'Item removed from cart', 'success');
-                    } else {
-                        showToast(data.error || 'Failed to remove item', 'danger');
+                            const data = await response.json();
+
+                            if (data.success) {
+                                // Remove item from DOM
+                                const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
+                                if (itemElement) {
+                                    itemElement.style.transition = 'opacity 0.3s ease';
+                                    itemElement.style.opacity = '0';
+                                    setTimeout(() => {
+                                        itemElement.remove();
+                                        if (data.cartEmpty) {
+                                            checkEmptyCart();
+                                        } else {
+                                            document.getElementById('subtotalDisplay').textContent = `₹${data.subtotal}`;
+                                            document.getElementById('totalAmount').textContent = data.subtotal;
+                                            updateCartSummary();
+                                        }
+                                    }, 300);
+                                }
+
+                                swal("Removed!", data.message || 'Item removed from cart', "success");
+                            } else {
+                                swal("Error!", data.error || 'Failed to remove item', "error");
+                            }
+                        } catch (error) {
+                            console.error('Error removing item:', error);
+                            swal("Error!", error.message || 'Error removing item. Please try again.', "error");
+                        }
                     }
-                } catch (error) {
-                    console.error('Error removing item:', error);
-                    showToast(error.message || 'Error removing item. Please try again.', 'danger');
-                }
+                });
             }
 
             // Update quantity buttons (enable/disable)
@@ -382,7 +372,7 @@
                 const totalItems = parseInt(document.getElementById('totalItemCount').textContent) || 0;
 
                 if (totalItems === 0) {
-                    showToast('Your cart is empty!', 'warning');
+                    swal("Cart Empty!", "Your cart is empty!", "warning");
                     return;
                 }
 

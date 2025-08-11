@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,6 +343,8 @@
             border-color: #bdd5eb;
         }
 
+        
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .card-body {
@@ -393,63 +396,26 @@
     <!-- Main Content -->
     <section style="background-color: #f8f9fa; min-height: 100vh;">
         <div class="container py-5">
-            <!-- Order Statistics -->
-            <!-- <div class="order-stats">
-                <div class="stat-card">
-                    <div class="stat-number">25</div>
-                    <div class="stat-label">Total Orders</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">18</div>
-                    <div class="stat-label">Delivered</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Processing</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">4</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-            </div> -->
-
+         
             <!-- Search and Filter Section -->
-            <div class="search-filter-section">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="Search orders..." id="searchInput">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="dateFilter">
-                            <option value="">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                            <option value="year">This Year</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary w-100" onclick="applyFilters()">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                    </div>
-                </div>
+            <!-- Search and Filter Section -->
+<div class="search-filter-section">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search orders..." id="searchInput">
+                <button class="btn btn-primary" id="searchBtn">
+                    Search
+                </button>
+                
             </div>
+        </div>
+    </div>
+</div>
+
 
             <!-- Orders Table -->
             <div class="card">
@@ -465,8 +431,10 @@
                                     <tr>
                                         <th>S.No</th>
                                         <th>Product Name</th>
+                                        <th>Quantity</th>
                                         <th>Price</th>
                                         <th>Order Date</th>
+                                        <th>Total</th>
                                         <th>Expiry Date</th>
                                         <th>Status</th>
                                         <th>Actions</th>
@@ -479,28 +447,32 @@
       <td colspan="7" class="text-center">No orders found.</td>
     </tr>
   <% } else { %>
+    <% let serial = 1; %>
     <% orders.forEach((order, index) => { %>
       <% order.product.forEach((item, i) => { %>
         <tr>
-          <td><%= index + 1 %></td>
+          <td><%= serial++ %></td>
           <td>
-            <div class="product-info">
+            <!-- <div class="product-info">
               <img src="/product-images/<%= item.productId %>.jpg" alt="Product" class="product-image">
-              <div class="product-details">
+              <div class="product-details"> -->
                 <div class="product-name"><%= item.name %></div>
                 <div class="product-category"><%= item.category.name %></div>
               </div>
             </div>
           </td>
-          <td class="price">₹<%= item.price %></td>
+          <td><%=item.quantity%></td>
+          <td class="price">₹<%= item.salePrice %></td>
           <td><%= order.Date ? order.Date.toDateString() : '' %></td>
+          <td><%=item.price%></td>
           <td><%= order.exprdate ? order.exprdate.toDateString() : '' %></td>
           <td>
             <span class="status-badge status-<%= order.status.toLowerCase() %>"><%= order.status %></span>
           </td>
           <td>
             <div class="action-buttons">
-              <button class="action-btn btn-info" onclick="viewOrder('<%= order._id %>')">
+                <%=console.log(item.productId,'item')%>
+              <button class="action-btn btn-info" onclick="viewOrder('<%= order._id %>','<%=item.productId%>')">
                 <i class="fas fa-eye"></i> View
               </button>
               <% if(order.status === 'Delivered') { %>
@@ -514,10 +486,14 @@
                 <!-- <button class="action-btn btn-success" onclick="payNow('<%= order._id %>')">
                   <i class="fas fa-credit-card"></i> Pay Now
                 </button> -->
-                <button class="action-btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                <%=console.log(item.productId,item.name,"ProductIdsssss")%>
+          
+
+                <button class="action-btn btn-danger" onclick="cancelOrder('<%= order._id %>','<%=item.productId%>','<%=item.name%>')">
                   <i class="fas fa-times"></i> Cancel
                 </button>
               <% } else if(order.status === 'Processing' || order.status === 'Shipped') { %>
+
                 <button class="action-btn btn-primary" onclick="trackOrder('<%= order._id %>')">
                   <i class="fas fa-truck"></i> Track
                 </button>
@@ -562,18 +538,19 @@
                 </div>
             </div>
         </div>
+        
     </section>
-
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.12/sweetalert2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+		
 
     <script>
         // View Order Function
-       function viewOrder(orderId) {
-  window.location.href = `/order-details/${orderId}`;
+       function viewOrder(orderId,productId) {
+  window.location.href = `/order-details/${orderId}/${productId}`;
 }
 
 
@@ -606,10 +583,11 @@
         }
 
         // Cancel Order Function
-        function cancelOrder(orderId) {
+        function cancelOrder(orderId,productId,productName) {
+            console.log(productName,'dfdf')
   Swal.fire({
     title: 'Cancel Order',
-    text: `Are you sure you want to cancel order #${orderId}?`,
+    text: `Are you sure you want to cancel order ${productName}?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#dc3545',
@@ -622,7 +600,7 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ orderId: orderId })
+        body: JSON.stringify({ orderId: orderId,productId })
       })
       .then(res => res.json())
       .then(data => {
@@ -633,7 +611,7 @@
             icon: 'success',
             confirmButtonColor: '#bdd5eb'
           }).then(() => {
-            window.location.reload(); // Reload to update UI
+            window.location.reload();
           });
         } else {
           Swal.fire('Error', data.message || 'Something went wrong.', 'error');
@@ -702,30 +680,9 @@
             });
         }
 
-        // Apply Filters Function
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            const dateFilter = document.getElementById('dateFilter').value;
-            
-            // Here you would implement the actual filtering logic
-            console.log('Applying filters:', { searchTerm, statusFilter, dateFilter });
-            
-            Swal.fire({
-                title: 'Filters Applied',
-                text: 'Search results have been updated.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                applyFilters();
-            }
-        });
+   
+      
     </script>
 </body>
 </html>
+		

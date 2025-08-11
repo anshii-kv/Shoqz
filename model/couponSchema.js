@@ -49,7 +49,8 @@ const CouponSchema =  new Schema({
     userId: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+   
 });
 const Coupon = mongoose.model("Coupon",CouponSchema)
 module.exports=Coupon

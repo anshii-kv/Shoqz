@@ -78,8 +78,17 @@ const addAddress = async (req, res) => {
   try {
     const userId = req.session.userId;
     const userData = await User.findById(userId);
-    const { fname, sname, mobile, email, address, city, pin, isDefault, type } = req.body;
-
+    let { fname, sname, mobile, email, address, city, pin, isDefault, type } = req.body;
+    const addreses = await Address.findOne({user:userId})
+    console.log(addreses,"ammuuuuu");
+    
+    if(addreses?.address?.length>0){
+      console.log("anshiammu");
+      
+      isDefault=false
+    }
+    console.log(isDefault,"default");
+    
     if (!userData) {
       return res.json({ success: false, message: "User not found" });
     }

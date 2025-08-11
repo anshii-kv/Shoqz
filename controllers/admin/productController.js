@@ -8,9 +8,11 @@ const mongoose = require("mongoose");
 
 const loadProducts = async (req, res) => {
     try {
+      
+        
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
-        const limit = 2;
+        const limit = 4;
         const skip = (page - 1) * limit;
 
         const query = {};
@@ -219,7 +221,11 @@ const addProducts = async (req, res) => {
 
 const loadUpdatePage = async (req, res) => {
     try {
-        const productId = req.params.id;
+        console.log(req.query,"queryyy");
+        
+        const productId = req.query.productId;
+        console.log(productId,"projdhsjfh");
+        
         const findAdmin = req.session.admin;
 
         if (!findAdmin) {
@@ -244,6 +250,8 @@ const updateProduct = async (req, res) => {
     try {
         console.log(req.body, "hee");
         const productId = req.body.productId;
+        console.log(productId,"heehuuu");
+        
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return res.status(400).json({ success: false, message: "Invalid product ID" });
         }
@@ -313,7 +321,7 @@ const updateProduct = async (req, res) => {
             const size = sizes[i].trim();
             const quantity = parseInt(quantities[i]) || 0;
 
-            if (uniqueSizes.includes(size)) {
+            if (uniqueSizes.has(size)) {
                 return res.status(400).json({ success: false, message: "Duplicate sizes are not allowed" });
             }
             if (quantity < 0) {
@@ -373,6 +381,8 @@ const updateProduct = async (req, res) => {
         product.updatedAt = Date.now();
 
         await product.save();
+        console.log(product,"products");
+        
         return res.redirect("/admin/products");
     } catch (error) {
         console.error("Error updating product:", error);

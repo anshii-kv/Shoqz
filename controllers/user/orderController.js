@@ -3,6 +3,28 @@ const Order = require("../../model/orderSchema");
 const Product = require("../../model/productSchema");
 const Category = require("../../model/categorySchema");
 const Cart = require("../../model/cartSchema");
+const Razorpay = require('razorpay')
+
+const razorpay = new Razorpay({
+    key_id:"rzp_test_lNqP0ShQDBIbqJ",
+    key_secret:process.env.RAZORPAY_SECURITY_KEY
+})
+
+async function generateDisplayOrderId() {
+    const year = new Date().getFullYear();
+
+    const lastOrder = await Order.findOne({ displayOrderId: { $regex: `^DORD-${year}` } }).sort({ Date: -1 });
+
+    let orderNumber = 1;
+    if (lastOrder && lastOrder.displayOrderId) {
+        const lastNumber = parseInt(lastOrder.displayOrderId.split("-").pop());
+        if (!isNaN(lastNumber)) {
+            orderNumber = lastNumber + 1;
+        }
+    }
+
+    return `DORD-${year}-${String(orderNumber).padStart(5, "0")}`;
+}
 
 const orderlist = async (req, res) => {
     try {
@@ -10,12 +32,7 @@ const orderlist = async (req, res) => {
         const userdata = await User.findOne({ _id: user });
         console.log(userdata);
 
-        // const orders = await Order.find({ user: user }).sort({ Date: -1 });
-        const orders = await Order.find({ user })
-            .populate("product.productId")
-            .populate("product.category")
-            .sort({ Date: -1 });
-        console.log(orders, "dfdlfdlfdslf");
+        const orders = await Order.find({ user }).populate("product.category").sort({ Date: -1 });
         res.render("myOrde", { orders, userdata, user });
     } catch (error) {
         console.log(error.message);
@@ -65,6 +82,10 @@ const placeOrder = async (req, res) => {
                 quantity: item.quantity,
                 price: item.price,
                 category: product.category,
+                description: product.description,
+                regularPrice: product.regularPrice,
+                salePrice: product.salePrice,
+                productImage: product.productImage,
             });
         }
 
@@ -87,6 +108,9 @@ const placeOrder = async (req, res) => {
             status: "Pending",
             productImage: productImage,
         });
+        var orderDisplay = await generateDisplayOrderId();
+
+        newOrder.displayOrderId = orderDisplay;
 
         await newOrder.save();
 
@@ -102,21 +126,33 @@ const placeOrder = async (req, res) => {
 const cancelOrder = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const orderId = req.body.orderId;
-        const orders = await Order.findById({ _id: orderId });
+        console.log(req.body, "cancelorder");
 
-        const WalletAmount = orders.subtotal;
+        const orderId = req.body.orderId;
+        const productIdToCancel = req.body.productId;
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        console.log(order, "Order");
+        const productIndex = order.product.findIndex((p) => p.productId.toString() === productIdToCancel);
+        if (productIndex === -1) {
+            return res.status(404).json({ message: "Product not found in the order" });
+        }
+
+        // Option 1: Remove the product from the order
+        order.product.splice(productIndex, 1);
+        await order.save();
+
+        const WalletAmount = order.subtotal;
         const WalletData = {
             amount: WalletAmount,
             date: Date.now(),
             discription: "Refund for order Cancelling order ",
         };
 
-        const data = await Order.findOneAndUpdate(
-            { _id: orderId, user: userId },
-            { $set: { status: "cancelled" } },
-            { new: true }
-        );
+        const data = await Order.findOneAndUpdate({ _id: orderId, user: userId }, { $set: { status: "Cancelled" } });
 
         if (data) {
             await User.findOneAndUpdate(
@@ -125,12 +161,13 @@ const cancelOrder = async (req, res) => {
             );
 
             res.json({ success: true });
-        } else {
-            res.json({
-                success: false,
-                message: "Order not found or not owned by the user",
-            });
         }
+        //  else {
+        //     res.json({
+        //         success: false,
+        //         message: "Order not found or not owned by the user",
+        //     });
+        // }
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
@@ -139,23 +176,22 @@ const cancelOrder = async (req, res) => {
 
 const orderdetails = async (req, res) => {
     try {
-        console.log(req.params.id, "idsd");
-        let id = req.params.id;
-        console.log(id, "dfls");
+        console.log(req.params,"another error");
+        
+        const { id, productId } = req.params;
 
-        const order = await Order.findOne({ _id: id })
-            .populate({
-                path: "product.productId",
-                populate: {
-                    path: "category",
-                    model: "Category",
-                },
-            })
-            .populate("user");
+console.log(id,productId,"new error");
+
+        const order = await Order.findOne({ _id: id }).populate("product.category").populate("user");
+        console.log(order, "order are consoloing here");
 
         if (!order) {
             return res.status(404).render("error", { message: "Order not found" });
         }
+        order.product = order.product.filter((p) => {
+            console.log(p.productId, productId, "dfdf");
+            return p.productId && p.productId.toString() === productId;
+        });
 
         console.log(order, "ammu");
 
@@ -192,54 +228,63 @@ const returnOrder = async (req, res) => {
     }
 };
 
-// const returnOrder = async (req, res) => {
-//   try {
-//     const { orderId, reason, comments } = req.body;
-//     const userId = req.session.userId;
-
-//     const order = await Order.findById(orderId);
-
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//     if (Date.now() > order.exprdate) {
-//       return res.json({ datelimit: true });
-//     }
-
-//     // Update order status to "waiting for approval"
-//     await Order.findByIdAndUpdate(
-//       orderId,
-//       { $set: { status: "waiting for approval" } },
-//       { new: true }
-//     );
-
-//     // Add refund amount to user's wallet
-//     const refundAmount = order.subtotal;
-//     await User.findByIdAndUpdate(
-//       userId,
-//       {
-//         $inc: { wallet: refundAmount }, // Increment wallet balance
-//         $push: {
-//           walletHistory: {
-//             amount: refundAmount,
-//             description: `Refund for Order #${orderId}`,
-//             date: new Date(),
-//           },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     res.json({ return: true });
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
 const downloadInvoice = async (req, res) => {
     try {
-        const { orderId } = req.params;
-    } catch (error) {}
+        const order = await Order.findById(req.params.orderId)
+            .populate("user")
+            .populate("product.productId")
+            .populate("product.category");
+
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+        const subtotal = order.product.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const shipping = 0;
+        const discount = 0;
+        const taxRate = 0;
+        const taxAmount = (subtotal + shipping - discount) * taxRate;
+        const totalAmount = subtotal + shipping - discount + taxAmount;
+
+        const invoiceData = {
+            customerName: `${order.deliveryDetails.fname} ${order.deliveryDetails.sname}`,
+            customerAddress: order.deliveryDetails.address,
+            customerCity: order.deliveryDetails.city,
+            customerPin: order.deliveryDetails.pin,
+            customerPhone: order.deliveryDetails.mobile,
+            customerEmail: order.deliveryDetails.email,
+
+            invoiceDate: new Date().toLocaleDateString("en-IN"),
+            orderDate: order.Date ? order.Date.toLocaleDateString("en-IN") : new Date().toLocaleDateString("en-IN"),
+            orderId: order._id.toString().slice(-10).toUpperCase(),
+            paymentMethod: order.paymentMethod || "Credit Card",
+            deliveryDate: order.exprdate ? order.exprdate.toLocaleDateString("en-IN") : "TBD",
+
+            products: order.product.map((item) => ({
+                name: item.name,
+                category: item.category?.name || "General",
+                quantity: item.quantity,
+                unitPrice: item.price,
+                total: item.price * item.quantity,
+                image: item.productId?.productImage?.[0]
+                    ? `/productImages/${item.productId.productImage[0]}`
+                    : "https://via.placeholder.com/50x50/bdd5eb/ffffff?text=IMG",
+            })),
+
+            subtotal: subtotal.toFixed(2),
+            shipping: shipping.toFixed(2),
+            discount: discount.toFixed(2),
+            taxRate: (taxRate * 100).toFixed(0),
+            taxAmount: taxAmount.toFixed(2),
+            totalAmount: totalAmount.toFixed(2),
+            paymentStatus: order.paymentStatus || "Paid",
+        };
+
+        res.render("invoice", { invoice: invoiceData });
+    } catch (error) {
+        console.error("Error generating invoice:", error);
+        res.status(500).send("Error generating invoice");
+    }
 };
+
 module.exports = { orderlist, placeOrder, cancelOrder, orderdetails, returnOrder, downloadInvoice };

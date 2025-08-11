@@ -48,6 +48,7 @@ const blockCustomer = async (req, res) => {
     try {
         let id = req.query.id;
         await User.findOneAndUpdate({ _id: id }, { $set: { isBlocked: true } });
+        req.session.email=null;
         res.redirect("/admin/user");
     } catch (error) {
         console.log("hello", error);

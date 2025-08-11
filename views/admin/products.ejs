@@ -315,7 +315,7 @@
                             type="text" 
                             class="search-input" 
                             name="search" 
-                            placeholder="Search customers..." 
+                            placeholder="Search products..." 
                             value="<%= search %>"
                         >
                         <span class="search-icon">🔍</span>
@@ -386,7 +386,8 @@
                             </div>
                         </td>
                         <td>
-                            <% if(!product.isBlocked) { %>
+                            <%=console.log(product.status,'sfdf')%>
+                            <% if(product.status==="Available") { %>
                                 <span class="status-badge status-active">Active</span>
                             <% } else { %>
                                 <span class="status-badge status-inactive">Inactive</span>

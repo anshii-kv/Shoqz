@@ -96,6 +96,12 @@ const userSchema = new Schema({
             pin: String,
         },
     ],
+    coupon:[
+       {
+        type: Schema.Types.ObjectId,
+        ref: "Coupon"
+    } 
+    ]
 });
 
 const User = mongoose.model("User", userSchema);
