@@ -6,7 +6,8 @@ const orderController = require("../controllers/user/orderController")
 const {userAuth} = require ('../middlewares/userAuth')
 const passport = require('../config/passport');
 const orderSchema = require('../model/orderSchema');
-const auth=require('../middlewares/auth')
+const auth=require('../middlewares/auth');
+const razorpay=require("../util/razorpay")
 router.use(express.json());
 
 router.set("views","./views/user")
@@ -106,6 +107,10 @@ router.post('/coupon',usercontroller.coupon)
 
 router.get('/wishlist',auth.isBlock,auth.toLogin,usercontroller.wishlist)
 
+router.post('/wishlist/add',usercontroller.addToWishlist)
+
+router.post('/add-to-cart',usercontroller.wishlistaddToCart)
+
 router.get('/profile',auth.isBlock,auth.toLogin,usercontroller.loadProfile);
 
 router.post('/update-profile',usercontroller.updateProfile)
@@ -140,10 +145,13 @@ router.post('/submitOrder',orderController.placeOrder)
 
 router.patch('/returnOrder',orderController.returnOrder)
 
+router.post('/paymentFailed',usercontroller.paymentFailed)
 
 router.get('/download-invoice/:orderId',auth.toLogin, orderController.downloadInvoice);
 
 
+router.post('/createOrder',razorpay.createOrder)
+router.post('/placeOrder',orderController.verifyPayment)
 router.get('/transactionHistory',auth.toLogin,usercontroller.transactionHistory);
 
 router.get('/user/coupons/available',usercontroller.applyCoupon);

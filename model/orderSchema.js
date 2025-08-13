@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { paymentFailed } = require("../controllers/user/userController");
 
 const OrderSchema = new mongoose.Schema({
     deliveryDetails: {
@@ -31,8 +32,12 @@ const OrderSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
+        paymentSuccess: {
+            type: String,
+            default: true,
+        },
     },
-    displayOrderId: { type: String, unique: true }, 
+    displayOrderId: { type: String, unique: true },
     user: {
         type: mongoose.Types.ObjectId,
         ref: "User",
@@ -83,20 +88,20 @@ const OrderSchema = new mongoose.Schema({
                 default: 0,
             },
 
-            categoryoffer: { 
-              type: Number, 
-              default: 0
-             },
+            categoryoffer: {
+                type: Number,
+                default: 0,
+            },
 
             finalamount: {
                 type: Number,
                 default: 0,
                 require: false,
             },
-               productImage: {
-        type: [String],
-        required: true,
-    },
+            productImage: {
+                type: [String],
+                required: true,
+            },
         },
     ],
     subtotal: {
@@ -114,7 +119,6 @@ const OrderSchema = new mongoose.Schema({
     // paymentId: {
     //   type: String,
     // },
- 
 });
 
 module.exports = mongoose.model("order", OrderSchema);

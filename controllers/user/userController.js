@@ -9,6 +9,9 @@ const Address = require("../../model/addressSchema");
 const Order = require("../../model/orderSchema");
 const mongoose = require("mongoose");
 const Coupon = require("../../model/couponSchema");
+const Wishlist = require("../../model/wishlistSchema");
+const Category = require("../../model/categorySchema");
+const { verifyPayment } = require("./orderController");
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000);
 }
@@ -921,9 +924,175 @@ const coupon = async (req, res) => {
 
 const wishlist = async (req, res) => {
     try {
-        res.render("wishlist");
+        console.log("hiiiii");
+        
+        const user = req.session.userId;
+        console.log(user,"aloo userr");
+        
+        const wishlist = await Wishlist.find({userId:user})
+        console.log(wishlist,"here my wishlist");
+        
+       res.render("wishlist",{wishlistdata:wishlist})  
     } catch (error) {}
 };
+
+
+
+
+
+const addToWishlist = async (req, res) => {
+  try {
+    const { size, productId } = req.body;
+
+    const user = req.session.userId;
+    console.log(user,"userId not");
+    
+
+    const product = await Product.findById(productId);
+    console.log(product,"here is the products");
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+
+    const selectedSizeObj = product.sizes.find(s => s.size === size);
+
+    if (!selectedSizeObj) {
+      return res.status(400).json({ success: false, message: 'Selected size not available for this product' });
+    }
+    console.log('Selected Size:', selectedSizeObj);
+
+   
+   const existProduct = await Wishlist.findOne({productId:product})
+   if(existProduct){
+    return res.status(400).json({success:false,message:"Product already exists in the wishlist"})
+   }
+
+
+   const wishlistItem = new Wishlist({
+      userId: req.session.userId,
+      productId: product._id,
+      productName: product.productName,
+      regularPrice: product.regularPrice,
+      salePrice: product.salePrice,
+      sizes: [selectedSizeObj], 
+      productImage: product.productImage
+    });
+
+   
+    await wishlistItem.save();
+
+    res.json({ success: true, message: 'Added to wishlist', data: wishlistItem });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
+const wishlistaddToCart = async(req,res)=>{
+    try {
+        // console.log(req.body,"helo sir");
+        const{productId,size,quantity}=req.body
+        const user = req.session.userId
+        const wishlist = await Wishlist.findOne({productId:productId,userId:user})
+        // console.log(wishlist,"i love you");
+        const products = await Product.findById(productId)
+         let existingCartItem= await Cart.findOne({ userId:user,
+            "product.productId": productId,
+            "product.size": size})
+            if(existingCartItem){
+                console.log(existingCartItem,"mealso");
+                
+                return res.status(400).json({success:false,message:"product already exists in the cart"})
+            }
+    //console.log(products._id,products.productName,products.category,products.regularPrice,products.finalamount,size,quantity,"sinan");
+       // console.log(req.session.user,"hey user are you there");
+       let cart = await Cart.findOne({userId:user});
+       if(!cart){
+        cartItem= new Cart({
+            userId:user,
+            product:[]
+        });
+       }
+          cartItem.product.push({
+            productId: products._id,
+            name: products.productName,
+            Category: products.category,
+            price: products.regularPrice,
+            total: products.finalamount,
+            size: size,
+            quantity: quantity
+        });
+         await cartItem.save()
+         await Wishlist.deleteOne({ productId, userId: user });
+          res.json({success:true,message:"item added to cart"})
+        
+        // console.log(cartItem,"can you please show me the cart items here");
+
+        
+       
+        // console.log("ashmikapp");
+        
+       
+      
+        
+    } catch (error) {
+        
+    }
+}
+
+const paymentFailed= async(req,res)=>{
+    try {
+        console.log(req.body,"payemnt datas here");
+        
+    } catch (error) {
+        
+    }
+}
+
+
+
+// const wishlistaddToCart = async(req,res)=>{
+//     try {
+//         console.log(req.body,"helo sir");
+//         const{productId}=req.body
+//         const user = req.session.userId
+//         const product = await Wishlist.findOne({productId:productId,userId:user})
+//         console.log(product,"i love you");
+//         console.log(product._id,product.productName,product.description,product.category,product.regularPrice,product.finalamount,product.productImage,"product details");
+//         const products = await Product.findById(productId)
+//         console.log(products,"sharun");
+        
+//         const cartItem = new Cart({
+//             userId:req.session.user,
+//             product:[{
+
+//                 productId:products._id,
+//                 productName:products.productName,
+//                 description:products.description,
+//                 category:products.category,
+//                 regularPrice:products.regularPrice,
+//                 finalamount:products.finalamount,
+//                 productImage:products.productImage,
+//                 size:sizes.size
+//          } ],
+//         })
+//         console.log(cartItem,"can you please show me the cart items here");
+        
+//         await cartItem.save()
+//         res.json({success:true,message:"item added to cart"})
+      
+        
+//     } catch (error) {
+//        console.error(error);
+//         res.status(500).json({ success: false, message: "Server error" }); 
+//     }
+// }
+
+
 
 const loadProfile = async (req, res) => {
     try {
@@ -951,46 +1120,46 @@ const updateProfile = async (req, res) => {
     }
 };
 // apply coupon
-const applycoupon = async (req, res) => {
-  try {
-    const couponId = req.body.id;
+// const applycoupon = async (req, res) => {
+//   try {
+//     const couponId = req.body.id;
 
-    const userId = req.session.userId;
+//     const userId = req.session.userId;
 
-    const currentdate = new Date();
+//     const currentdate = new Date();
 
-    const coupondata = await Coupon.findOne({
-      _id: couponId,
-      expiryDate: { $gt: currentdate },
-    });
+//     const coupondata = await Coupon.findOne({
+//       _id: couponId,
+//       expiryDate: { $gt: currentdate },
+//     });
 
-    const Exist = coupondata.useduser.includes(userId);
+//     const Exist = coupondata.useduser.includes(userId);
 
-    if (!Exist) {
-      const existingcart = await Cart.findOne({ user: userId });
+//     if (!Exist) {
+//       const existingcart = await Cart.findOne({ user: userId });
 
-      if (existingcart && existingcart.coupondiscount == null) {
-        const adduser = await Coupon.findByIdAndUpdate(
-          { _id: couponId },
-          { $push: { useduser: userId } }
-        );
+//       if (existingcart && existingcart.coupondiscount == null) {
+//         const adduser = await Coupon.findByIdAndUpdate(
+//           { _id: couponId },
+//           { $push: { useduser: userId } }
+//         );
 
-        const addcart = await Cart.findOneAndUpdate(
-          { user: userId },
-          { $set: { coupondiscount: coupondata._id } }
-        );
+//         const addcart = await Cart.findOneAndUpdate(
+//           { user: userId },
+//           { $set: { coupondiscount: coupondata._id } }
+//         );
 
-        res.json({ coupon: true ,coupondata });
-      } else {
-        res.json({ coupon: "Already Applied" });
-      }
-    } else {
-      res.json({ coupon: "AlreadyUsed" });
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+//         res.json({ coupon: true ,coupondata });
+//       } else {
+//         res.json({ coupon: "Already Applied" });
+//       }
+//     } else {
+//       res.json({ coupon: "AlreadyUsed" });
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// };
 
 const loadEditProfile = async (req, res) => {
     try {
@@ -1178,5 +1347,8 @@ module.exports = {
     wishlist,
     applyCoupon,
     coupons,
-    
+    addToWishlist,
+    wishlistaddToCart,
+    verifyPayment,
+    paymentFailed,
 };

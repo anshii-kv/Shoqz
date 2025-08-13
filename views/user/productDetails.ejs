@@ -660,11 +660,15 @@
                             <i class="fas fa-shopping-cart"></i>
                             Add to Cart
                         </button>
-
-                        <button type="button" class="wishlist-button" id="wishlistBtn" data-product-id="<%= product._id %>">
-                            <i class="<%= user && user.wishlist && user.wishlist.includes(product._id) ? 'fas' : 'far' %> fa-heart"></i>
-                            <span><%= user && user.wishlist && user.wishlist.includes(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist' %></span>
+ <%=console.log(product.sizes,"productid in ")%>
+                <button type="button" class="add-to-cart" onclick="goToWishlist( '<%= product._id %>')" id="addTowishlistBtn" disabled>
+                            <i class="fas fa-shopping-cart"></i>
+                            Add to wishlist
                         </button>
+                       
+
+
+
                     </div>
                 </form>
 
@@ -868,45 +872,16 @@
                     });
                 }
             });
+            
 
-            // Wishlist Logic
-            const wishlistBtn = document.getElementById('wishlistBtn');
-            wishlistBtn.addEventListener('click', async function() {
-                const productId = this.dataset.productId;
-                const isInWishlist = this.querySelector('i').classList.contains('fas');
-
-                const endpoint = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-                const response = await fetch('/wishlist', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire('Success', data.message, 'success');
-                    const heartIcon = this.querySelector('i');
-                    const span = this.querySelector('span');
-                    if (isInWishlist) {
-                        heartIcon.classList.remove('fas', 'text-danger');
-                        heartIcon.classList.add('far');
-                        span.textContent = 'Add to Wishlist';
-                    } else {
-                        heartIcon.classList.remove('far');
-                        heartIcon.classList.add('fas', 'text-danger');
-                        span.textContent = 'Remove from Wishlist';
-                    }
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            });
-        });
+            
     </script>
 <script>
 function onSizeChange(sel) {
   const container = sel.closest('.product-info');
   const quantityInput = container.querySelector('input[name="quantity"]');
-  const addBtn = container.querySelector('button[type="button"], button[id="addToCartBtn"]');
+ const addBtn = container.querySelector('#addToCartBtn');          
+  const wishBtn = container.querySelector('#addTowishlistBtn');  
 
   const stock = parseInt(sel.selectedOptions[0].getAttribute('data-stock'), 10);
   if (stock > 0 && sel.value) {
@@ -914,10 +889,12 @@ function onSizeChange(sel) {
     quantityInput.max = Math.min(stock, 20);
     quantityInput.value = 1;
     addBtn.disabled = false;
+    wishBtn.disabled=false;
   } else {
     quantityInput.disabled = true;
     quantityInput.value = 0;
     addBtn.disabled = true;
+    wishBtn.disabled=true
   }
 }
 </script>
@@ -996,44 +973,47 @@ function addedCart(btn, productId) {
 
 
 
-</script>
-<script>
+
+async function goToWishlist(productId) {
+  // Find the container of the button or product-info element
+  const productInfo = document.querySelector('.product-info');
+console.log(productId,"id of the product");
+
+  // Find the selected size from the dropdown
+  const sizeSelect = productInfo.querySelector('.size-select');
+  const selectedSize = sizeSelect.value;
+
+  if (!selectedSize) {
+    alert('Please select a size before adding to wishlist');
+    return;
+  }
+
+  // Now you can send productId and selectedSize to server
+const response = await fetch('/wishlist/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, size: selectedSize }),
+    credentials: 'include' // ensures session cookies go with request
+});
+
+const data = await response.json()
+console.log(data.message,'resposeeeee')
+
+if(data.message=="Product already exists in the wishlist"){
+    console.log("dfdsdf")
+    swal("Error","product can't be add ,already exists in wishlist","error")
+}else{
+    swal("success","added to wishlist").then(()=>{
+    window.location.href="/wishlist"
+    })
+}
+}
 
 
-            // Wishlist Logic
-            const wishlistBtn = document.getElementById('wishlistBtn');
-            wishlistBtn.addEventListener('click', async function() {
-                const productId = this.dataset.productId;
-                const isInWishlist = this.querySelector('i').classList.contains('fas');
 
-                const endpoint = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId })
-                });
-                const data = await response.json();
+   </script>     
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
-                if (data.success) {
-                    Swal.fire('Success', data.message, 'success');
-                    const heartIcoyn = this.querySelector('i');
-                    const span = this.querySelector('span');
-                    if (isInWishlist) {
-                        heartIcon.classList.remove('fas', 'text-danger');
-            
-                        heartIcon.classList.add('far');
-                        span.textContent = 'Add to Wishlist';
-                    } else {
-                        heartIcon.classList.remove('far');
-                        heartIcon.classList.add('fas', 'text-danger');
-                        span.textContent = 'Remove from Wishlist';
-                    }
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            });
-      
-    </script>
 </body>
 </html>
-<%- include("../../views/partials/user/footer") %>
+// <%- include("../../views/partials/user/footer") %>

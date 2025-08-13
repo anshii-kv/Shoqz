@@ -5,10 +5,10 @@ const Category = require("../../model/categorySchema");
 const Cart = require("../../model/cartSchema");
 const Razorpay = require('razorpay')
 
-const razorpay = new Razorpay({
-    key_id:"rzp_test_lNqP0ShQDBIbqJ",
-    key_secret:process.env.RAZORPAY_SECURITY_KEY
-})
+// const razorpay = new Razorpay({
+//     key_id:process.env.KEY_ID,
+//     key_secret:process.env.RAZORPAY_SECURITY_KEY
+// })
 
 async function generateDisplayOrderId() {
     const year = new Date().getFullYear();
@@ -287,4 +287,79 @@ const downloadInvoice = async (req, res) => {
     }
 };
 
-module.exports = { orderlist, placeOrder, cancelOrder, orderdetails, returnOrder, downloadInvoice };
+
+const verifyPayment = async (req, res) => {
+    try {
+        console.log(req.body,'Body')
+        const {
+            address,
+            paymentMethod,
+            products,
+            subtotal,
+            paymentResponse
+        } = req.body;
+
+        const fullProducts = [];
+        const userId = req.session.userId;
+        for (const p of products) {
+            const prodDoc = await Product.findById(p.productId)
+                .populate("category")
+                .lean();
+
+            if (!prodDoc) {
+                throw new Error(`Product not found: ${p.productId}`);
+            }
+
+            fullProducts.push({
+                productId: prodDoc._id,
+                name: prodDoc.productName,
+                quantity: p.quantity,
+                price: p.price,
+                category: prodDoc.category._id,
+                description: prodDoc.description,
+                regularPrice: prodDoc.regularPrice,
+                salePrice: prodDoc.salePrice,
+                productOffer: prodDoc.productOffer || 0,
+                categoryoffer: prodDoc.categoryoffer || 0,
+                finalamount: p.price * p.quantity,
+                productImage: prodDoc.productImage,
+            });
+        } 
+
+        const order = new Order({
+            deliveryDetails: {
+                fname: address.fname,
+                sname: address.sname,
+                mobile: address.mobile,
+                email: address.email,
+                address: address.address,
+                city: address.city,
+                pin: address.pin,
+            },
+            displayOrderId: paymentResponse.razorpay_order_id,
+            user: userId, 
+            paymentMethod,
+            product: fullProducts,
+            subtotal,
+            Date: new Date(),
+            status: "Pending"
+        });
+        console.log(order,"Order")
+       await order.save();
+
+return res.status(200).json({
+    success: true,
+    message: "Order placed successfully",
+    orderId: order._id
+});
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: true, message: error.message });
+    }
+};
+
+
+
+module.exports = { orderlist, placeOrder, cancelOrder, orderdetails, returnOrder, downloadInvoice,verifyPayment};
