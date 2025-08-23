@@ -2,9 +2,9 @@ const Admin = require ("../../model/userSchema");
 const mongoose = require ("mongoose");
 const bcrypt = require ('bcrypt');
 const User = require("../../model/userSchema")
-const Offer =require("../../model/offer")
+// const Offer =require("../../model/offer")
 
-const Order =require("../../model/orderSchema")
+// const Order =require("../../model/orderSchema")
 
 
 const loadLogin =async(req,res)=>{

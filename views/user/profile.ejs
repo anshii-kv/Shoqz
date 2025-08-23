@@ -31,14 +31,14 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h4 class="card-title mb-4">User Profile</h4>
-             <form onsubmit="submitEditProfile(event, '<%= user._id %>')">
-
+                
+             <form onsubmit="submitEditProfile(event,'<%=user?._id %>')">
 
                     <div class="mb-3">
                         <label for="firstName" class="form-label">
                             <i class="fas fa-user me-1"></i> Full Name
                         </label>
-                        <input type="text" class="form-control" id="firstName" name="names" value="<%=user.name %>" required />
+                        <input type="text" class="form-control" id="firstName" name="names" value="<%=user?.name %>" required />
                         <div id="firstNameMessage" class="text-danger"></div>
                     </div>
 
@@ -46,14 +46,14 @@
                         <label for="email" class="form-label">
                             <i class="fas fa-envelope me-1"></i> Email
                         </label>
-                        <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly />
+                        <input type="email" class="form-control" id="email" name="email" value="<%= user?.email %>" readonly />
                     </div>
 
                     <div class="mb-3">
                         <label for="mobile" class="form-label">
                             <i class="fas fa-mobile-alt me-1"></i> Mobile
                         </label>
-                        <input type="text" class="form-control" id="mobile" name="phone" value="<%= user.phone %>" required />
+                        <input type="text" class="form-control" id="mobile" name="phone" value="<%= user?.phone %>" required />
                         <div id="mobileMessage" class="text-danger"></div>
                     </div>
 
@@ -73,12 +73,12 @@
                            <form onsubmit="updateProfile(event)">
   <div class="mb-3">
     <label class="form-label"><i class="fas fa-user me-1"></i> Full Name</label>
-    <input type="text" class="form-control" id="firstName" name="name" value="<%= user.name %>" required>
+    <input type="text" class="form-control" id="firstName" name="name" value="<%= user?.name %>" required>
   </div>
 
   <div class="mb-3">
     <label class="form-label"><i class="fas fa-mobile-alt me-1"></i> Mobile</label>
-    <input type="text" class="form-control" id="mobile" name="phone" value="<%= user.phone %>" required>
+    <input type="text" class="form-control" id="mobile" name="phone" value="<%= user?.phone %>" required>
   </div>
 
   <button type="submit" class="btn btn-primary">
@@ -184,8 +184,8 @@
                             <thead>
                                 <tr>
                                     <th colspan="3" class="balance-row">
-                                        Total Balance: ₹<span id="walletBalance"><%= user.wallet %></span>
- /-
+                                        Total Balance: ₹<span id="walletBalance"><%= user?.wallet %></span>
+ 
                                     </th>
                                 </tr>
                                 <tr>
@@ -195,8 +195,8 @@
                                 </tr>
                             </thead>
                             <tbody id="walletHistoryBody">
-  <% if(user.walletHistory && user.walletHistory.length > 0) { %>
-    <% user.walletHistory.forEach(txn => { %>
+  <% if(user?.walletHistory && user?.walletHistory.length > 0) { %>
+    <% user?.walletHistory.forEach(txn => { %>
       <tr>
         <td><%= txn.date.toISOString().split('T')[0] %></td>
         <td style="color: <%= txn.amount >= 0 ? '#28a745' : '#dc3545' %>; font-weight: bold;">
@@ -227,7 +227,8 @@
                             <div class="wallet-balance-label">Available Balance</div>
                             <h3 class="wallet-balance">
                                 <i class="fas fa-rupee-sign"></i>
-                               <span id="walletBalance"><%= user.wallet %></span>
+                                <%=console.log(user)%>
+                              <span><%= user?.walletId ? user?.walletId.balance : 0 %></span>
 
                             </h3>
                             
@@ -364,7 +365,7 @@
                             <thead>
                                 <tr>
                                     <th colspan="3" class="balance-row">
-                                        Total Balance: ₹<span id="walletBalance"><%= user.wallet %></span>
+                                        Total Balance: ₹<span id="walletBalance"><%= user?.wallet %></span>
  /-
                                     </th>
                                 </tr>
@@ -375,8 +376,8 @@
                                 </tr>
                             </thead>
                            <tbody id="walletHistoryBody">
-  <% if(user.walletHistory && user.walletHistory.length > 0) { %>
-    <% user.walletHistory.forEach(txn => { %>
+  <% if(user?.walletHistory && user?.walletHistory.length > 0) { %>
+    <% user?.walletHistory.forEach(txn => { %>
       <tr>
         <td><%= txn.date.toISOString().split('T')[0] %></td>
         <td style="color: <%= txn.amount >= 0 ? '#28a745' : '#dc3545' %>; font-weight: bold;">

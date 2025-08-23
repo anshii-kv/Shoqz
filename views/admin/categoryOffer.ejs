@@ -1,0 +1,1106 @@
+<%- include("../partials/admin/sidebar") %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoqz Admin - Category Offers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background: linear-gradient(135deg, #fff 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .page-header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #182f95 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #5cd8c4 0%, #43a047 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(92, 216, 196, 0.3);
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 216, 196, 0.4);
+        }
+        
+        .action-button i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .offers-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .filters-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-input, .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-input:focus, .filter-select:focus {
+            border-color: #5cd8c4;
+            box-shadow: 0 0 0 3px rgba(92, 216, 196, 0.1);
+        }
+        
+        .filter-select {
+            min-width: 150px;
+            cursor: pointer;
+        }
+        
+        .offers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .offers-table th {
+            text-align: left;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .offers-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        
+        .offers-table tbody tr:hover {
+            background-color: #f8fafc;
+            transition: background-color 0.2s ease;
+        }
+        
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        
+        .category-description {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        
+        .products-count {
+            color: #10b981;
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 1px;
+        }
+        
+        .offer-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .expires-info {
+            color: #64748b;
+            font-size: 13px;
+        }
+        
+        .expires-soon {
+            color: #f59e0b;
+            font-weight: 500;
+        }
+        
+        .expires-today {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-expired {
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+        
+        .action-icons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .edit-icon {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .edit-icon:hover {
+            background-color: #fed7aa;
+            transform: translateY(-2px);
+        }
+        
+        .delete-icon {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .delete-icon:hover {
+            background-color: #fecaca;
+            transform: translateY(-2px);
+        }
+        
+        .extend-icon {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .extend-icon:hover {
+            background-color: #bfdbfe;
+            transform: translateY(-2px);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 8% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 25px 30px 20px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #94a3b8;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            color: #475569;
+            background-color: #f1f5f9;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            border-color: #5cd8c4;
+            box-shadow: 0 0 0 3px rgba(92, 216, 196, 0.1);
+        }
+        
+        .form-select {
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            padding: 20px 30px 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #5cd8c4 0%, #43a047 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(92, 216, 196, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 216, 196, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: #f8fafc;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .no-offers {
+            text-align: center;
+            padding: 60px 0;
+            color: #64748b;
+        }
+        
+        .no-offers-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .no-offers-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .no-offers-subtext {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 5px;
+        }
+        
+        .page-item {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #475569;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .page-item:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .page-item.active {
+            background: linear-gradient(135deg, #5cd8c4 0%, #43a047 100%);
+            color: white;
+            border-color: #5cd8c4;
+        }
+        
+        .page-nav {
+            background-color: #f8fafc;
+        }
+        
+        .page-ellipsis {
+            padding: 10px 14px;
+            color: #94a3b8;
+        }
+        
+        @media (max-width: 768px) {
+            .filters-section {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .offers-table {
+                font-size: 12px;
+            }
+            
+            .offers-table th,
+            .offers-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <div class="page-title">Category Offers</div>
+                <div class="page-subtitle">Manage special offers and discounts for product categories</div>
+            </div>
+            <button class="action-button" onclick="openOfferModal()">
+                <i>🏷️</i> Create Category Offer
+            </button>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.totalOffers || 0 : 0 %></div>
+                <div class="stat-label">Total Category Offers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.activeOffers || 0 : 0 %></div>
+                <div class="stat-label">Active Offers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.expiringOffers || 0 : 0 %></div>
+                <div class="stat-label">Expiring Soon</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.averageDiscount || 0 : 0 %>%</div>
+                <div class="stat-label">Avg. Discount</div>
+            </div>
+        </div>
+        
+        <div class="offers-container">
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <form action="/admin/category-offers" method="GET" style="display: flex; gap: 15px; flex: 1;">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        name="search" 
+                        placeholder="Search by category name..." 
+                        value="<%= typeof search !== 'undefined' ? search : '' %>"
+                    >
+                    <select class="filter-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="active" <%= typeof status !== 'undefined' && status === 'active' ? 'selected' : '' %>>Active</option>
+                        <option value="expired" <%= typeof status !== 'undefined' && status === 'expired' ? 'selected' : '' %>>Expired</option>
+                    </select>
+                    <select class="filter-select" name="sortBy">
+                        <option value="createdAt" <%= typeof sortBy !== 'undefined' && sortBy === 'createdAt' ? 'selected' : '' %>>Latest</option>
+                        <option value="expires" <%= typeof sortBy !== 'undefined' && sortBy === 'expires' ? 'selected' : '' %>>Expiry Date</option>
+                        <option value="offer" <%= typeof sortBy !== 'undefined' && sortBy === 'offer' ? 'selected' : '' %>>Offer %</option>
+                    </select>
+                    <button type="submit" class="action-button">
+                        <i>🔍</i> Search
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Category Offers Table -->
+            <table class="offers-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Offer</th>
+                        <th>Created Date</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof offers !== 'undefined' && offers.length > 0) { %>
+                        <% offers.forEach(offer => { %>
+                        <tr>
+                            <td>
+                                <div class="category-info">
+                                    <div class="category-icon">
+                                        <%= offer.category?.name ? offer.category.name.charAt(0).toUpperCase() : 'C' %>
+                                    </div>
+                                    <div>
+                                        <div class="category-name"><%= offer.category?.name || 'Category Name' %></div>
+                                        <div class="category-description"><%= offer.category?.description ? (offer.category.description.length > 30 ? offer.category.description.substring(0, 30) + '...' : offer.category.description) : 'No description' %></div>
+                                        <div class="products-count"><%= offer.category?.productCount || 0 %> products in this category</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="offer-badge"><%= offer.offer %>% OFF</span>
+                            </td>
+                            <td>
+                                <span class="expires-info">
+                                    <%= new Date(offer.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    }) %>
+                                </span>
+                            </td>
+                            <td>
+                                <%
+                                    const now = new Date();
+                                    const expiryDate = new Date(offer.expires);
+                                    const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                                    let expiryClass = 'expires-info';
+                                    let expiryText = '';
+                                    
+                                    if (daysUntilExpiry < 0) {
+                                        expiryClass = 'expires-today';
+                                        expiryText = 'Expired';
+                                    } else if (daysUntilExpiry === 0) {
+                                        expiryClass = 'expires-today';
+                                        expiryText = 'Expires Today';
+                                    } else if (daysUntilExpiry <= 3) {
+                                        expiryClass = 'expires-soon';
+                                        expiryText = `${daysUntilExpiry} day${daysUntilExpiry > 1 ? 's' : ''} left`;
+                                    } else {
+                                        expiryText = expiryDate.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        });
+                                    }
+                                %>
+                                <span class="<%= expiryClass %>">
+                                    <%= expiryText %>
+                                </span>
+                            </td>
+                            <td>
+                                <%
+                                    const isExpired = new Date(offer.expires) < new Date();
+                                %>
+                                <span class="status-badge <%= isExpired ? 'status-expired' : 'status-active' %>">
+                                    <%= isExpired ? 'Expired' : 'Active' %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-icons">
+                                    <button class="action-icon edit-icon" onclick="editOffer('<%= offer._id %>', '<%= offer.category._id %>', <%= offer.offer %>, '<%= offer.expires %>')" title="Edit Offer">
+                                        ✏️
+                                    </button>
+                                    <% if (!isExpired) { %>
+                                    <button class="action-icon extend-icon" onclick="extendOffer('<%= offer._id %>')" title="Extend Expiry">
+                                        🕒
+                                    </button>
+                                    <% } %>
+                                    <button class="action-icon delete-icon" onclick="deleteOffer('<%= offer._id %>')" title="Delete Offer">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6">
+                                <div class="no-offers">
+                                    <div class="no-offers-icon">🏷️</div>
+                                    <div class="no-offers-text">No category offers found</div>
+                                    <div class="no-offers-subtext">Create your first category offer to boost category sales!</div>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+            <div class="pagination">
+                <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+                    <a href="/admin/category-offers?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>&sortBy=<%= typeof sortBy !== 'undefined' ? sortBy : '' %>" class="page-item page-nav">&laquo; Prev</a>
+                <% } %>
+                
+                <% 
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                if (endPage - startPage < 4 && startPage > 1) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+                
+                if (startPage > 1) { %>
+                    <a href="/admin/category-offers?page=1&search=<%= typeof search !== 'undefined' ? search : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>&sortBy=<%= typeof sortBy !== 'undefined' ? sortBy : '' %>" class="page-item">1</a>
+                    <% if (startPage > 2) { %>
+                        <span class="page-ellipsis">...</span>
+                    <% } %>
+                <% } %>
+                
+                <% for(let i = startPage; i <= endPage; i++) { %>
+                    <a href="/admin/category-offers?page=<%= i %>&search=<%= typeof search !== 'undefined' ? search : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>&sortBy=<%= typeof sortBy !== 'undefined' ? sortBy : '' %>" class="page-item <%= typeof currentPage !== 'undefined' && currentPage == i ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                
+                <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                        <span class="page-ellipsis">...</span>
+                    <% } %>
+                    <a href="/admin/category-offers?page=<%= totalPages %>&search=<%= typeof search !== 'undefined' ? search : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>&sortBy=<%= typeof sortBy !== 'undefined' ? sortBy : '' %>" class="page-item"><%= totalPages %></a>
+                <% } %>
+                
+                <% if (typeof currentPage !== 'undefined' && currentPage < totalPages) { %>
+                    <a href="/admin/category-offers?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>&status=<%= typeof status !== 'undefined' ? status : '' %>&sortBy=<%= typeof sortBy !== 'undefined' ? sortBy : '' %>" class="page-item page-nav">Next &raquo;</a>
+                <% } %>
+            </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Category Offer Modal -->
+    <div id="offerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="offerModalTitle" class="modal-title">Create Category Offer</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="offerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="categorySelect">Select Category *</label>
+                        <select id="categorySelect" class="form-select" required>
+                            <option value="">Choose a category...</option>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category._id %>"><%= category.name %> (<%= category.productCount || 0 %> products)</option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="offerPercentage">Discount Percentage (%) *</label>
+                        <input type="number" id="offerPercentage" class="form-input" min="1" max="90" placeholder="e.g., 25" required>
+                        <small style="color: #64748b; font-size: 12px; margin-top: 5px; display: block;">This discount will apply to all products in the selected category</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="expiryDays">Valid For (Days) *</label>
+                        <select id="expiryDays" class="form-select" required>
+                            <option value="1">1 Day</option>
+                            <option value="3" selected>3 Days</option>
+                            <option value="7">1 Week</option>
+                            <option value="14">2 Weeks</option>
+                            <option value="30">1 Month</option>
+                            <option value="custom">Custom Date</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customDateGroup" style="display: none;">
+                        <label class="form-label" for="customExpiryDate">Custom Expiry Date *</label>
+                        <input type="date" id="customExpiryDate" class="form-input">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeOfferModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveOffer()">Save Offer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOfferId = null;
+        let isEditMode = false;
+
+        // Modal Functions
+        function openOfferModal() {
+            const modal = document.getElementById('offerModal');
+            const title = document.getElementById('offerModalTitle');
+            
+            title.textContent = 'Create Category Offer';
+            isEditMode = false;
+            currentOfferId = null;
+            document.getElementById('offerForm').reset();
+            document.getElementById('categorySelect').disabled = false;
+            
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeOfferModal() {
+            const modal = document.getElementById('offerModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('offerForm').reset();
+                document.getElementById('customDateGroup').style.display = 'none';
+                currentOfferId = null;
+                isEditMode = false;
+            }, 300);
+        }
+
+        function editOffer(offerId, categoryId, offerPercentage, expiryDate) {
+            const modal = document.getElementById('offerModal');
+            const title = document.getElementById('offerModalTitle');
+            
+            title.textContent = 'Edit Category Offer';
+            isEditMode = true;
+            currentOfferId = offerId;
+            
+            // Set form values
+            document.getElementById('categorySelect').value = categoryId;
+            document.getElementById('categorySelect').disabled = true;
+            document.getElementById('offerPercentage').value = offerPercentage;
+            
+            // Calculate days until expiry
+            const expiry = new Date(expiryDate);
+            const now = new Date();
+            const diffTime = expiry.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if ([1, 3, 7, 14, 30].includes(diffDays)) {
+                document.getElementById('expiryDays').value = diffDays;
+            } else {
+                document.getElementById('expiryDays').value = 'custom';
+                document.getElementById('customDateGroup').style.display = 'block';
+                document.getElementById('customExpiryDate').value = expiry.toISOString().split('T')[0];
+            }
+            
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        // Save Category Offer Function
+        async function saveOffer() {
+            const categoryId = document.getElementById('categorySelect').value;
+            const offerPercentage = document.getElementById('offerPercentage').value;
+            const expiryDays = document.getElementById('expiryDays').value;
+            const customExpiryDate = document.getElementById('customExpiryDate').value;
+
+            // Validation
+            if (!categoryId) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please select a category',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            if (!offerPercentage || offerPercentage < 1 || offerPercentage > 90) {
+                Swal.fire({
+                    title: 'Invalid Percentage',
+                    text: 'Offer percentage must be between 1% and 90%',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            let expiryDate;
+            if (expiryDays === 'custom') {
+                if (!customExpiryDate) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Please select a custom expiry date',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                expiryDate = new Date(customExpiryDate);
+                if (expiryDate <= new Date()) {
+                    Swal.fire({
+                        title: 'Invalid Date',
+                        text: 'Expiry date must be in the future',
+                        icon: 'error'
+                    });
+                    return;
+                }
+            } else {
+                expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + parseInt(expiryDays));
+            }
+
+            try {
+                const url = isEditMode ? `/admin/category-offers/update/${currentOfferId}` : '/admin/category-offers/create';
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        category: categoryId,
+                        offer: parseInt(offerPercentage),
+                        expires: expiryDate.toISOString()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to save category offer',
+                        icon: 'error'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong while saving the category offer',
+                    icon: 'error'
+                });
+            }
+        }
+
+        // Delete Category Offer Function
+        async function deleteOffer(offerId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "This category offer will be permanently deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/category-offers/delete/${offerId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message,
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to delete category offer',
+                            icon: 'error'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Something went wrong while deleting the category offer',
+                        icon: 'error'
+                    });
+                }
+            }
+        }
+
+        // Extend Category Offer Function
+        async function extendOffer(offerId) {
+            const { value: days } = await Swal.fire({
+                title: 'Extend Category Offer',
+                text: 'How many days would you like to extend this category offer?',
+                input: 'select',
+                inputOptions: {
+                    '1': '1 Day',
+                    '3': '3 Days',
+                    '7': '1 Week',
+                    '14': '2 Weeks',
+                    '30': '1 Month'
+                },
+                inputValue: '7',
+                showCancelButton: true,
+                confirmButtonText: 'Extend',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (days) {
+                try {
+                    const response = await fetch(`/admin/category-offers/extend/${offerId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            days: parseInt(days)
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Extended!',
+                            text: data.message,
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to extend category offer',
+                            icon: 'error'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Something went wrong while extending the category offer',
+                        icon: 'error'
+                    });
+                }
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close modal events
+            const modal = document.getElementById('offerModal');
+            const closeBtn = document.querySelector('.close-modal');
+
+            if (closeBtn) {
+                closeBtn.onclick = closeOfferModal;
+            }
+
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeOfferModal();
+                }
+            }
+
+            // Expiry days change handler
+            const expiryDaysSelect = document.getElementById('expiryDays');
+            const customDateGroup = document.getElementById('customDateGroup');
+
+            expiryDaysSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDateGroup.style.display = 'block';
+                    document.getElementById('customExpiryDate').required = true;
+                } else {
+                    customDateGroup.style.display = 'none';
+                    document.getElementById('customExpiryDate').required = false;
+                }
+            });
+
+            // Set minimum date for custom expiry
+            const customExpiryDate = document.getElementById('customExpiryDate');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            customExpiryDate.min = tomorrow.toISOString().split('T')[0];
+        });
+
+        // Auto-submit search form on input
+        let searchTimeout;
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.form.submit();
+                }, 500);
+            });
+        }
+
+        // Auto-submit form on filter change
+        const filterSelects = document.querySelectorAll('select[name="status"], select[name="sortBy"]');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+    </script>
+</body>
+</html>

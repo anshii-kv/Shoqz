@@ -456,11 +456,11 @@
                         <td class="text-start"><%= category.description %></td>
                         <td>
                             <%=console.log(category.name)%>
-                            <%=console.log(category.offer)%>
+                           
                             <%if(category.offer.discount_percentage ){%>
                             <span class="badge alert-success"><%= category.offer.discount_percentage %>%</span>
                             <%}else{%>
-                            <span class="badge" style="background: #e2e8f0; color: #4a5568;">88%</span>
+                            <span class="badge" style="background: #e2e8f0; color: #4a5568;"><%=category.categoryoffer%></span>
                             <%}%>
                         </td>
                         <td class="text-start">
@@ -647,10 +647,10 @@
             })
         });
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Failed to add offer');
-        }
+        // if (!response.ok) {
+        //     const err = await response.json();
+        //     throw new Error(err.error || 'Failed to add offer');
+        // }
 
         const data = await response.json();
         console.log("Data",data)

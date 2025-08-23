@@ -1,38 +1,38 @@
 
 
-const userAuth = (req,res,next)=>{
-    if(req.session.user){
-        User.findById(req.session.user)
-        .then(data=>{
-            if(data&&!data.isBlocked){
-                next()
-            }else{
-                res.redirect("/login")
-            }
-        }).catch(error=>{
-            console.log("Error in userAuth middleware");
-            res.status(500).send("Internal Server Error")
-        })
-    }else{
-        res.redirect("/login")
-    }
-}
+// const userAuth = (req,res,next)=>{
+//     if(req.session.user){
+//         User.findById(req.session.user)
+//         .then(data=>{
+//             if(data&&!data.isBlocked){
+//                 next()
+//             }else{
+//                 res.redirect("/login")
+//             }
+//         }).catch(error=>{
+//             console.log("Error in userAuth middleware");
+//             res.status(500).send("Internal Server Error")
+//         })
+//     }else{
+//         res.redirect("/login")
+//     }
+// }
 
 
-const adminAuth = (req, res, next) => {
-    User.findOne({ isAdmin: true })
-        .then(data => {
-            if (data) {
-                next(); // proceed if admin is found
-            } else {
-                res.redirect("/admin/login"); // redirect if not found
-            }
-        })
-        .catch(error => {
-            console.log("Error in adminAuth:", error);
-            res.redirect("/admin/adminLogin"); // optionally redirect on DB error
-        });
-};
+// const adminAuth = (req, res, next) => {
+//     User.findOne({ isAdmin: true })
+//         .then(data => {
+//             if (data) {
+//                 next(); // proceed if admin is found
+//             } else {
+//                 res.redirect("/admin/login"); // redirect if not found
+//             }
+//         })
+//         .catch(error => {
+//             console.log("Error in adminAuth:", error);
+//             res.redirect("/admin/adminLogin"); // optionally redirect on DB error
+//         });
+// };
 
 
 
@@ -44,8 +44,8 @@ const adminAuth = (req, res, next) => {
    
 
 
-module.exports = {
-    userAuth,
-    adminAuth,
+// module.exports = {
+//     userAuth,
+//     adminAuth,
    
-};
+// };

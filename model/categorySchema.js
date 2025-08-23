@@ -15,20 +15,14 @@ const categorySchema = new Schema({
         type: Boolean,
         default: true,
     },
+    
     offer: {
-        discount_percentage: {
-            type: Number,
-            default: 0
-        },
-        valid_until: {
-            type: Date
-        },
-        description: {
-            type: String
-        },
+       type:mongoose.Schema.Types.ObjectId,
+       ref:'category'
         
     }
-}, { timestamps: true });
+},
+ { timestamps: true });
 
 const Category = mongoose.model("Category", categorySchema);
 

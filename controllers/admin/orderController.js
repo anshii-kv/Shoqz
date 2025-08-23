@@ -111,4 +111,15 @@ const loadviewOrder=async(req,res)=>{
     
   }
 }
-module.exports={loadOrder,changeStatus,approveOrder,loadviewOrder}
+const rejectOrder = async (req, res) => {
+  try {
+    const orderId = req.body.orderId;
+    await Order.updateOne({ _id: orderId }, { $set: { status: 'rejected' } });
+    res.redirect('/admin/orderDetails');
+  } catch (error) {
+    console.error("Error rejecting order:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+module.exports={loadOrder,changeStatus,approveOrder,loadviewOrder,rejectOrder}

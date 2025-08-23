@@ -1,8 +1,9 @@
-const { ObjectId } = require("mongodb");
-const mongoose = require("mongoose");
-const { paymentFailed } = require("../controllers/user/userController");
 
-const OrderSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const {Schema}= mongoose;
+// const { paymentFailed } = require("../controllers/user/userController");
+
+const OrderSchema = new Schema({
     deliveryDetails: {
         fname: {
             type: String,
@@ -37,9 +38,9 @@ const OrderSchema = new mongoose.Schema({
             default: true,
         },
     },
-    displayOrderId: { type: String, unique: true },
+    displayOrderId: { type: String, unique: true ,required:true},
     user: {
-        type: mongoose.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
     },
@@ -49,7 +50,7 @@ const OrderSchema = new mongoose.Schema({
     product: [
         {
             productId: {
-                type: mongoose.Types.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Product",
                 required: true,
             },
@@ -67,7 +68,7 @@ const OrderSchema = new mongoose.Schema({
             },
 
             category: {
-                type: mongoose.Types.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Category",
                 required: true,
             },
@@ -102,6 +103,10 @@ const OrderSchema = new mongoose.Schema({
                 type: [String],
                 required: true,
             },
+            approvalStatus:{
+                type:Number,
+                default:0
+            },
         },
     ],
     subtotal: {
@@ -116,9 +121,11 @@ const OrderSchema = new mongoose.Schema({
     status: {
         type: String,
     },
-    // paymentId: {
-    //   type: String,
-    // },
+    paymentId: {
+      type: String,
+    },
 });
 
-module.exports = mongoose.model("order", OrderSchema);
+// module.exports = mongoose.model("order", OrderSchema);
+const order = mongoose.model("Order",OrderSchema);
+module.exports=order

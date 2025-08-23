@@ -446,8 +446,24 @@
 
                         
                          <% if(order.status==="delivered"){%>
-                            <span class="status-badge status-cancelled">Delivered</span>  
-                        <% }else if(order.status==="cancelled"){%>
+                            
+   <form method="POST" action="/admin/approveOrder" style="display:inline; margin-right: 5px;">
+        <input type="hidden" name="orderId" value="<%= order._id %>">
+        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve this order?')">
+            Approve
+   </button>
+        
+    </form>
+    
+    <form method="POST" action="/admin/rejectOrder" style="display:inline; margin-left: 5px;">
+        <input type="hidden" name="orderId" value="<%= order._id %>">
+        <button type="submit" class="btn btn-danger btn-sm" onclick="rejectfn('<%= order._id %>')">
+            Reject
+        </button>
+        <!-- <span class="status-badge status-cancelled">Delivered</span>  -->
+    </form>
+                            
+                        <% }else if(order.status==="delivered"){%>
                             <span class="status-badge status-cancelled">Cancelled</span>  
     <% }else if (order.status === 'return') { %>
         Return

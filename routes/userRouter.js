@@ -46,7 +46,7 @@ router.post("/verify-otp",usercontroller.verifyOtp)
 
 router.post("/resend-otp",usercontroller.resendOtp)
 
-router.get('/verifyOtp',auth.isBlock,auth.toLogin,usercontroller.loadVerifyOtp)
+router.get('/verifyOtp',usercontroller.loadVerifyOtp)
 
 router.post('/verifiedOtp',usercontroller.verifiedOtp)
 
@@ -103,7 +103,7 @@ router.post('/remove-item', usercontroller.removeFromCart);
 
 router.get('/checkout',auth.isBlock,auth.toLogin,usercontroller.loadCheckout);
 
-router.post('/coupon',usercontroller.coupon)
+// router.post('/coupon',usercontroller.coupon)
 
 router.get('/wishlist',auth.isBlock,auth.toLogin,usercontroller.wishlist)
 
@@ -132,7 +132,7 @@ router.patch('/editAddress',addressController.editAddress)
 
 router.delete('/deleteAddress',addressController.deleteAddress)
 
-router.get('/thankyou',usercontroller.loadThankyou)
+router.get('/thankyou/:orderId',usercontroller.loadThankyou)
 
 router.get('/order',auth.isBlock,auth.toLogin,orderController.orderlist)
 
@@ -141,21 +141,30 @@ router.post('/cancel-order',orderController.cancelOrder)
 router.get('/order-details/:id/:productId',auth.isBlock,auth.toLogin,orderController.orderdetails)
 
 router.post('/submitOrder',orderController.placeOrder)
+router.post('/placeOrder',orderController.verifyPayment)
 // router.post('/apply-coupon',usercontroller.applycoupon)
 
 router.patch('/returnOrder',orderController.returnOrder)
 
 router.post('/paymentFailed',usercontroller.paymentFailed)
 
-router.get('/download-invoice/:orderId',auth.toLogin, orderController.downloadInvoice);
+router.get('/paymentFailGet/:orderId',usercontroller.paymentFailGet)
+
+router.post('/retryPayment',usercontroller.retryPayement)
+router.get('/download-invoice/:orderId',auth.toLogin,orderController.downloadInvoice);
 
 
 router.post('/createOrder',razorpay.createOrder)
-router.post('/placeOrder',orderController.verifyPayment)
+
+
 router.get('/transactionHistory',auth.toLogin,usercontroller.transactionHistory);
 
 router.get('/user/coupons/available',usercontroller.applyCoupon);
 
 router.post('/applyCoupon',usercontroller.coupons)
+
+router.get('/referalCode',usercontroller.referalCode)
+
+router.post('/apply-referral',usercontroller.applyReferalCode)
 
 module.exports=router;

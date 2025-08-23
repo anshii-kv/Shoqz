@@ -13,10 +13,10 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
-    brand: {
-      type: String,
-      required: false,
-    },
+    // brand: {
+    //   type: String,
+    //   required: false,
+    // },
     category: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -30,14 +30,17 @@ const productSchema = new Schema(
       type: Number,
       required: true,
     },
-    productOffer: {
-      type: Number,
-      default: 0,
-    },
-       
-    categoryoffer: { type: Number,
-       default: 0 
-      },
+   productOffer: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "productOffer",  
+  default: null
+},
+categoryOffer:{
+  type:mongoose.Schema.Types.ObjectId,
+  ref:"categoryOffer",
+  default:null
+},
+
 
     finalamount:{
       type:Number,

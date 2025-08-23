@@ -24,6 +24,8 @@ const loadaddCoupon = async (req, res) => {
 
 const addCoupon = async (req, res) => {
     try {
+        console.log(req.body,"coupon1");
+        
         const {
             code,
             discountType,

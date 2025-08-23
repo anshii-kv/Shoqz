@@ -25,10 +25,11 @@ const loadProducts = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit);
 
         const products = await Product.find(query)
-            .populate("category")
+            .populate("category").populate('productOffer')
+            
             .skip(skip)
             .limit(limit)
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
 
         res.render("admin/products", {
             products,
@@ -373,13 +374,13 @@ const updateProduct = async (req, res) => {
         product.description = description.trim();
         product.regularPrice = regPrice;
         product.salePrice = salPrice;
-        product.productOffer = offer;
+        // product.productOffer = offer;
         product.category = category;
         product.status = status;
         product.sizes = sizeVariants;
         product.productImage = productImages;
         product.updatedAt = Date.now();
-
+       product.quantities=quantities
         await product.save();
         console.log(product,"products");
         

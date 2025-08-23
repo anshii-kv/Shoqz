@@ -11,9 +11,33 @@ const mongoose = require("mongoose");
 const Coupon = require("../../model/couponSchema");
 const Wishlist = require("../../model/wishlistSchema");
 const Category = require("../../model/categorySchema");
+const Wallet = require("../../model/walletSchema")
 const { verifyPayment } = require("./orderController");
+const Razorpay = require('razorpay')
+const crypto = require("crypto");
+const { type } = require("os");
+const { log } = require("console");
+function generateReferalCode(){
+    return crypto.randomBytes(4).toString("hex").toUpperCase();
+}
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000);
+}
+
+async function generateDisplayOrderId() {
+    const year = new Date().getFullYear();
+
+    const lastOrder = await Order.findOne({ displayOrderId: { $regex: `^DORD-${year}` } }).sort({ Date: -1 });
+
+    let orderNumber = 1;
+    if (lastOrder && lastOrder.displayOrderId) {
+        const lastNumber = parseInt(lastOrder.displayOrderId.split("-").pop());
+        if (!isNaN(lastNumber)) {
+            orderNumber = lastNumber + 1;
+        }
+    }
+
+    return `DORD-${year}-${String(orderNumber).padStart(5, "0")}`;
 }
 
 const loadHomepage = async (req, res) => {
@@ -54,14 +78,35 @@ const pageNotfound = async (req, res) => {
 
 const loadSignuppage = async (req, res) => {
     try {
+        console.log("anshi");
+        
+        console.log(req?.query,'qeuryrrrrrrrr')
+        console.log(req.session.userData);
+        
+        if(req.query?.referal){
+            if(!req.session.userData){
+                req.session.userData = {};
+            }
+
+            req.session.userData.referralCode = req.query?.referal;
+            console.log(req.session.userData.referralCode,"unclebun");
+            
+        }
         return res.render("signup");
     } catch (error) {
+        console.log(error,"err")
         res.status(500).send("Server error");
     }
 };
 
 const signup = async (req, res) => {
     try {
+
+        console.log(req?.body,"referalcode is here");
+        console.log(req?.query,'queryrrrrr')
+        console.log(req?.query.referal,"querykal");
+       
+        
         const { name, email, phone, password, cpassword } = req.body;
 
       
@@ -99,19 +144,38 @@ const signup = async (req, res) => {
             text: "Otp",
             html: `Your otp is ${otp}`,
         });
-
+        console.log('heyy')
         const hashedPassword = await bcrypt.hash(password, 10);
+        const newReferalCode = generateReferalCode();
+        // req.session.email = email;
+        // req.session.name = name;
+        // req.session.phone = phone;
+        // req.session.password = hashedPassword;
+      if (req.session) {
+            req.session.userData = {
+                 ...req.session.userData, 
+                email,
+                name,
+                phone,
+                password: hashedPassword,
+            };
+        }
+    //      if (referralFromQuery) {
+    //   const referrer = await User.findOne({ referralCode: referralFromQuery });
+    //   if (referrer) {
+    //     referrer.wallet += 50;
+    //     referrer.walletHistory.push({
+    //       date: new Date(),
+    //       amount: 50,
+    //       description: "Referral bonus",
+    //     });
+    //     await referrer.save();
+    //     console.log("Referral bonus added to:", referrer.email);
+    //   } else {
+    //     console.log("Invalid referral code");
+    //   }
+    // }
 
-        req.session.email = email;
-        req.session.name = name;
-        req.session.phone = phone;
-        req.session.password = hashedPassword;
-        req.session.userData = {
-            email,
-            name,
-            phone,
-            hashedPassword,
-        };
         return res.status(200).json({ message: "Successful" });
     } catch (error) {
         console.error("Error for save user", error);
@@ -129,22 +193,82 @@ const loadVerifyOtp = async (req, res) => {
 
 const verifiedOtp = async (req, res) => {
     try {
+        console.log(req.session, "referal verifiedotp");
+        
         const otp = Number(req?.body?.otp);
-        const email = req.session.email;
-        const name = req.session.name;
-        const password = req.session.password;
-        const phone = req.session.phone;
+        const email = req.session.userData.email;
+        const name = req.session.userData.name;
+        const password = req.session.userData.password;
+        const phone = req.session.userData.phone;
+        const referralCode = req.session.userData.referralCode;
         const existOtp = await Otp.findOne({ email });
-
         if (existOtp?.otp === otp) {
+            const newReferal = generateReferalCode();
             const savedata = new User({
-                name: name,
-                email: email,
-                phone: phone,
-                password: password,
+                name,
+                email,
+                phone,
+                password,
+                referralCode :newReferal,
             });
-
             await savedata.save();
+
+            
+            const newWallet = new Wallet({
+                userId: savedata._id,
+                balance: 0,
+                Transactionhistory: [],
+            });
+            
+            await newWallet.save();
+
+            savedata.walletId = newWallet._id;
+            await savedata.save();
+            console.log(referralCode,"Reffff")
+            if (referralCode) { 
+                console.log("sangeeth ramsed");
+                console.log(referralCode,"sangetth query");
+                
+                
+                const referrer = await User.findOne({ referralCode: referralCode });
+          console.log(referrer,"refferer");
+          
+                if (referrer && referrer.walletId) {
+                    const walletid = await Wallet.findById(referrer.walletId)
+                    console.log(walletid,"walletid is here");
+
+                    
+                    await Wallet.findByIdAndUpdate(referrer.walletId, {
+                        $inc: { balance: 50 },
+                        $push: {
+                            Transactionhistory: {
+                                amount: 50,
+                                transactiontype: "referral",
+                                type: "credit",
+                                description: "Referral bonus (you referred someone)",
+                            },
+                        },
+                    });
+
+                    // ✅ Update new user wallet
+                    await Wallet.findByIdAndUpdate(newWallet._id, {
+                        $inc: { balance: 50 },
+                        $push: {
+                            Transactionhistory: {
+                                amount: 50,
+                                transactiontype: "referral",
+                                type: "credit",
+                                description: "Referral bonus (you joined using a code)",
+                            },
+                        },
+                    });
+
+                    console.log("Referral bonus applied to both:", referrer.email, savedata.email);
+                } else {
+                    console.log("Invalid referral code");
+                }
+            }
+
             console.log("added user");
             return res.status(200).json({ message: "otp verified" });
         } else {
@@ -152,8 +276,10 @@ const verifiedOtp = async (req, res) => {
         }
     } catch (error) {
         console.log("error on verify otp", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 const loadloginpage = async (req, res) => {
     try {
@@ -165,12 +291,16 @@ const loadloginpage = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        console.log(req.body);
+        console.log(req.body,"anshi");
         const { email, password } = req.body;
         const userMatch = await User.findOne({ email, isAdmin: false });
+        console.log(userMatch,"kv");
+        
         if (!userMatch) {
             return res.status(200).json({ message: "User not found" });
         }
+        console.log(userMatch.password,password,"passsssssssssssssssssssssss");
+        
         const isPasswordVaild = await bcrypt.compare(password, userMatch.password);
         if (!isPasswordVaild) {
             return res.status(200).json({ message: "Password does not match" });
@@ -187,7 +317,7 @@ const login = async (req, res) => {
         console.log(req.session.email,'Poga')
         return res.status(200).json({ message: "Login Succesfully" });
     } catch (error) {
-        console.log("error");
+        console.log("error",error);
     }
 };
 
@@ -599,6 +729,13 @@ const addToCart = async (req, res) => {
                                     );
 
                                     const newQuantity = currentProduct.quantity + requestedQuantity;
+//   // ✅ Validate against stock
+//       if (newQuantity > sizeInfo.quantity) {
+//         return res.json({
+//           success: false,
+//           error: `Only ${sizeInfo.quantity} items available in stock for size ${size}`,
+//         });
+//       }
 
                                     if (newQuantity > 4) {
                                         responseData = {
@@ -872,8 +1009,13 @@ const loadCheckout = async (req, res) => {
 
     const userId = req.session.userId;
 
+    console.log(userId,"user");
     
     const cartData = await Cart.findOne({ userId }).populate('product.productId');
+
+    console.log(cartData,"cartdata");
+
+    
 
     if (!cartData || !cartData.product || cartData.product.length === 0) {
       return res.render('checkout', {
@@ -882,7 +1024,8 @@ const loadCheckout = async (req, res) => {
         coupondiscount: 0,
         subtotal: 0,
         userAddresses: [],
-        defaultAddress: null
+        defaultAddress: null,
+       
       });
     }
 
@@ -894,14 +1037,22 @@ const loadCheckout = async (req, res) => {
     const userAddresses = addressData ? addressData.address : [];
     const defaultAddress = userAddresses.find(addr => addr.isDefault) || null;
 
-   
+    // const coupons = await Coupon.find({
+    //   status: "active",
+    //   expireOn: { $gte: new Date() },
+    //   minimumPurchase: { $lte: subtotal } // only show eligible coupons
+    // });
+    const coupons = await Coupon.find()
+    console.log(coupons,"coupons");
+    
     res.render('checkout', {
       cartItems: cartData.product,
       shippingCharge: cartData.shippingCharge || 0,
       coupondiscount: cartData.coupondiscount || 0,
       subtotal,
       userAddresses,
-      defaultAddress
+      defaultAddress,
+      coupons
     });
 
   } catch (error) {
@@ -915,11 +1066,6 @@ const loadCheckout = async (req, res) => {
 
 
 
-const coupon = async (req, res) => {
-    try {
-        const { couponCode } = req.body;
-    } catch (error) {}
-};
 
 
 const wishlist = async (req, res) => {
@@ -1045,15 +1191,172 @@ const wishlistaddToCart = async(req,res)=>{
 }
 
 const paymentFailed= async(req,res)=>{
-    try {
+    try { 
         console.log(req.body,"payemnt datas here");
+        const user = req.session.userId;
+        console.log(user,"i am the user cutiepie");
         
+        const{paymentMethod,products,subtotal,address,deliveryCharge,discount,total,paymentResponse}=req.body
+        // const{fname,sname,mobile,email,,city,pin,isDefault,type,_id}=req.body.address
+    //    const productDetails = products.map(item => ({
+    //         productId: item.productId,
+    //         name: item.productName,
+    //         quantity: item.quantity,
+    //         size: item.size,
+    //         price: item.price
+    //     }));
+     const displayOrderId = await generateDisplayOrderId();
+    const newProducts = [];
+    for(const p of products){
+        const product = await Product.findById(p.productId).populate("category")
+    
+    newProducts.push({
+        productId:product._id,
+        name:product.productName,
+        quantity:p.quantity,
+        price:p.price,
+        category:product.category._id,
+        regularPrice:product.regularPrice,
+        salePrice:product.salePrice,
+        productOffer:product.productOffer||0,
+        categoryOffer:product.categoryOffer||0,
+        finalamount:p.price*p.quantity,
+        productImage:product.productImage,
+        description:product.description
+
+    })
+    console.log(product,"cutiess product");
+}
+    
+        // console.log(productDetails,"cutiepiee");
+        console.log(req.session.userId,"again userId");
+        
+        const orderItem = new Order({
+            user:user,
+            deliveryDetails:{
+                  fname: address.fname,
+                sname: address.sname,
+                mobile: address.mobile,
+                email: address.email,
+                address: address.address,
+                city: address.city,
+                pin: address.pin, 
+            },
+            displayOrderId,
+            paymentMethod,
+            product:newProducts,
+            subtotal,
+            Date:new Date(),
+            status:"payment_failed"
+        })
+        console.log(orderItem,"here the orderItem cuteeee");
+             
+
+       await orderItem.save()
+       console.log("pookies error");
+       
+        res.status(200).json({success: true,message: "Your payment failed",orderId:orderItem._id});
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({success: false,message: "Something went wrongkkkkkkkkkkkkkkkkk " });
+    }
+};
+
+
+
+
+const paymentFailGet=async(req,res)=>{
+    try {
+
+const data = req.params.orderId;
+const order = await Order.findById(data)
+console.log(order,"faileddatas");
+
+        
+        res.render('paymentFailed',{order})
+
     } catch (error) {
         
     }
 }
+// const retryPayement=async(req,res)=>{
+//     console.log(req.body,"anshi sadu");
+//    console.log(process.env.RAZORPAY_KEY_ID,"keyyyyys are hera");
+//    console.log(process.env.RAZORPAY_SECURITY_KEY,'Secrte here') 
+   
+//         const razorpay = new Razorpay({
+//             key_id:process.env.RAZORPAY_KEY_ID,
+//             key_secret:process.env.RAZORPAY_KEY_SECRET,
+//         });
+
+        
+//         const options = {
+//             amount:req.body.subtotal * 100,
+//             receipt:"any unique id for every order here",
+//             payment_capture:1
+//         }
+//          try {
+//             const response = await razorpay.orders.create(options)
+//             console.log(response,"responesedfh here" );
+            
+//             res.json({
+//             success: true,
+//             order_id: response.id,
+//             amount: response.amount,
+//             currency: response.currency,
+//         });
+//     } catch (error) {
+//         res.status(400).send("Notable to create order.Please try again!. here")
+//     }
 
 
+// }
+
+
+const retryPayement = async (req, res) => {
+  try {
+    const orderId = req.body.orderId;
+    console.log(orderId,"here i can");
+    
+    // Get the order from DB
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+
+    const options = {
+      amount: order.subtotal * 100, // in paise
+      currency: "INR",
+      receipt: `retry_${order.displayOrderId}_${Date.now()}`,
+      payment_capture: 1,
+    };
+
+    const rzpOrder = await razorpay.orders.create(options);
+
+    res.json({
+      success: true,
+      key: process.env.RAZORPAY_KEY_ID, // send public key
+      orderId: rzpOrder.id,
+      amount: rzpOrder.amount,
+      currency: rzpOrder.currency,
+      customer: {
+        name: order.deliveryDetails.fname + " " + order.deliveryDetails.sname,
+        email: order.deliveryDetails.email,
+        contact: order.deliveryDetails.mobile,
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Unable to retry payment" });
+  }
+};
 
 // const wishlistaddToCart = async(req,res)=>{
 //     try {
@@ -1096,8 +1399,14 @@ const paymentFailed= async(req,res)=>{
 
 const loadProfile = async (req, res) => {
     try {
+        console.log(req.session,"session");
+        
         const userId = req.session.userId;
-        const user = await User.findById(userId).lean();
+        console.log(userId,"session2");
+        
+        const user = await User.findById(userId).populate("walletId").lean();
+        console.log(user,"session3");
+        
         res.render("profile", { user });
     } catch (error) {
         console.error(error);
@@ -1219,14 +1528,17 @@ const postChangePass = async (req, res) => {
 
 const loadThankyou = async (req, res) => {
     try {
-        const id = req.query.orderId;
+       
+        
+        const id = req.params.orderId;
         const orderData = await Order.findById(id);
         console.log(id);
 
         if (!orderData) {
             return res.status(404).send("Order not found");
         }
-
+     console.log(orderData,"orderdata came");
+     
         res.render("thankyou", { order: orderData });
     } catch (error) {
         console.error(error);
@@ -1239,17 +1551,32 @@ const transactionHistory = async (req, res) => {
         res.render("transactionHistory");
     } catch (error) {}
 };
+// const coupon = async (req, res) => {
+//     try {
+//         const { couponCode } = req.body;
+//     } catch (error) {}
+// };
 
 
-const applyCoupon = async(req,res)=>{
+// const applyCoupon = async(req,res)=>{
+//     try {
+//        const coupons = await Coupon.find({status:'active'});
+//        res.json({success:true,coupons:coupons})
+        
+//     } catch (error) {
+        
+//     }
+// }
+const applyCoupon = async (req,res)=>{
     try {
        const coupons = await Coupon.find({status:'active'});
-       res.json({success:true,coupons:coupons})
-        
+       res.json({success:true, coupons})
     } catch (error) {
-        
+        console.error(error);
+        res.status(500).json({success:false, message:"Server error"})
     }
 }
+
 
 const coupons = async(req,res)=>{
     try {
@@ -1305,6 +1632,31 @@ const coupons = async(req,res)=>{
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }
+
+const referalCode=async(req,res)=>{
+    try {
+       console.log(req.session,"recode");
+       const user = req.session.userId;
+       console.log(user,"recoded");
+       const userId = await User.findById({_id:user})
+       console.log(userId,"noted");
+       
+       
+       
+        
+        res.render("referalCode",{user:userId})
+    } catch (error) {
+        
+    }
+}
+
+const applyReferalCode = async(req,res)=>{
+    try {
+    
+    } catch (error) {
+        
+    }
+}
 module.exports = {
     loadHomepage,
     loadContact,
@@ -1343,7 +1695,7 @@ module.exports = {
     postChangePass,
     loadThankyou,
     transactionHistory,
-    coupon,
+    // coupon,
     wishlist,
     applyCoupon,
     coupons,
@@ -1351,4 +1703,8 @@ module.exports = {
     wishlistaddToCart,
     verifyPayment,
     paymentFailed,
+    paymentFailGet,
+    retryPayement,
+    referalCode,
+    applyReferalCode
 };

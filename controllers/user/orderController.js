@@ -5,10 +5,7 @@ const Category = require("../../model/categorySchema");
 const Cart = require("../../model/cartSchema");
 const Razorpay = require('razorpay')
 
-// const razorpay = new Razorpay({
-//     key_id:process.env.KEY_ID,
-//     key_secret:process.env.RAZORPAY_SECURITY_KEY
-// })
+
 
 async function generateDisplayOrderId() {
     const year = new Date().getFullYear();
@@ -41,8 +38,15 @@ const orderlist = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
+        console.log(req.body,"rameshan ibda undeee ");
+        const{productId,total}=req.body
         const orderData = req.body;
+        console.log(orderData,"ramesh orderdata");
+        
+        
         const userId = req.session.userId;
+        console.log(userId,"ramseh userId");
+        
         const productList = [];
         let productImage = [];
         for (let item of orderData.products) {
@@ -102,7 +106,7 @@ const placeOrder = async (req, res) => {
             },
             paymentMethod: orderData.paymentMethod,
             product: productList,
-            subtotal: orderData.subtotal,
+            subtotal: orderData.total,
             Date: new Date(),
             exprdate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             status: "Pending",
@@ -133,7 +137,7 @@ const cancelOrder = async (req, res) => {
 
         const order = await Order.findById(orderId);
         if (!order) {
-            return res.status(404).json({ message: "Order not found" });
+            return res.status(404).json({ message: "Order not found hey" });
         }
         console.log(order, "Order");
         const productIndex = order.product.findIndex((p) => p.productId.toString() === productIdToCancel);
@@ -152,7 +156,7 @@ const cancelOrder = async (req, res) => {
             discription: "Refund for order Cancelling order ",
         };
 
-        const data = await Order.findOneAndUpdate({ _id: orderId, user: userId }, { $set: { status: "Cancelled" } });
+        const data = await Order.findOneAndUpdate({ _id: orderId, user: userId }, { $set: { status: "waiting for approval" } });
 
         if (data) {
             await User.findOneAndUpdate(
@@ -201,30 +205,72 @@ console.log(id,productId,"new error");
         res.status(500).render("error", { message: "Internal server error" });
     }
 };
+// const returnOrder = async (req, res) => {
+//     try {
+//         console.log("hrlo");
+//         console.log(req.body);
+
+//         const userId = req.session.userId;
+
+//         const orderId = req.body.orderId;
+//         console.log(orderId);
+
+//         const orders = await Order.findById({ _id: orderId });
+
+//         console.log("hiiii");
+
+//         if (Date.now() > orders.exprdate) {
+//             res.json({ datelimit: true });
+//         } else {
+//             await Order.findByIdAndUpdate({ _id: orderId }, { $set: { status: "waiting for approval" } });
+
+//             res.json({ return: true });
+//         }
+//     } catch (error) {
+//         console.log(error.message);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// };
+
+// last one i used
 const returnOrder = async (req, res) => {
     try {
-        console.log("hrlo");
-        console.log(req.body);
+        console.log("Return request received:", req.body);
 
         const userId = req.session.userId;
-
         const orderId = req.body.orderId;
-        console.log(orderId);
 
-        const orders = await Order.findById({ _id: orderId });
+        const order = await Order.findById(orderId);
 
-        console.log("hiiii");
-
-        if (Date.now() > orders.exprdate) {
-            res.json({ datelimit: true });
-        } else {
-            await Order.findByIdAndUpdate({ _id: orderId }, { $set: { status: "waiting for approval" } });
-
-            res.json({ return: true });
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
         }
+
+        // Check if return window expired
+        if (Date.now() > order.exprdate) {
+            return res.json({ datelimit: true, message: "Return period expired" });
+        }
+
+        // Refund to wallet
+        const walletAmount = order.subtotal;
+        const walletData = {
+            amount: walletAmount,
+            date: Date.now(),
+            description: "Refund for Returned Order",
+        };
+
+        await Order.findByIdAndUpdate(orderId, { $set: { status: "Returned" } });
+
+        await User.findByIdAndUpdate(
+            userId,
+            { $inc: { wallet: walletAmount }, $push: { walletHistory: walletData } }
+        );
+
+        res.json({ success: true, message: "Order returned and amount refunded to wallet" });
+
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Return Order Error:", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
 
@@ -296,47 +342,51 @@ const verifyPayment = async (req, res) => {
             paymentMethod,
             products,
             subtotal,
-            paymentResponse
+            
         } = req.body;
 
         const fullProducts = [];
         const userId = req.session.userId;
         for (const p of products) {
             const prodDoc = await Product.findById(p.productId)
-                .populate("category")
+                .populate("category").populate("productOffer").populate("categoryOffer")
                 .lean();
 
             if (!prodDoc) {
                 throw new Error(`Product not found: ${p.productId}`);
             }
+fullProducts.push({
+  productId: prodDoc._id,
+  name: prodDoc.productName,
+  quantity: p.quantity,
+  price: p.price,
+  category: prodDoc.category._id,
+  description: prodDoc.description,
+  regularPrice: prodDoc.regularPrice,
+  salePrice: prodDoc.salePrice,
+  productOffer: prodDoc.productOffer?.discountValue || 0,   // ✅ store number only
+  categoryOffer: prodDoc.categoryOffer?.discountValue || 0, // ✅ store number only
+  finalamount: p.price * p.quantity,
+  productImage: prodDoc.productImage,
+});
+// fullProducts.push({ productId: prodDoc._id, name: prodDoc.productName, quantity: p.quantity, price: p.price, category: prodDoc.category._id, description: prodDoc.description, regularPrice: prodDoc.regularPrice, salePrice: prodDoc.salePrice, productOffer: prodDoc.productOffer|| null, categoryoffer: prodDoc.categoryOffer || null, finalamount: p.price * p.quantity, productImage: prodDoc.productImage, });
 
-            fullProducts.push({
-                productId: prodDoc._id,
-                name: prodDoc.productName,
-                quantity: p.quantity,
-                price: p.price,
-                category: prodDoc.category._id,
-                description: prodDoc.description,
-                regularPrice: prodDoc.regularPrice,
-                salePrice: prodDoc.salePrice,
-                productOffer: prodDoc.productOffer || 0,
-                categoryoffer: prodDoc.categoryoffer || 0,
-                finalamount: p.price * p.quantity,
-                productImage: prodDoc.productImage,
-            });
         } 
+        
+        
 
+const displayOrderId = await generateDisplayOrderId();
         const order = new Order({
             deliveryDetails: {
                 fname: address.fname,
                 sname: address.sname,
-                mobile: address.mobile,
+                mobile:address.mobile,
                 email: address.email,
                 address: address.address,
-                city: address.city,
+                city:address.city,
                 pin: address.pin,
             },
-            displayOrderId: paymentResponse.razorpay_order_id,
+            displayOrderId,
             user: userId, 
             paymentMethod,
             product: fullProducts,
@@ -346,6 +396,9 @@ const verifyPayment = async (req, res) => {
         });
         console.log(order,"Order")
        await order.save();
+console.log(userId,"use");
+
+       await Cart.deleteOne({userId:userId})
 
 return res.status(200).json({
     success: true,
@@ -355,8 +408,9 @@ return res.status(200).json({
 
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: true, message: error.message });
+    console.log(error,"err");
+    
+        res.status(500).json({ success: true, message: "error full" });
     }
 };
 

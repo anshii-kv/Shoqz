@@ -14,13 +14,11 @@ const userSchema = new Schema({
     phone: {
         type: String,
         required: false,
-        unique: true,
         sparse: true,
         default: null,
     },
     googleId: {
         type: String,
-        unique: true,
         default: undefined,
     },
     password: {
@@ -35,6 +33,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    referralCode:{
+        type:String,
+       
+    },
     cart: [
         {
             productId: {
@@ -43,24 +45,12 @@ const userSchema = new Schema({
             },
         },
     ],
-    wallet: {
-        type: Number,
-        default: 0,
+    walletId: {
+        type:  Schema.Types.ObjectId,
+        ref:"wallet"
     },
 
-    walletHistory: [
-        {
-            date: {
-                type: Date,
-            },
-            amount: {
-                type: Number,
-            },
-            description: {
-                type: String,
-            },
-        },
-    ],
+  
     wishlist: [
         {
             type: Schema.Types.ObjectId,
@@ -77,9 +67,7 @@ const userSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-    referalCode: {
-        type: String,
-    },
+ 
 
     category: {
         type: Schema.Types.ObjectId,

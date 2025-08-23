@@ -153,64 +153,9 @@ const updateProductPricesWithCategoryOffer = async (categoryId, offerPercentage)
         throw error;
     }
 };
-const addCategoryOffer = async (req, res) => {
-    try {
-        const { categoryId, offerPercentage } = req.body;
 
-        if (!categoryId || !offerPercentage) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
 
-        const percentage = parseInt(offerPercentage);
 
-        if (isNaN(percentage) || percentage < 1 || percentage > 90) {
-            return res.status(400).json({ error: "Offer percentage must be between 1 and 90" });
-        }
-
-        const category = await Category.findById(categoryId);
-
-        if (!category) {
-            return res.status(404).json({ error: "Category not found" });
-        }
-
-        category.offer.discount_percentage = percentage;
-
-        category.offerActive = true;
-
-        await category.save();
-
-        await updateProductPricesWithCategoryOffer(categoryId, percentage);
-
-        return res.status(200).json({ success: true, message: "Category offer added successfully" });
-    } catch (error) {
-        console.error("Error adding category offer:", error);
-        return res.status(500).json({ error: "Failed to add category offer" });
-    }
-};
-
-const removeCategoryOffer = async (req, res) => {
-    try {
-        const { categoryId } = req.body;
-
-        if (!categoryId) {
-            return res.status(400).json({ error: "Category ID is required" });
-        }
-
-        const category = await Category.findById(categoryId);
-
-        if (!category) {
-            return res.status(404).json({ error: "Category not found" });
-        }
-        category.offer.discount_percentage = 0;
-
-        await category.save();
-
-        return res.status(200).json({ success: true, message: "Category offer removed successfully" });
-    } catch (error) {
-        console.error("Error removing category offer:", error);
-        return res.status(500).json({ error: "Failed to remove category offer" });
-    }
-};
 
 
 
@@ -222,7 +167,7 @@ module.exports = {
     getEditCategory,
     categoryAdd,
     editCategory,
-    addCategoryOffer,
+    
     updateProductPricesWithCategoryOffer,
-    removeCategoryOffer,
+
 };

@@ -8,7 +8,7 @@ exports.isUser = (req, res, next) => {
 };
 
 exports.User = (req, res, next) => {
-    
+    console.log(req.session.email,'Emaildaaa')
     if (req.session.email) {
         res.redirect("/");
     } else {

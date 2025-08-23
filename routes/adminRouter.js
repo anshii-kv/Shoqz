@@ -12,6 +12,7 @@ const { adminAuth } = require('../middlewares/userAuth');
 const orderController=require("../controllers/admin/orderController")
 const couponController=require("../controllers/admin/couponController")
 const auth=require('../middlewares/auth')
+const offerController = require('../controllers/admin/offerController')
 router.get("/adminLogin",auth.admin,admincontroller.loadLogin);
 
 router.post("/login",admincontroller.adminLogin);
@@ -52,13 +53,15 @@ router.put('/category/:id',categoryController.editCategory)
 
 // router.delete('/deleteCategory',categoryController.deleteCategory)
 
-router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer);
+router.post('/addCategoryOffer',auth.adminLogin,offerController.addCategoryOffer);
 
-router.delete('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
+router.delete('/removeCategoryOffer',auth.adminLogin,offerController.removeCategoryOffer)
 
+router.get('/Offer',offerController.productOfferget)
 
+router.post("/product-offers/create",offerController.updateProductOffer)
 
-
+router.delete('/removeProductOffer/delete/:id',offerController.removeProductOffer)
 
 router.get('/addProduct',auth.adminLogin,productController.loadProductAddPage)
 
@@ -70,7 +73,7 @@ router.delete('/products/delete/:id', productController.deleteProduct);
 
 router.get('/updateProduct',auth.adminLogin,productController.loadUpdatePage);
 
-router.patch("/products/toggle-status/:id",productController.toggleProductStatus);
+// router.patch("/products/toggle-status/:id",productController.toggleProductStatus);
 
 
 const storage = multer.diskStorage({
@@ -110,7 +113,7 @@ router.post('/updateProduct',uploads.array("croppedImages", 4),productController
 
 router.get('/orderDetails',auth.adminLogin,orderController.loadOrder)
 router.post('/changeStatus',orderController.changeStatus)
-
+router.post('/rejectOrder',orderController.rejectOrder)
 
 router.post('/approveOrder',orderController.approveOrder)
 
