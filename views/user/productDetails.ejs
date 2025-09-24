@@ -609,20 +609,30 @@
                 <h1 class="product-title"><%= product.productName %></h1>
 
                 <!-- Pricing -->
-                <div class="product-price">
-                    <span class="original-price" id="originalPrice">₹<%= (product.regularPrice || 0).toFixed(2) %></span>
-                    <span class="sale-price" id="salePrice">₹<%= (product.salePrice || product.regularPrice || 0).toFixed(2) %></span>
+                <%= console.log(product, "hey") %>
 
-                    <% const maxDiscount = (product.categoryoffer && product.categoryoffer > (product.productOffer || 0)) 
-                        ? product.categoryoffer 
-                        : (product.productOffer || 0); %>
+<div class="product-price">
+    <!-- Original Price -->
+    <span class="original-price" id="originalPrice">
+        ₹<%= product.salePrice.toFixed(2) %>
+    </span>
 
-                    <% if (maxDiscount > 0) { %>
-                        <span class="discount-label">
-                            <%= maxDiscount %>% OFF (<%= maxDiscount === product.productOffer ? 'Product' : 'Category' %>)
-                        </span>
-                    <% } %>
-                </div>
+    <!-- Final Price (after discount) -->
+    <span class="sale-price" id="salePrice">
+        ₹<%= product.finalPrice.toFixed(2) %>
+    </span>
+
+    <!-- Discount Label -->
+    <% if (product.maxDiscount > 0) { %>
+        <span class="discount-label">
+            <%= product.maxDiscount %>% OFF 
+            (<%= product.maxDiscount === product.productOfferValue ? 'Product' : 'Category' %>)
+        </span>
+    <% } %>
+</div>
+
+
+
 
                 <!-- Description -->
                 <p class="product-description"><%= product.description %></p>
@@ -694,9 +704,9 @@
                             </a>
                             <h3><%= relatedProduct.productName %></h3>
                             <div class="price-container">
-                                <span class="price">₹<%= (relatedProduct.salePrice || relatedProduct.regularPrice || 0).toFixed(2) %></span>
-                                <% if (relatedProduct.salePrice < relatedProduct.regularPrice) { %>
-                                    <span class="original-price">₹<%= (relatedProduct.regularPrice || 0).toFixed(2) %></span>
+                                <span class="price">₹<%= (relatedProduct.salePrice || relatedProduct.salePrice || 0).toFixed(2) %></span>
+                                <% if (relatedProduct.salePrice < relatedProduct.salePrice) { %>
+                                    <span class="original-price">₹<%= (relatedProduct.Price || 0).toFixed(2) %></span>
                                 <% } %>
                             </div>
                         </div>
@@ -812,6 +822,7 @@
                 quantityInput.value = stock > 0 && selectedOption.value ? 1 : 0;
                 addToCartBtn.disabled = stock === 0 || !selectedOption.value;
             });
+            
 
             // Add to Cart Logic
             addToCartBtn.addEventListener('click', async function() {
@@ -872,7 +883,7 @@
                     });
                 }
             });
-            
+        })
 
             
     </script>
@@ -993,7 +1004,7 @@ const response = await fetch('/wishlist/add', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ productId, size: selectedSize }),
-    credentials: 'include' // ensures session cookies go with request
+   
 });
 
 const data = await response.json()
@@ -1016,4 +1027,3 @@ if(data.message=="Product already exists in the wishlist"){
 
 </body>
 </html>
-// <%- include("../../views/partials/user/footer") %>

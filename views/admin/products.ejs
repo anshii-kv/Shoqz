@@ -463,7 +463,7 @@
                         </td>
                         <td><span class="category-badge"><%= product?.category?.name %></span></td>
                         <td class="product-price">
-                            $<%= product?.regularPrice %>
+                            $<%= product?.salePrice %>
                             <% if (product.productOffer > 0 || product.categoryoffer > 0) { %>
                                 <span class="offer-badge">
                                     <% if (product.productOffer > 0 && product.categoryoffer > 0) { %>

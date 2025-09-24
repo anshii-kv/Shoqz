@@ -74,6 +74,19 @@
             .is-invalid ~ .invalid-feedback {
                 display: block;
             }
+            .coupon-item {
+    transition: all 0.2s ease;
+}
+
+.coupon-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.coupon-item .badge {
+    font-family: monospace;
+    font-weight: bold;
+}
         </style>
     </head>
     <body>
@@ -545,7 +558,7 @@
             }
 
 
-                        // Modal functions
+                        // Modal functions    
                         function showManualAddressForm() {
                             document.getElementById('selectedAddressDisplay').style.display = 'none';
                             document.getElementById('manualAddressInput').style.display = 'block';
@@ -673,48 +686,52 @@
 
             // Handle failure
             async function paymentFail(orderId) {
-                const failedOrderData = getOrderData(); // no paymentResponse
-                console.log("Payment cancelled! 1234", failedOrderData);
+    const failedOrderData = getOrderData(); // no paymentResponse
+    console.log("Payment cancelled! 1234", failedOrderData);
 
-                // Optionally send to backend for logging
-                try{
-                const response =  await fetch("/paymentFailed", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(failedOrderData)
-                });
-               const data = await response.json();
-               console.log(data,"pookies msg");
+    try {
+        const response = await fetch("/placeOrder", {   // ✅ create order first
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(failedOrderData)
+        });
 
-              if(data.success){
-                console.log("fvdbd");
+        const data = await response.json();
+        console.log(data, "payment fail response");
 
-                swal({
-                    title:"Payemet Failed",
-                    text:data.message,
-                    icon:"error",
+        if (data.success) {
+            // Now mark it as failed
+            await fetch(`/paymentFailed/${data.orderId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
 
-                }).then(()=>{
-                    window.location.href=`/paymentFailGet/${data.orderId}`;
-                })
-              }else{
-                swal({
-                    title:"Error",
-                    text:data.message,
-                    icon:"warning",
-                    button:"OK"
-                })
-            }
+            swal({
+                title: "Payment Failedkkk",
+                text: "Order placed but payment not completed.",
+                icon: "error",
+            }).then(() => {
+                window.location.href = '/paymentFailGet'
+            });
+        } else {
+            swal({
+                title: "Error",
+                text: data.message,
+                icon: "warning",
+                button: "OK",
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        swal({
+            title: "Error",
+            text: "Unable to process payment failure.",
+            icon: "warning",
+            button: "OK",
+        });
+    }
+}
 
-            }    catch (err) {
-                    swal({
-                        title: "Error",
-                        text: "Unable to process payment failure.",
-                        icon: "warning",
-                        button: "OK",
-                    });
-                }
-            }
 
             // Razorpay options
             const options = {
@@ -724,32 +741,7 @@
                 name: "My Store",
                 description: "Purchase Payment",
                 order_id: order_id,
-                // handler: async function (paymentResponse) {
-                //     const orderData = getOrderData(paymentResponse);
-                //     orderData.subtotal=total
-                   
-                    
-                //     console.log(orderData, "OrderData");
-
-                //     const finalRes = await fetch("/placeOrder", {
-                //         method: "POST",
-                //         headers: { "Content-Type": "application/json" },
-                //         body: JSON.stringify(orderData)
-                //     });
-
-                //     const finalData = await finalRes.json();
-                //     console.log(finalData,"kumar jii");
-                //     // if(finalData.message==="Order placed successfully"){
-                //     //     window.location.href =`/thankyou/${finalData.orderId}`;
-
-                //     // }else{
-
-                //     // }
-                //     if (finalData.success) {
-                //         window.location.href = `/thankyou/${finalData.orderId}`;
-                //     } else {
-                //         Swal.fire({ icon: 'error', title: 'Order Failed', text: finalData.message });
-                //     }
+               
                 // },
                 handler: async function (paymentResponse) {
     const orderData = getOrderData(paymentResponse);
@@ -862,6 +854,7 @@
 
             
         </script>
+
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
             async function selectRazorpayPayment(method) {
@@ -880,6 +873,137 @@
                 }
             }
         </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <!-- Coupon Modal - Add this after the Select Address Modal -->
@@ -937,7 +1061,7 @@
           <div class="col-4 text-end">
             <button 
               class="btn btn-primary btn-sm"
-              onclick="applyCoupon('<%= coupon.code %>', <%= coupon.discountPercentage || coupon.offerPrice %>, '<%= coupon.discountType %>', <%= coupon.minimumPurchase %>)">
+              onclick="applyCoupon('<%= coupon.code %>', <%= coupon.discountPercentage || coupon.offerPrice %>, '<%= coupon.discountType %>', <%= coupon.minimumPurchase %>,'<%= coupon._id %>')">
               Apply
             </button>
           </div>
@@ -954,6 +1078,7 @@
                 <div id="appliedCouponSection" class="alert alert-success d-none">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
+                            <input class="display:hidden" id="appliedCouponId" value=""></input>
                             <strong id="appliedCouponCode"></strong> applied successfully!
                             <br><small id="appliedCouponDetails"></small>
                         </div>
@@ -969,23 +1094,6 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Additional CSS for coupon modal */
-.coupon-item {
-    transition: all 0.2s ease;
-}
-
-.coupon-item:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transform: translateY(-1px);
-}
-
-.coupon-item .badge {
-    font-family: monospace;
-    font-weight: bold;
-}
-</style>
 
 <script>
 // Coupon related JavaScript functions
@@ -1037,7 +1145,7 @@ function validateAndApplyCoupon(couponCode) {
     });
 }
 
-function applyCoupon(couponCode, discountValue, discountType, minAmount) {
+function applyCoupon(couponCode, discountValue, discountType, minAmount,id) {
     // Check minimum order amount
     if (subtotal < minAmount) {
         Swal.fire({
@@ -1058,6 +1166,7 @@ function applyCoupon(couponCode, discountValue, discountType, minAmount) {
 
     // Apply the coupon
     appliedCoupon = {
+        id:id,
         code: couponCode,
         discount: discountAmount,
         type: discountType,
@@ -1070,6 +1179,8 @@ function applyCoupon(couponCode, discountValue, discountType, minAmount) {
 
     // Show applied coupon section
     document.getElementById('appliedCouponCode').textContent = couponCode;
+    document.getElementById('appliedCouponCodeId').va = id;
+
     document.getElementById('appliedCouponDetails').textContent = 
         `You saved ₹${discountAmount.toFixed(2)}`;
     document.getElementById('appliedCouponSection').classList.remove('d-none');

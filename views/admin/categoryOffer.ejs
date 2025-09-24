@@ -540,11 +540,11 @@
         <!-- Statistics Cards -->
         <div class="stats-cards">
             <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.totalOffers || 0 : 0 %></div>
+                <div class="stat-number"><%= totalOffer%></div>
                 <div class="stat-label">Total Category Offers</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.activeOffers || 0 : 0 %></div>
+                <div class="stat-number">1</div>
                 <div class="stat-label">Active Offers</div>
             </div>
             <div class="stat-card">
@@ -608,7 +608,7 @@
                                     <div>
                                         <div class="category-name"><%= offer.category?.name || 'Category Name' %></div>
                                         <div class="category-description"><%= offer.category?.description ? (offer.category.description.length > 30 ? offer.category.description.substring(0, 30) + '...' : offer.category.description) : 'No description' %></div>
-                                        <div class="products-count"><%= offer.category?.productCount || 0 %> products in this category</div>
+                                        <!-- <div class="products-count"><%= offer.category?.productCount || 0 %> products in this category</div> -->
                                     </div>
                                 </div>
                             </td>
@@ -663,9 +663,7 @@
                             </td>
                             <td>
                                 <div class="action-icons">
-                                    <button class="action-icon edit-icon" onclick="editOffer('<%= offer._id %>', '<%= offer.category._id %>', <%= offer.offer %>, '<%= offer.expires %>')" title="Edit Offer">
-                                        ✏️
-                                    </button>
+                                    
                                     <% if (!isExpired) { %>
                                     <button class="action-icon extend-icon" onclick="extendOffer('<%= offer._id %>')" title="Extend Expiry">
                                         🕒
@@ -744,14 +742,17 @@
                 <form id="offerForm">
                     <div class="form-group">
                         <label class="form-label" for="categorySelect">Select Category *</label>
-                        <select id="categorySelect" class="form-select" required>
-                            <option value="">Choose a category...</option>
-                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                                <% categories.forEach(category => { %>
-                                    <option value="<%= category._id %>"><%= category.name %> (<%= category.productCount || 0 %> products)</option>
-                                <% }); %>
-                            <% } %>
-                        </select>
+                       <select id="categorySelect" class="form-select" required>
+  <option value="">Choose a category...</option>
+  <% if (categories && categories.length > 0) { %>
+    <% categories.forEach(category => { %>
+      <option value="<%= category._id %>">
+        <%= category.name %> (<%= category.productCount || 0 %> products)
+      </option>
+    <% }); %>
+  <% } %>
+</select>
+
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="offerPercentage">Discount Percentage (%) *</label>
@@ -895,11 +896,10 @@
             }
 
             try {
-                const url = isEditMode ? `/admin/category-offers/update/${currentOfferId}` : '/admin/category-offers/create';
-                const method = isEditMode ? 'PUT' : 'POST';
+                
 
-                const response = await fetch(url, {
-                    method: method,
+                const response = await fetch('/admin/category-offers/create', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -911,6 +911,7 @@
                 });
 
                 const data = await response.json();
+console.log(data,"hey mngg");
 
                 if (data.success) {
                     Swal.fire({
@@ -952,11 +953,10 @@
             if (result.isConfirmed) {
                 try {
                     const response = await fetch(`/admin/category-offers/delete/${offerId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+  method: 'DELETE',
+  headers: { 'Content-Type': 'application/json' }
+});
+
 
                     const data = await response.json();
 

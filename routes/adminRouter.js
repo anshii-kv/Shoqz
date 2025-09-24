@@ -11,8 +11,11 @@ const path = require("path");
 const { adminAuth } = require('../middlewares/userAuth');
 const orderController=require("../controllers/admin/orderController")
 const couponController=require("../controllers/admin/couponController")
-const auth=require('../middlewares/auth')
+const auth=require('../middlewares/auth');
+const salesController = require('../controllers/admin/salesController')
 const offerController = require('../controllers/admin/offerController')
+const { generatePDF } = require("../controllers/admin/pdfcontroller");
+const { generateExcel } = require("../controllers/admin/pdfcontroller");
 router.get("/adminLogin",auth.admin,admincontroller.loadLogin);
 
 router.post("/login",admincontroller.adminLogin);
@@ -24,7 +27,8 @@ router.get('/adminError',admincontroller.error);
 router.post('/logout',auth.isAdmin,admincontroller.logout)
 
 
-
+router.post("/export-pdf", generatePDF);
+router.get("/export-excel",generateExcel)
 
 
 router.get('/user',auth.isAdmin,customerController.user)
@@ -53,15 +57,22 @@ router.put('/category/:id',categoryController.editCategory)
 
 // router.delete('/deleteCategory',categoryController.deleteCategory)
 
-router.post('/addCategoryOffer',auth.adminLogin,offerController.addCategoryOffer);
+router.post('/category-offers/create',offerController.addCategoryOffer);
 
-router.delete('/removeCategoryOffer',auth.adminLogin,offerController.removeCategoryOffer)
+// `/admin/category-offers/delete/${offerId}`
+router.delete('/category-offers/delete/:id', offerController.removeCategoryOffer);
+
+
 
 router.get('/Offer',offerController.productOfferget)
 
+router.get('/categoryOffer',offerController.categoryOffer)
+
 router.post("/product-offers/create",offerController.updateProductOffer)
 
-router.delete('/removeProductOffer/delete/:id',offerController.removeProductOffer)
+router.patch("/product/editOffer/:id",offerController.editOffer)
+
+router.delete('/product-offers/delete/:id',offerController.removeProductOffer)
 
 router.get('/addProduct',auth.adminLogin,productController.loadProductAddPage)
 
@@ -135,6 +146,9 @@ router.patch('/coupon/:id/status',couponController.toggleCouponStatus);
 router.get('/editcoupon/:couponId',auth.adminLogin,couponController.editCoupon)
 
 router.post('/editCoupon/:id',couponController.editedCoupon)
+
+router.get('/salesReport',salesController.salesReport);
+router.get("/sales/:period", dashboard.filterGraph)
 
 module.exports = router;
 

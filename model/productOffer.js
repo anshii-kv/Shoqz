@@ -14,7 +14,8 @@ const productOfferSchema = new mongoose.Schema({
     expires: {
     type: Date,
     default: () => Date.now() + (3 * 24 * 60 * 60 * 1000)
-}
+},
+
 
 })
 

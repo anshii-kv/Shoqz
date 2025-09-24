@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Failed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      max-width: 400px;
+    }
+    .illustration {
+      font-size: 80px;
+      color: #e63946;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 30px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      margin: 5px;
+      border-radius: 8px;
+      font-size: 15px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .retry {
+      background: #e63946;
+      color: #fff;
+    }
+    .retry:hover {
+      background: #c71c30;
+    }
+    .details {
+      background: #f1f1f1;
+      color: #333;
+    }
+    .details:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="illustration">❌</div>
+    <h1>Payment Failed</h1>
+    <p>Something went wrong while processing your payment. Please try again or view your order details.</p>
+    <!-- <a href="/retryPayment" class="btn retry">Retry Payment</a> -->
+    <a href="/order" class="btn details">View Order</a>
+  </div>
+</body>
+</html>

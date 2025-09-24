@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Report Dashboard - ZENVOGUE</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container-fluid {
+      padding: 20px;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-icon {
+      font-size: 1.5rem;
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .stat-label {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+    .sales-table-container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .search-container {
+      position: relative;
+      width: 300px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+    .search-input {
+      padding-left: 35px;
+      width: 100%;
+      height: 38px;
+      border-radius: 5px;
+    }
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #28a745;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    .notification.show {
+      display: flex;
+    }
+    .dropdown-menu {
+      min-width: 150px;
+      border-radius: 5px;
+    }
+    .dropdown-item:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <%-include("../../views/partials/admin/sidebar")%>
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-chart-line me-2"></i>
+        Sales Report Dashboard
+      </h1>
+      <div class="export-buttons d-flex gap-2">
+        <button id="exportExcel" class="btn btn-outline-secondary">
+          <i class="fas fa-file-excel me-1"></i> Export Excel
+        </button>
+        <button id="exportPDF" class="btn btn-outline-secondary">
+          <i class="fas fa-file-pdf me-1"></i> Export PDF
+        </button>
+        <!-- Filter Button with Dropdown -->
+        <div class="dropdown">
+          <button id="filterBtn" class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-sync-alt me-1"></i> Filter
+          </button>
+          <ul class="dropdown-menu" id="filterDropdown">
+            <li><a class="dropdown-item" href="#" data-filter="today">Today</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="weekly">Weekly</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="monthly">Monthly</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="custom">Custom Range</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+          <div class="stat-value">₹<%= totalRevenue.toLocaleString() %></div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+          <div class="stat-value"><%= totalOrders %></div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon"><i class="fas fa-tags"></i></div>
+          <div class="stat-value">₹<%= totalDiscounts.toLocaleString() %></div>
+          <div class="stat-label">Total Discounts</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+          <div class="stat-value">₹<%= avgOrderValue %></div>
+          <div class="stat-label">Avg Order Value</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+  <!-- Sales Report Table with Dummy Data -->
+<div class="table-responsive mt-4">
+  <table class="table table-striped table-bordered" id="salesReportTable">
+    <thead class="table-dark">
+      <tr>
+        <th>Order ID</th>
+        <th>Customer Name</th>
+        <th>Date</th>
+        <th>Total Amount (₹)</th>
+        <th>Coupon Discount (₹)</th>
+        <th>Offer Discount (₹)</th>
+        <th>Delivery Charge (₹)</th>
+        <th>Final Price (₹)</th>
+        <th>Payment Method</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (recentOrders && recentOrders.length > 0) { %>
+        <% recentOrders.forEach(order => { %>
+          <tr>
+            <td><%= order.orderId %></td>
+            <td><%= order.customerName %></td>
+            <td><%= order.date %></td>
+            <td>₹<%= order.totalAmount %></td>
+            <td>₹<%= order.couponDiscount %></td>
+            <td>₹<%= order.offerDiscount %></td>
+            <td>₹<%= order.deliveryCharge %></td>
+            <td>₹<%= order.finalPrice %></td>
+            <td><%= order.paymentMethod %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="9" class="text-center">No delivered orders available</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+
+
+    <div id="notification" class="notification">
+      <i class="fas fa-check-circle"></i>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+  <script>
+    // 1️⃣ Data from server
+    const salesData = <%- JSON.stringify(recentOrders) %>;
+    let filteredData = [...salesData];
+    let currentPage = 1;
+    const itemsPerPage = 8;
+
+    // 2️⃣ Export functions
+    function exportToExcel() {
+      const headers = ['Order ID', 'Customer', 'Date', 'Amount', 'Category', 'Status'];
+      let csv = headers.join(',') + '\n';
+
+      filteredData.forEach(row => {
+        const csvRow = [
+          row.displayOrderId || row.orderId,
+          row.deliveryDetails ? `${row.deliveryDetails.fname} ${row.deliveryDetails.sname}` : '',
+          row.Date ? new Date(row.Date).toLocaleDateString() : '',
+          row.subtotal || row.amount,
+          row.product && row.product.length > 0 ? row.product[0].category.name : '',
+          row.status || 'Pending'
+        ].join(',');
+        csv += csvRow + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sales_report.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function exportToPDF() {
+  if (!filteredData || filteredData.length === 0) {
+    alert("No data available to export!");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+
+  // Increase page size: A3 or custom size (in mm)
+  const doc = new jsPDF({
+    orientation: "landscape", // or "portrait"
+    unit: "mm",
+    format: "a3" // options: "a0" to "a10", "letter", "legal", or [width, height]
+  });
+
+  doc.setFontSize(18);
+  doc.text('Sales Report Dashboard', 20, 20);
+
+  doc.setFontSize(12);
+  let y = 30;
+
+  // Adjust xPositions for wider page
+  const headers = ['Order ID', 'Customer', 'Date', 'Amount', 'Category', 'Status'];
+  let xPositions = [20, 70, 130, 180, 230, 280];
+
+  // Header row
+  headers.forEach((header, i) => doc.text(header, xPositions[i], y));
+  y += 10;
+
+  // Table rows
+  filteredData.forEach((row) => {
+    doc.text(row.displayOrderId || row.orderId, xPositions[0], y);
+    doc.text(row.deliveryDetails ? `${row.deliveryDetails.fname} ${row.deliveryDetails.sname}`.substring(0,12) : '', xPositions[1], y);
+    doc.text(row.Date ? new Date(row.Date).toLocaleDateString() : '', xPositions[2], y);
+    doc.text(`₹${row.subtotal || row.amount}`, xPositions[3], y);
+    doc.text(row.product && row.product.length > 0 ? row.product[0].category.name : '', xPositions[4], y);
+    doc.text(row.status || 'Pending', xPositions[5], y);
+    y += 8;
+
+    if (y > 200) { // adjust for larger page
+      doc.addPage();
+      y = 20;
+      // Optionally, re-add headers on new page
+      headers.forEach((header, i) => doc.text(header, xPositions[i], y));
+      y += 10;
+    }
+  });
+
+  doc.save('sales_report.pdf');
+}
+
+
+    // 3️⃣ Notification helper
+    function showNotification(message) {
+      const notification = document.getElementById("notification");
+      const span = notification.querySelector("span");
+      span.textContent = message;
+      notification.classList.add("show");
+      setTimeout(() => notification.classList.remove("show"), 3000);
+    }
+
+    // 4️⃣ Handle filter selection
+    document.querySelectorAll("#filterDropdown .dropdown-item").forEach(item => {
+      item.addEventListener("click", function(e) {
+        e.preventDefault();
+        const filter = this.dataset.filter;
+        console.log("Selected filter:", filter);
+        // Add your filtering logic here
+      });
+    });
+
+    // 5️⃣ Attach button events
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('exportExcel').addEventListener('click', () => exportToExcel());
+      document.getElementById('exportPDF').addEventListener('click', () => exportToPDF());
+      // Note: refreshBtn event listener removed as the button is not present in the HTML
+    });
+  </script>
+</body>
+</html>

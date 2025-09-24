@@ -16,6 +16,8 @@ const loadCategory = async (req, res) => {
             query.name = { $regex: search, $options: "i" };
         }
         const categoeryData = await Category.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        console.log(categoeryData,"anbin");
+        
 
         const totalCategories = await Category.countDocuments();
         const totalPages = Math.ceil(totalCategories / limit);

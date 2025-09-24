@@ -103,11 +103,16 @@ router.post('/remove-item', usercontroller.removeFromCart);
 
 router.get('/checkout',auth.isBlock,auth.toLogin,usercontroller.loadCheckout);
 
-// router.post('/coupon',usercontroller.coupon)
+router.post("/paymentFailed/:orderId",orderController.paymentFailed);
+router.get("/paymentFailGet", orderController.paymentFailedGet);
+
+
 
 router.get('/wishlist',auth.isBlock,auth.toLogin,usercontroller.wishlist)
 
 router.post('/wishlist/add',usercontroller.addToWishlist)
+
+router.post('/remove-from-wishlist',usercontroller.removeWishlist)
 
 router.post('/add-to-cart',usercontroller.wishlistaddToCart)
 
@@ -138,11 +143,14 @@ router.get('/order',auth.isBlock,auth.toLogin,orderController.orderlist)
 
 router.post('/cancel-order',orderController.cancelOrder)
 
+router.post("/cancel-orders",orderController.cancelOrders);
+
+router.post("/retryPayment/:orderId", orderController.retryPayment);
 router.get('/order-details/:id/:productId',auth.isBlock,auth.toLogin,orderController.orderdetails)
 
 router.post('/submitOrder',orderController.placeOrder)
 router.post('/placeOrder',orderController.verifyPayment)
-// router.post('/apply-coupon',usercontroller.applycoupon)
+
 
 router.patch('/returnOrder',orderController.returnOrder)
 
@@ -166,5 +174,7 @@ router.post('/applyCoupon',usercontroller.coupons)
 router.get('/referalCode',usercontroller.referalCode)
 
 router.post('/apply-referral',usercontroller.applyReferalCode)
+
+router.post('/paymentSuccess/:orderId',orderController.paymentSucess)
 
 module.exports=router;

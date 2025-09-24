@@ -1,7 +1,6 @@
 
 const mongoose = require("mongoose");
 const {Schema}= mongoose;
-// const { paymentFailed } = require("../controllers/user/userController");
 
 const OrderSchema = new Schema({
     deliveryDetails: {
@@ -34,7 +33,7 @@ const OrderSchema = new Schema({
             required: true,
         },
         paymentSuccess: {
-            type: String,
+            type: Boolean,
             default: true,
         },
     },
@@ -97,7 +96,7 @@ const OrderSchema = new Schema({
             finalamount: {
                 type: Number,
                 default: 0,
-                require: false,
+                required: false,
             },
             productImage: {
                 type: [String],
@@ -124,6 +123,18 @@ const OrderSchema = new Schema({
     paymentId: {
       type: String,
     },
+   couponDiscount: {
+  type: Number,
+  default: 0,
+},
+deliveryCharge: {
+  type: Number,
+  default: 0,
+},
+finalPrice: {
+  type: Number,
+  default: 0,
+},
 });
 
 // module.exports = mongoose.model("order", OrderSchema);

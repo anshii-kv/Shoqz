@@ -76,7 +76,7 @@ const approveOrder = async (req, res) => {
     const reason = `Return amount of order ${order._id}`;
     const date = new Date();
 
-    await Order.updateOne({ _id: req.body.orderId }, { $set: { status: 'return' } });
+    await Order.updateOne({ _id: req.body.orderId }, { $set: { status: 'Returned' } });
 
     await User.updateOne(
       { _id: userId },
@@ -114,8 +114,9 @@ const loadviewOrder=async(req,res)=>{
 const rejectOrder = async (req, res) => {
   try {
     const orderId = req.body.orderId;
-    await Order.updateOne({ _id: orderId }, { $set: { status: 'rejected' } });
-    res.redirect('/admin/orderDetails');
+    await Order.updateOne({ _id: orderId }, { $set: { status: 'Return Rejected' } });
+    // res.redirect('/admin/orderDetails');
+      return res.json({ success: true, message: "Order rejected successfully" });
   } catch (error) {
     console.error("Error rejecting order:", error);
     res.status(500).send("Internal Server Error");

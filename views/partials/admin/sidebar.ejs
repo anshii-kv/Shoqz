@@ -21,7 +21,7 @@
         .sidebar {
             width: 240px;
             background-color: white;
-            height: 100vh;
+            /* height: 100vh; */
             padding: 20px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
         }
@@ -241,7 +241,7 @@
     <div class="sidebar">
         <div class="logo">Sho<span>qz</span></div>
         
-        <a href="#" class="menu-item active">
+        <a href="/admin/" class="menu-item active">
             <div class="icon icon-dashboard">📊</div>
             <span>Dashboard</span>
         </a>
@@ -278,7 +278,11 @@
         
         <a href="/admin/Offer" class="menu-item">
             <div class="icon icon-banners">🖼️</div>
-            <span>Offers</span>
+            <span>productOffers</span>
+        </a>
+          <a href="/admin/categoryOffer" class="menu-item">
+            <div class="icon icon-banners">🖼️</div>
+            <span>categoryOffers</span>
         </a>
         
         <form action="/admin/logout" method="POST" style="margin:0;">

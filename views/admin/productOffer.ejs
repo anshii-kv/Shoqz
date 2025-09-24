@@ -528,25 +528,25 @@
         <!-- Statistics Cards -->
         <div class="stats-cards">
             <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.totalOffers || 0 : 0 %></div>
+                <div class="stat-number"><%= countOffers %></div>
                 <div class="stat-label">Total Offers</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.activeOffers || 0 : 0 %></div>
+                <div class="stat-number"><%= stats.activeOffers %></div>
                 <div class="stat-label">Active Offers</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.expiringOffers || 0 : 0 %></div>
-                <div class="stat-label">Expiring Soon</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number"><%= typeof stats !== 'undefined' ? stats.averageDiscount || 0 : 0 %>%</div>
-                <div class="stat-label">Avg. Discount</div>
-            </div>
+  <div class="stat-number"><%= stats.expiringOffers %></div>
+  <div class="stat-label">Expiring Soon</div>
+</div>
+<div class="stat-card">
+  <div class="stat-number"><%= stats.averageDiscount %>%</div>
+  <div class="stat-label">Avg. Discount</div>
+</div>
         </div>
         
         <div class="offers-container">
-            <!-- Filters Section -->
+            <!-- Filters Section
             <div class="filters-section">
                 <form action="/admin/product-offers" method="GET" style="display: flex; gap: 15px; flex: 1;">
                     <input 
@@ -570,7 +570,32 @@
                         <i>🔍</i> Search
                     </button>
                 </form>
-            </div>
+            </div> -->
+            <div class="filters-section" style="display: flex; gap: 15px; flex: 1;">
+    <input 
+        type="text" 
+        id="searchInput"
+        class="search-input" 
+        placeholder="Search by product name..."
+    >
+    
+    <select class="filter-select" id="statusFilter">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+    </select>
+    
+    <select class="filter-select" id="sortBy">
+        <option value="createdAt">Latest</option>
+        <option value="expires">Expiry Date</option>
+        <option value="offer">Offer %</option>
+    </select>
+    
+    <button type="button" class="action-button" onclick="applyFilters()">
+        <i>🔍</i> Apply Filters
+    </button>
+</div>
+
             
             <!-- Offers Table -->
             <table class="offers-table">
@@ -657,9 +682,9 @@
                                         ✏️
                                     </button>
                                     <% if (!isExpired) { %>
-                                    <button class="action-icon extend-icon" onclick="extendOffer('<%= offer._id %>')" title="Extend Expiry">
+                                    <!-- <button class="action-icon extend-icon" onclick="extendOffer('<%= offer._id %>')" title="Extend Expiry">
                                         🕒
-                                    </button>
+                                    </button> -->
                                     <% } %>
                                     <button class="action-icon delete-icon" onclick="deleteOffer('<%= offer._id %>')" title="Delete Offer">
                                         🗑️
@@ -805,7 +830,7 @@
             }, 300);
         }
 
-        function editOffer(offerId, productId, offerPercentage, expiryDate) {
+      async  function editOffer(offerId, productId, offerPercentage, expiryDate) {
             const modal = document.getElementById('offerModal');
             const title = document.getElementById('offerModalTitle');
             
@@ -830,6 +855,19 @@
                 document.getElementById('expiryDays').value = 'custom';
                 document.getElementById('customDateGroup').style.display = 'block';
                 document.getElementById('customExpiryDate').value = expiry.toISOString().split('T')[0];
+            }
+            try{
+             const response = await fetch(`/admin/product/editOffer/${offerId}`,{
+                method:'PATCH',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({
+                    productId, offerPercentage, expiryDate
+                })
+             })
+            }catch{
+
             }
             
             modal.style.display = 'block';
@@ -978,63 +1016,63 @@
         }
 
         // Extend Offer Function
-        async function extendOffer(offerId) {
-            const { value: days } = await Swal.fire({
-                title: 'Extend Offer',
-                text: 'How many days would you like to extend this offer?',
-                input: 'select',
-                inputOptions: {
-                    '1': '1 Day',
-                    '3': '3 Days',
-                    '7': '1 Week',
-                    '14': '2 Weeks',
-                    '30': '1 Month'
-                },
-                inputValue: '7',
-                showCancelButton: true,
-                confirmButtonText: 'Extend',
-                cancelButtonText: 'Cancel'
-            });
+        // async function extendOffer(offerId) {
+        //     const { value: days } = await Swal.fire({
+        //         title: 'Extend Offer',
+        //         text: 'How many days would you like to extend this offer?',
+        //         input: 'select',
+        //         inputOptions: {
+        //             '1': '1 Day',
+        //             '3': '3 Days',
+        //             '7': '1 Week',
+        //             '14': '2 Weeks',
+        //             '30': '1 Month'
+        //         },
+        //         inputValue: '7',
+        //         showCancelButton: true,
+        //         confirmButtonText: 'Extend',
+        //         cancelButtonText: 'Cancel'
+        //     });
 
-            if (days) {
-                try {
-                    const response = await fetch(`/admin/product-offers/extend/${offerId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            days: parseInt(days)
-                        })
-                    });
+        //     if (days) {
+        //         try {
+        //             const response = await fetch(`/admin/product-offers/extend/${offerId}`, {
+        //                 method: 'PATCH',
+        //                 headers: {
+        //                     'Content-Type': 'application/json'
+        //                 },
+        //                 body: JSON.stringify({
+        //                     days: parseInt(days)
+        //                 })
+        //             });
 
-                    const data = await response.json();
+        //             const data = await response.json();
 
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Extended!',
-                            text: data.message,
-                            icon: 'success'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message || 'Failed to extend offer',
-                            icon: 'error'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Something went wrong while extending the offer',
-                        icon: 'error'
-                    });
-                }
-            }
-        }
+        //             if (data.success) {
+        //                 Swal.fire({
+        //                     title: 'Extended!',
+        //                     text: data.message,
+        //                     icon: 'success'
+        //                 }).then(() => {
+        //                     window.location.reload();
+        //                 });
+        //             } else {
+        //                 Swal.fire({
+        //                     title: 'Error!',
+        //                     text: data.message || 'Failed to extend offer',
+        //                     icon: 'error'
+        //                 });
+        //             }
+        //         } catch (error) {
+        //             console.error('Error:', error);
+        //             Swal.fire({
+        //                 title: 'Error!',
+        //                 text: 'Something went wrong while extending the offer',
+        //                 icon: 'error'
+        //             });
+        //         }
+        //     }
+        // }
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
@@ -1074,24 +1112,24 @@
         });
 
         // Auto-submit search form on input
-        let searchTimeout;
-        const searchInput = document.querySelector('input[name="search"]');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    this.form.submit();
-                }, 500);
-            });
-        }
+        // let searchTimeout;
+        // const searchInput = document.querySelector('input[name="search"]');
+        // if (searchInput) {
+        //     searchInput.addEventListener('input', function() {
+        //         clearTimeout(searchTimeout);
+        //         searchTimeout = setTimeout(() => {
+        //             this.form.submit();
+        //         }, 500);
+        //     });
+        // }
 
         // Auto-submit form on filter change
-        const filterSelects = document.querySelectorAll('select[name="status"], select[name="sortBy"]');
-        filterSelects.forEach(select => {
-            select.addEventListener('change', function() {
-                this.form.submit();
-            });
-        });
+        // const filterSelects = document.querySelectorAll('select[name="status"], select[name="sortBy"]');
+        // filterSelects.forEach(select => {
+        //     select.addEventListener('change', function() {
+        //         this.form.submit();
+        //     });
+        // });
     </script>
 </body>
 </html>

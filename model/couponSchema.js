@@ -4,7 +4,7 @@ const CouponSchema =  new Schema({
     code: {
         type: String,
         required: true,
-        unique: true,
+        // unique: true,
     },
    
     createdOn: {

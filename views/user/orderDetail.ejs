@@ -375,6 +375,26 @@
                             <% }); %>
                         </div>
                     </div>
+   
+                    <div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Price Details</h5>
+    <hr>
+    <p class="d-flex justify-content-between">
+      <span>Subtotal</span>
+      <span>₹<%= subtotal %></span>
+    </p>
+    <p class="d-flex justify-content-between">
+      <span>Delivery Charge</span>
+      <span><%= deliveryCharge === 0 ? "Free" : "₹" + deliveryCharge %></span>
+    </p>
+    <hr>
+    <p class="d-flex justify-content-between fw-bold">
+      <span>Total</span>
+      <span>₹<%= finalTotal %></span>
+    </p>
+  </div>
+</div>
 
                     <!-- Return Form (Only show if order is delivered and within return period) -->
                     
@@ -499,16 +519,17 @@
                                         <i class="fas fa-undo me-2"></i>Request Return
                                     </button>
                                 <% } else if (order.status === 'Pending') { %>
-                                    <!-- <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                                    <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
                                         <i class="fas fa-times me-2"></i>Cancel Order
-                                    </button> -->
+                                    </button>
                                 <% } else if (order.status === 'Processing' || order.status === 'Shipped') { %>
                                     <button class="btn btn-primary" onclick="trackOrder('<%= order._id %>')">
                                         <i class="fas fa-truck me-2"></i>Track Order
                                     </button>
-                                    <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
-                                        <i class="fas fa-times me-2"></i>Cancel Order
-                                    </button>
+                                    <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>', '<%= product.productId %>')">
+    <i class="fas fa-times me-2"></i>Cancel Order
+</button>
+
                                 <% } else if (order.status === 'Cancelled') { %>
                                     <button class="btn btn-primary" onclick="reorder('<%= order._id %>')">
                                         <i class="fas fa-redo me-2"></i>Reorder
@@ -530,77 +551,67 @@
     <script>
         // Return Form Submit Handler
         document.getElementById('returnForm')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const reason = document.getElementById('returnReason').value;
-            const comments = document.getElementById('returnComments').value;
-           
-            
-            if (!reason) {
-                Swal.fire('Error', 'Please select a reason for return', 'error');
-                return;
-            }
-            
-            Swal.fire({
-                title: 'Confirm Return Request',
-                text: 'Are you sure you want to submit this return request?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Submit Request'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Create FormData for file upload
-                    const formData = new FormData();
-                    formData.append('orderId', '<%= order._id %>');
-                    formData.append('reason', reason);
-                    formData.append('comments', comments);
-                    
-                    for (let [key, value] of formData.entries()) {
-  
-}
-                    
-                    fetch('/returnOrder', {
-  method: 'PATCH',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    orderId: '<%= order._id %>',
-    reason,
-    comments
-  })
-})
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.return) {
-                            Swal.fire({
-                                title: 'Return Request Submitted!',
-                                text: 'Your return request has been submitted successfully. We will review it and get back to you soon.',
-                                icon: 'success',
-                                confirmButtonColor: '#bdd5eb'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else if (data.datelimit) {
-                            Swal.fire({
-                                title: 'Return Period Expired',
-                                text: 'The return period for this order has expired.',
-                                icon: 'error',
-                                confirmButtonColor: '#dc3545'
-                            });
-                        } else {
-                            Swal.fire('Error', data.message || 'Something went wrong.', 'error');
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        Swal.fire('Error', 'Server error occurred.', 'error');
+    e.preventDefault();
+    
+    const reason = document.getElementById('returnReason').value;
+    const comments = document.getElementById('returnComments').value;
+
+    if (!reason) {
+        Swal.fire('Error', 'Please select a reason for return', 'error');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Confirm Return Request',
+        text: 'Are you sure you want to submit this return request?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Submit Request'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Send fetch request
+            fetch('/returnOrder', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: '<%= order._id %>',  // your EJS order ID
+                    reason,
+                    comments
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {   // ✅ Backend returns success
+                    Swal.fire({
+                        title: 'Return Request Submitted!',
+                        text: data.message || 'Your return request has been submitted successfully. We will review it and get back to you soon.',
+                        icon: 'success',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        window.location.reload();
                     });
+                } else if (data.datelimit) {
+                    Swal.fire({
+                        title: 'Return Period Expired',
+                        text: data.message || 'The return period for this order has expired.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    Swal.fire('Error', data.message || 'Something went wrong.', 'error');
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Server error occurred here.', 'error');
             });
-        });
+        }
+    });
+});
 
         // Request Return Function
         function requestReturn(orderId) {
@@ -633,46 +644,55 @@
         }
 
         // Cancel Order Function
-        function cancelOrder(orderId) {
-            Swal.fire({
-                title: 'Cancel Order',
-                text: 'Are you sure you want to cancel this order?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Cancel Order'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('/cancel-order', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ orderId: orderId })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Cancelled!',
-                                text: 'Your order has been cancelled.',
-                                icon: 'success',
-                                confirmButtonColor: '#bdd5eb'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', data.message || 'Something went wrong.', 'error');
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        Swal.fire('Error', 'Server error occurred.', 'error');
-                    });
-                }
+  async function cancelOrder(orderId,productId) {
+    try {
+        console.log("anshi");
+        
+        // Step 1: Ask for confirmation
+        const result = await Swal.fire({
+            title: 'Cancel Order',
+            text: 'Are you sure you want to cancel this order?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Cancel Order'
+        });
+
+        // Step 2: If user confirms, send request to server
+        if (result.isConfirmed) {
+            const response = await fetch('/cancel-orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId,productId })
             });
+          console.log("amna");
+          
+            const data = await response.json();
+console.log(data,"ashmika");
+
+            // Step 3: Handle server response
+            if (data.success) {
+                await Swal.fire({
+                    title: 'Cancelled!',
+                    text: 'Your order has been cancelled.',
+                    icon: 'success',
+                    confirmButtonColor: '#bdd5eb'
+                });
+
+                // Reload page after success
+                window.location.reload();
+            } else {
+                Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+            }
         }
+
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        Swal.fire('Error', 'Server error occurred hi.', 'error');
+    }
+}
+
 
         // Download Invoice Function
         function downloadInvoice(orderId) {

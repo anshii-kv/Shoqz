@@ -425,96 +425,107 @@
         </tr>
     </thead>
     <tbody id="ordersTableBody">
-        <% if (orders.length > 0) { %>
-            <% orders.forEach((order) => { %>
-                <tr data-order-id="<%= order._id %>" 
-                    data-date="<%= order.Date ? order.Date.toISOString() : '' %>" 
-                    data-customer="<%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %>"
-                    data-email="<%= order.deliveryDetails.email %>"
-                    data-total="<%= order.subtotal %>"
-                    data-status="<%= order.status %>">
-                    <td><%= order.displayOrderId %></td>
-                    <td><%= order.Date?.toDateString() %></td>
-                    <td>
-                        <%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %><br>
-                        <small><%= order.deliveryDetails.email %></small>
-                    </td>
-                    <td>₹<%= order.subtotal.toFixed(2) %></td>
-                    <td><span class="status-badge status-<%= order.status %>"><%= order.status.replace('-', ' ') %></span></td>
-                    <td>
-                        <%=console.log(order.status,'dfdsfdsfdsfsdfsdfdsfsdf')%>
+    <% if (orders.length > 0) { %>
+        <% orders.forEach((order) => { %>
+            <tr data-order-id="<%= order._id %>" 
+                data-date="<%= order.Date ? order.Date.toISOString() : '' %>" 
+                data-customer="<%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %>"
+                data-email="<%= order.deliveryDetails.email %>"
+                data-total="<%= order.subtotal %>"
+                data-status="<%= order.status %>">
 
-                        
-                         <% if(order.status==="delivered"){%>
-                            
-   <form method="POST" action="/admin/approveOrder" style="display:inline; margin-right: 5px;">
-        <input type="hidden" name="orderId" value="<%= order._id %>">
-        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve this order?')">
-            Approve
-   </button>
-        
-    </form>
-    
-    <form method="POST" action="/admin/rejectOrder" style="display:inline; margin-left: 5px;">
-        <input type="hidden" name="orderId" value="<%= order._id %>">
-        <button type="submit" class="btn btn-danger btn-sm" onclick="rejectfn('<%= order._id %>')">
-            Reject
-        </button>
-        <!-- <span class="status-badge status-cancelled">Delivered</span>  -->
-    </form>
-                            
-                        <% }else if(order.status==="delivered"){%>
-                            <span class="status-badge status-cancelled">Cancelled</span>  
-    <% }else if (order.status === 'return') { %>
-        Return
-  <% } else if (order.status === 'waiting for approval') { %>
-   
+                <td><%= order.displayOrderId %></td>
+                <td><%= order.Date?.toDateString() %></td>
+                <td>
+                    <%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %><br>
+                    <small><%= order.deliveryDetails.email %></small>
+                </td>
+                <td>₹<%= order.subtotal.toFixed(2) %></td>
 
-    <form method="POST" action="/admin/rejectOrder" style="display:inline; margin-left: 5px;">
-        <input type="hidden" name="orderId" value="<%= order._id %>">
-        <button type="submit" class="btn btn-danger btn-sm" onclick="rejectfn('<%= order._id %>')">
-            Reject
-        </button>
-    </form>
-<% }  else { %>
-        <a href="/admin/viewOrder/<%=order._id%>" class="btn btn-info btn-sm">View</a>
+                <td>
+                    <span class="status-badge status-<%= order.status %>">
+                        <%= order.status.replace('-', ' ') %>
+                    </span>
+                </td>
+
+<td>
+    <!-- View button always visible -->
+    <a href="/admin/viewOrder/<%=order._id%>" class="btn btn-info btn-sm" style="margin-bottom: 5px;">View</a>
+
+    <% if(order.status === "delivered") { %>
+        <span class="status-badge status-delivered">Delivered</span>
+
+    <% } else if(order.status === "cancelled") { %>
+        <span class="status-badge status-cancelled">Cancelled</span>
+
+    <% } else if(order.status === "Returned") { %>
+        <span class="status-badge status-returned">Returned</span>
+
+    <% } else if(order.status === "return-rejected") { %>
+        <span class="status-badge status-rejected">Return Rejected</span>
+
+    <% } else if(order.status === "waiting for approval") { %>
+        <span class="status-badge status-pending">Waiting for Approval</span>
+
+        <!-- Approve button -->
+        <form method="POST" action="/admin/approveOrder" style="display:inline; margin-right: 5px;">
+            <input type="hidden" name="orderId" value="<%= order._id %>">
+            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve this return request?')">
+                Approve
+            </button>
+        </form>
+
+        <!-- Reject button -->
+        <form method="POST" action="/admin/rejectOrder" style="display:inline; margin-left: 5px;">
+            <input type="hidden" name="orderId" value="<%= order._id %>">
+            <button type="button" class="btn btn-danger btn-sm" onclick="rejectOrder('<%= order._id %>')">
+                Reject
+            </button>
+        </form>
+
+    <% } else if(order.status ==="Payment Failed") { %>
+        <!-- Payment failed, no dropdown -->
+        <span class="status-badge status-failed">Payment Failed</span>
+
+    <% } else { %>
+        <!-- Default status change flow -->
         <form method="POST" action="/admin/changeStatus" style="display:inline;">
             <input type="hidden" name="orderId" value="<%= order._id %>">
-       <select name="status" id="status-<%= order._id.toString() %>" style="margin-left: 5px; padding: 5px;">
-    <option disabled value="">Change Status</option>
+            <select name="status" id="status-<%= order._id.toString() %>" style="margin-left: 5px; padding: 5px;">
+                <option disabled value="">Change Status</option>
 
-    <% if (order.status !== 'shipped' && order.status !== 'out-for-delivery') { %>
-        <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
-    <% } %>
+                <% if (order.status !== 'shipped' && order.status !== 'out-for-delivery') { %>
+                    <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <% } %>
 
-    <% if (order.status !== 'out-for-delivery') { %>
-        <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
-    <% } %>
+                <% if (order.status !== 'out-for-delivery') { %>
+                    <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                <% } %>
 
-    <option value="out-for-delivery" <%= order.status === 'out-for-delivery' ? 'selected' : '' %>>Out for Delivery</option>
-    <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
-    <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-</select>
-
-
+                <option value="out-for-delivery" <%= order.status === 'out-for-delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
         </form>
-        <!-- NEW CHECK BUTTON -->
         <button type="button"
-        class="btn btn-warning btn-sm"
-        onclick="checkOrder('<%= order._id %>', document.getElementById('status-<%= order._id %>').value)">
-    Check
-</button>
+            class="btn btn-warning btn-sm"
+            onclick="checkOrder('<%= order._id %>', document.getElementById('status-<%= order._id %>').value)">
+            Check
+        </button>
     <% } %>
 </td>
 
-                </tr>
-            <% }) %>
-        <% } else { %>
-            <tr>
-                <td colspan="6" class="text-center">No orders found</td>
+
+
             </tr>
-        <% } %>
-    </tbody>
+        <% }) %>
+    <% } else { %>
+        <tr>
+            <td colspan="6" class="text-center">No orders found</td>
+        </tr>
+    <% } %>
+</tbody>
+
 </table>
 
         </div>
@@ -705,7 +716,61 @@
         });
     }
 }
-    </script>
+
+
+
+
+
+
+
+
+
+async function rejectOrder(orderId) {
+    try {
+        const response = await fetch('/admin/rejectOrder', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Order Rejected',
+                text: data.message,
+                confirmButtonColor: '#d33'
+            });
+
+            // remove action buttons & update status badge immediately
+            const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+            if (row) {
+                const statusCell = row.querySelector("td:nth-child(5)"); // status column
+                const actionCell = row.querySelector("td:nth-child(6)"); // actions column
+
+                statusCell.innerHTML = `<span class="status-badge status-rejected">Return Rejected</span>`;
+                actionCell.innerHTML = ''; // clear buttons
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message
+            });
+        }
+    } catch (error) {
+        console.error("Error rejecting order:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong while rejecting order'
+        });
+    }
+}
+</script>
+
+ 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

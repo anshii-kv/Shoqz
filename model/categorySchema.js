@@ -15,12 +15,11 @@ const categorySchema = new Schema({
         type: Boolean,
         default: true,
     },
-    
-    offer: {
-       type:mongoose.Schema.Types.ObjectId,
-       ref:'category'
-        
-    }
+  offer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CategoryOffer'
+}
+
 },
  { timestamps: true });
 

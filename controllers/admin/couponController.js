@@ -42,6 +42,8 @@ const addCoupon = async (req, res) => {
         console.log(req.body,"coupon addededdd");
 
         const existing = await Coupon.findOne({ code });
+        console.log(existing,"exists");
+        
         if (existing) {
             return res.status(400).json({ success: false, message: "Coupon code already exists." });
         }

@@ -11,7 +11,7 @@ const wishlistSchema = new Schema({
    productId:{
     type:Schema.Types.ObjectId,
     ref:"Product"
-   } ,
+   },
     productName: {
       type: String,
       required: true,

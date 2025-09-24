@@ -5,6 +5,8 @@
         <title>My Wishlist</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     </head>
     <body>
         <!-- Toast Container for notifications -->
@@ -46,13 +48,12 @@
                                                             <div class="col-md-6">
                                                                 <div class="card-body">
                                                                     <h5 class="card-title">
-                                                                        <%= item.productName %>
-                                                                    </h5>
-                                                                     <% if (item.size) { %>
-    <p class="card-text">
-      <strong>Selected Size:</strong> <%= item.size %>
-    </p>
-  <% } %>
+                                                                     <% if (item.sizes && item.sizes.length > 0) { %>
+  <p class="card-text">
+    <strong>Selected Size:</strong> <%= item.sizes[0].size %>
+  </p>
+<% } %>
+
   <%=console.log(item.size,"i hate you")%>
                                                                     <p class="card-text text-muted">
                                                                         <% if (item.category) { %>
@@ -172,12 +173,12 @@
                                             <hr class="my-4" />
 
                                             <% if (wishlistdata && wishlistdata.length > 0) { %>
-                                            <button class="btn btn-success btn-lg w-100 mb-3" onclick="addAllToCart()">
+                                            <!-- <button class="btn btn-success btn-lg w-100 mb-3" onclick="addAllToCart()">
                                                 <i class="fas fa-cart-plus me-2"></i>Add All to Cart
                                             </button>
                                             <button class="btn btn-outline-danger btn-lg w-100" onclick="clearWishlist()">
                                                 <i class="fas fa-trash me-2"></i>Clear Wishlist
-                                            </button>
+                                            </button> -->
                                             <% } else { %>
                                             <button class="btn btn-secondary btn-lg w-100" disabled>
                                                 Wishlist is Empty
@@ -199,7 +200,7 @@
                 </div>
             </div>
         </section>
-
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             // Utility function to show notifications
             function showToast(message, type = "info") {
@@ -261,31 +262,7 @@
             });
         } 
 
-                    // Check if response is JSON
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        let errorText = 'Unexpected server response';
-                        if (response.status === 401) {
-                            errorText = 'Please log in to add items to cart';
-                            window.location.href = '/login';
-                        }
-                        throw new Error(errorText);
-                    }
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showToast('Item added to cart successfully!', 'success');
-                        
-                        // Optional: Ask if user wants to remove from wishlist
-                        setTimeout(() => {
-                            if (confirm('Item added to cart! Would you like to remove it from your wishlist?')) {
-                                removeFromWishlist(productId);
-                            }
-                        }, 1000);
-                    } else {
-                        showToast(data.error || 'Failed to add item to cart', 'danger');
-                    }
+                  
                 } catch (error) {
                     console.error('Error adding to cart:', error);
                     showToast(error.message || 'Error adding to cart. Please try again.', 'danger');
@@ -294,9 +271,7 @@
 
             // Remove item from wishlist
             async function removeFromWishlist(productId) {
-                if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
-                    return;
-                }
+             
 
                 try {
                     const response = await fetch('/remove-from-wishlist', {
@@ -308,102 +283,93 @@
                         body: JSON.stringify({ productId: productId }),
                     });
 
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        let errorText = 'Unexpected server response';
-                        if (response.status === 401) {
-                            errorText = 'Please log in to update wishlist';
-                            window.location.href = '/login';
-                        }
-                        throw new Error(errorText);
-                    }
+                console.log("anshi")
 
                     const data = await response.json();
-
-                    if (data.success) {
-                        // Remove item from DOM with animation
-                        const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
-                        if (itemElement) {
-                            itemElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                            itemElement.style.opacity = '0';
-                            itemElement.style.transform = 'translateX(-100%)';
-                            
-                            setTimeout(() => {
-                                itemElement.remove();
-                                updateWishlistSummary();
-                                if (data.wishlistEmpty) {
-                                    checkEmptyWishlist();
-                                }
-                            }, 300);
-                        }
-
-                        showToast(data.message || 'Item removed from wishlist', 'success');
+                    console.log(data,"data anshi")
+                      if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.message,
+                            showConfirmButton: true,
+                            timer: 1500
+                        });
                     } else {
-                        showToast(data.error || 'Failed to remove item from wishlist', 'danger');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: data.message,
+                        });
                     }
                 } catch (error) {
-                    console.error('Error removing from wishlist:', error);
-                    showToast(error.message || 'Error removing item. Please try again.', 'danger');
+                    console.error('Error adding to cart:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to add to cart. Please try again.',
+                    });
                 }
+                 
             }
 
             // Add all in-stock items to cart
-            async function addAllToCart() {
-                const inStockItems = document.querySelectorAll('[data-product-id]');
-                const productIds = [];
+            // async function addAllToCart() {
+            //     const inStockItems = document.querySelectorAll('[data-product-id]');
+            //     const productIds = [];
 
-                inStockItems.forEach(item => {
-                    const stockBadge = item.querySelector('.badge');
-                    if (stockBadge && !stockBadge.classList.contains('bg-danger')) {
-                        productIds.push(item.getAttribute('data-product-id'));
-                    }
-                });
+            //     inStockItems.forEach(item => {
+            //         const stockBadge = item.querySelector('.badge');
+            //         if (stockBadge && !stockBadge.classList.contains('bg-danger')) {
+            //             productIds.push(item.getAttribute('data-product-id'));
+            //         }
+            //     });
 
-                if (productIds.length === 0) {
-                    showToast('No items are available to add to cart', 'warning');
-                    return;
-                }
+            //     if (productIds.length === 0) {
+            //         showToast('No items are available to add to cart', 'warning');
+            //         return;
+            //     }
 
-                if (!confirm(`Are you sure you want to add ${productIds.length} items to your cart?`)) {
-                    return;
-                }
+            //     if (!confirm(`Are you sure you want to add ${productIds.length} items to your cart?`)) {
+            //         return;
+            //     }
 
-                try {
-                    const response = await fetch('/add-all-to-cart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ productIds: productIds }),
-                    });
+            //     try {
+            //         const response = await fetch('/add-all-to-cart', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //             },
+            //             credentials: 'include',
+            //             body: JSON.stringify({ productIds: productIds }),
+            //         });
 
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        let errorText = 'Unexpected server response';
-                        if (response.status === 401) {
-                            errorText = 'Please log in to add items to cart';
-                            window.location.href = '/login';
-                        }
-                        throw new Error(errorText);
-                    }
+            //         const contentType = response.headers.get('content-type');
+            //         if (!contentType || !contentType.includes('application/json')) {
+            //             let errorText = 'Unexpected server response';
+            //             if (response.status === 401) {
+            //                 errorText = 'Please log in to add items to cart';
+            //                 window.location.href = '/login';
+            //             }
+            //             throw new Error(errorText);
+            //         }
 
-                    const data = await response.json();
+            //         const data = await response.json();
 
-                    if (data.success) {
-                        showToast(`Successfully added ${data.addedCount} items to cart!`, 'success');
+            //         if (data.success) {
+            //             showToast(`Successfully added ${data.addedCount} items to cart!`, 'success');
                         
-                        if (data.failedCount > 0) {
-                            showToast(`${data.failedCount} items could not be added (out of stock or other issues)`, 'warning');
-                        }
-                    } else {
-                        showToast(data.error || 'Failed to add items to cart', 'danger');
-                    }
-                } catch (error) {
-                    console.error('Error adding all to cart:', error);
-                    showToast(error.message || 'Error adding items to cart. Please try again.', 'danger');
-                }
-            }
+            //             if (data.failedCount > 0) {
+            //                 showToast(`${data.failedCount} items could not be added (out of stock or other issues)`, 'warning');
+            //             }
+            //         } else {
+            //             showToast(data.error || 'Failed to add items to cart', 'danger');
+            //         }
+            //     } catch (error) {
+            //         console.error('Error adding all to cart:', error);
+            //         showToast(error.message || 'Error adding items to cart. Please try again.', 'danger');
+            //     }
+            // }
 
             // Clear entire wishlist
             async function clearWishlist() {

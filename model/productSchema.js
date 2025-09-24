@@ -35,10 +35,15 @@ const productSchema = new Schema(
   ref: "productOffer",  
   default: null
 },
-categoryOffer:{
-  type:mongoose.Schema.Types.ObjectId,
-  ref:"categoryOffer",
-  default:null
+// categoryOffer:{
+//   type:mongoose.Schema.Types.ObjectId,
+//   ref:"categoryOffer",
+//   default:null
+// },
+categoryOffer: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "CategoryOffer",  // ✅ must match the model name
+  default: null,
 },
 
 
