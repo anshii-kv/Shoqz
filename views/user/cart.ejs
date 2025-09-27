@@ -58,7 +58,7 @@
                                                                             class="item-price"
                                                                             data-price="<%= item.productId.salePrice || item.productId.regularPrice %>"
                                                                         >
-                                                                            <%= item.productId.salePrice || item.productId.regularPrice %>
+                                                                            <%= item.finalPrice*item.quantity %>
                                                                         </span>
                                                                     </strong>
                                                                 </p>
@@ -93,12 +93,11 @@
                                                                 <!-- Item Total -->
                                                                 <p class="card-text">
                                                                     <strong>
-                                                                        Total: ₹<span
+                                                                        Totalk: ₹<span
                                                                             class="item-total"
                                                                             data-product-id="<%= item.productId._id %>"
                                                                         >
-                                                                            <%= (item.quantity * (item.productId.salePrice || item.productId.regularPrice)).toFixed(2) %>
-                                                                        </span>
+ ₹<%= item.finalPrice*item.quantity %>                                                                    </span>
                                                                     </strong>
                                                                 </p>
 
@@ -315,6 +314,7 @@
 
             // Update cart summary totals
             function updateCartSummary() {
+                window.location.reload()
                 let subtotal = 0;
                 let totalItems = 0;
 

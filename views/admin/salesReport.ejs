@@ -119,17 +119,32 @@
         <i class="fas fa-chart-line me-2"></i>
         Sales Report Dashboard
       </h1>
-      <div class="export-buttons d-flex gap-2">
+      <div class="export-buttons d-flex gap-2 align-items-center">
         <button id="exportExcel" class="btn btn-outline-secondary">
           <i class="fas fa-file-excel me-1"></i> Export Excel
         </button>
         <button id="exportPDF" class="btn btn-outline-secondary">
           <i class="fas fa-file-pdf me-1"></i> Export PDF
         </button>
+        
+        <!-- Custom Date Range Inputs (Hidden by Default) -->
+        <div id="customDateRange" class="d-none align-items-center gap-2">
+          <input type="date" id="startDate" class="form-control form-control-sm" style="width: 150px;">
+          <span>to</span>
+          <input type="date" id="endDate" class="form-control form-control-sm" style="width: 150px;">
+          <button id="applyCustomFilter" class="btn btn-primary btn-sm">Apply</button>
+        </div>
+
         <!-- Filter Button with Dropdown -->
         <div class="dropdown">
           <button id="filterBtn" class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-sync-alt me-1"></i> Filter
+            <i class="fas fa-filter me-1"></i> 
+            <span id="currentFilterText">
+              <% if (currentFilter === 'today') { %>Today<% } %>
+              <% if (currentFilter === 'weekly') { %>Weekly<% } %>
+              <% if (currentFilter === 'monthly') { %>Monthly<% } %>
+              <% if (currentFilter === 'custom') { %>Custom Range<% } %>
+            </span>
           </button>
           <ul class="dropdown-menu" id="filterDropdown">
             <li><a class="dropdown-item" href="#" data-filter="today">Today</a></li>
@@ -174,47 +189,57 @@
     </div>
 
     <!-- Table -->
-  <!-- Sales Report Table with Dummy Data -->
-<div class="table-responsive mt-4">
-  <table class="table table-striped table-bordered" id="salesReportTable">
-    <thead class="table-dark">
-      <tr>
-        <th>Order ID</th>
-        <th>Customer Name</th>
-        <th>Date</th>
-        <th>Total Amount (₹)</th>
-        <th>Coupon Discount (₹)</th>
-        <th>Offer Discount (₹)</th>
-        <th>Delivery Charge (₹)</th>
-        <th>Final Price (₹)</th>
-        <th>Payment Method</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if (recentOrders && recentOrders.length > 0) { %>
-        <% recentOrders.forEach(order => { %>
+    <div class="table-responsive mt-4">
+      <table class="table table-striped table-bordered" id="salesReportTable">
+        <thead class="table-dark">
           <tr>
-            <td><%= order.orderId %></td>
-            <td><%= order.customerName %></td>
-            <td><%= order.date %></td>
-            <td>₹<%= order.totalAmount %></td>
-            <td>₹<%= order.couponDiscount %></td>
-            <td>₹<%= order.offerDiscount %></td>
-            <td>₹<%= order.deliveryCharge %></td>
-            <td>₹<%= order.finalPrice %></td>
-            <td><%= order.paymentMethod %></td>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer Name</th>
+            <th>Original Price (₹)</th>
+            <th>Coupon Discount (₹)</th>
+            <th>Offer Discount (₹)</th>
+            <th>Delivery Charge (₹)</th>
+            <th>Final Price (₹)</th>
+            <th>Payment Method</th>
           </tr>
-        <% }) %>
-      <% } else { %>
-        <tr>
-          <td colspan="9" class="text-center">No delivered orders available</td>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
-</div>
+        </thead>
+       <!-- In your table body section -->
+<tbody>
+ <% if (recentOrders && recentOrders.length > 0) { %>
+  <% recentOrders.forEach(order => { %>
+    <tr>
+      <td><%= order.orderId %></td>
+      <td><%= order.date %></td>
+      <td><%= order.customerName %></td>
 
+      <!-- Loop products for salePrice -->
+      <td>
+        <% if (order.products && order.products.length > 0) { %>
+          <% order.products.forEach(p => { %>
+            <div><%= p.name %> → ₹<%= p.salePrice %></div>
+          <% }) %>
+        <% } else { %>
+          N/A
+        <% } %>
+      </td>
 
+      <td>₹<%= order.couponDiscount %></td>
+      <td>₹<%= order.offerDiscount %></td>
+      <td>₹<%= order.deliveryCharge %></td>
+      <td>₹<%= order.finalPrice %></td>
+      <td><%= order.paymentMethod %></td>
+    </tr>
+  <% }) %>
+<% } else { %>
+  <tr>
+    <td colspan="9" class="text-center">No orders available for the selected filter</td>
+  </tr>
+<% } %>
+
+</tbody>
+      </table>
+    </div>
 
     <div id="notification" class="notification">
       <i class="fas fa-check-circle"></i>
@@ -225,116 +250,247 @@
   <!-- Bootstrap JS and Popper.js -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-  <script>
-    // 1️⃣ Data from server
-    const salesData = <%- JSON.stringify(recentOrders) %>;
-    let filteredData = [...salesData];
-    let currentPage = 1;
-    const itemsPerPage = 8;
+  
+<script>
+  // Filter functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterDropdownItems = document.querySelectorAll('#filterDropdown .dropdown-item');
+    const customDateRange = document.getElementById('customDateRange');
+    const currentFilterText = document.getElementById('currentFilterText');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const applyCustomFilterBtn = document.getElementById('applyCustomFilter');
 
-    // 2️⃣ Export functions
+    // Set default dates for custom range
+    const today = new Date();
+    const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    startDateInput.value = oneWeekAgo.toISOString().split('T')[0];
+    endDateInput.value = today.toISOString().split('T')[0];
+
+    // Handle filter selection
+    filterDropdownItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const filter = this.dataset.filter;
+        
+        if (filter === 'custom') {
+          // Show custom date range inputs
+          customDateRange.classList.remove('d-none');
+          currentFilterText.textContent = 'Custom Range';
+        } else {
+          // Hide custom date range and apply filter immediately
+          customDateRange.classList.add('d-none');
+          currentFilterText.textContent = this.textContent;
+          applyFilter(filter);
+        }
+      });
+    });
+
+    // Apply custom filter
+    applyCustomFilterBtn.addEventListener('click', function() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      
+      if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+      }
+      
+      if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date cannot be after end date');
+        return;
+      }
+      
+      applyFilter('custom', startDate, endDate);
+    });
+
+    // Filter function
+    function applyFilter(filter, startDate = '', endDate = '') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('filter', filter);
+      
+      if (filter === 'custom' && startDate && endDate) {
+        url.searchParams.set('startDate', startDate);
+        url.searchParams.set('endDate', endDate);
+      } else {
+        url.searchParams.delete('startDate');
+        url.searchParams.delete('endDate');
+      }
+      
+      // Show loading state
+      currentFilterText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      
+      // Reload page with new filter
+      window.location.href = url.toString();
+    }
+
+    // Export functions
     function exportToExcel() {
-      const headers = ['Order ID', 'Customer', 'Date', 'Amount', 'Category', 'Status'];
-      let csv = headers.join(',') + '\n';
+      try {
+        // Get the actual table data from the rendered HTML
+        const table = document.getElementById('salesReportTable');
+        const headers = [];
+        const rows = [];
 
-      filteredData.forEach(row => {
-        const csvRow = [
-          row.displayOrderId || row.orderId,
-          row.deliveryDetails ? `${row.deliveryDetails.fname} ${row.deliveryDetails.sname}` : '',
-          row.Date ? new Date(row.Date).toLocaleDateString() : '',
-          row.subtotal || row.amount,
-          row.product && row.product.length > 0 ? row.product[0].category.name : '',
-          row.status || 'Pending'
-        ].join(',');
-        csv += csvRow + '\n';
+        // Get headers
+        table.querySelectorAll('thead th').forEach(header => {
+          headers.push(header.textContent.trim());
+        });
+
+        // Get rows data
+        table.querySelectorAll('tbody tr').forEach(row => {
+          const rowData = [];
+          row.querySelectorAll('td').forEach(cell => {
+            rowData.push(cell.textContent.trim());
+          });
+          rows.push(rowData);
+        });
+
+        // Create CSV content
+        let csv = headers.join(',') + '\n';
+        rows.forEach(row => {
+          // Escape commas and quotes in data
+          const escapedRow = row.map(field => {
+            if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+              return '"' + field.replace(/"/g, '""') + '"';
+            }
+            return field;
+          });
+          csv += escapedRow.join(',') + '\n';
+        });
+
+        // Create and download file
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'sales_report.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('Excel file exported successfully!');
+      } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        alert('Error exporting to Excel: ' + error.message);
+      }
+    }
+
+function exportToPDF() {
+  try {
+    const { jsPDF } = window.jspdf;
+
+    // Create new PDF document
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a3'
+    });
+
+    // Title
+    doc.setFontSize(18);
+    doc.text('Sales Report - ZENVOGUE', 20, 20);
+
+    // Get table data
+    const table = document.getElementById('salesReportTable');
+    const headers = [];
+    const rows = [];
+
+    // Extract headers
+    table.querySelectorAll('thead th').forEach(header => {
+      headers.push(header.textContent.trim());
+    });
+
+    // Extract rows
+    table.querySelectorAll('tbody tr').forEach(row => {
+      const rowData = [];
+      row.querySelectorAll('td').forEach(cell => {
+        rowData.push(cell.textContent.trim());
+      });
+      rows.push(rowData);
+    });
+
+    // PDF table settings
+    doc.setFontSize(10);
+    const margin = 20;
+    const lineHeight = 8;
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+
+    const colWidth = (pageWidth - margin * 2) / headers.length;
+    const colPositions = headers.map((_, i) => margin + i * colWidth);
+
+    let yPosition = 40;
+
+    // Draw headers with borders
+    headers.forEach((header, i) => {
+      doc.text(header, colPositions[i] + 2, yPosition);
+      // Header cell border
+      doc.rect(colPositions[i], yPosition - lineHeight + 2, colWidth, lineHeight, 'S');
+    });
+
+    yPosition += lineHeight;
+
+    // Draw row data
+    rows.forEach(row => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+
+        // redraw headers on new page
+        headers.forEach((header, i) => {
+          doc.text(header, colPositions[i] + 2, yPosition);
+          doc.rect(colPositions[i], yPosition - lineHeight + 2, colWidth, lineHeight, 'S');
+        });
+
+        yPosition += lineHeight;
+      }
+
+      row.forEach((cell, i) => {
+        const text = cell || '';
+        const wrappedText = doc.splitTextToSize(text, colWidth - 4);
+
+        // Place text
+        doc.text(wrappedText, colPositions[i] + 2, yPosition);
+
+        // Cell border
+        doc.rect(colPositions[i], yPosition - lineHeight + 2, colWidth, lineHeight, 'S');
       });
 
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sales_report.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
+      yPosition += lineHeight;
+    });
 
-    function exportToPDF() {
-  if (!filteredData || filteredData.length === 0) {
-    alert("No data available to export!");
-    return;
+    // Footer with date
+    const exportDate = new Date().toLocaleString();
+    doc.setFontSize(8);
+    doc.text(`Exported on: ${exportDate}`, margin, pageHeight - 10);
+
+    // Save file
+    doc.save('sales_report.pdf');
+    showNotification('PDF file exported successfully!');
+  } catch (error) {
+    console.error('Error exporting to PDF:', error);
+    alert('Error exporting to PDF: ' + error.message);
   }
-
-  const { jsPDF } = window.jspdf;
-
-  // Increase page size: A3 or custom size (in mm)
-  const doc = new jsPDF({
-    orientation: "landscape", // or "portrait"
-    unit: "mm",
-    format: "a3" // options: "a0" to "a10", "letter", "legal", or [width, height]
-  });
-
-  doc.setFontSize(18);
-  doc.text('Sales Report Dashboard', 20, 20);
-
-  doc.setFontSize(12);
-  let y = 30;
-
-  // Adjust xPositions for wider page
-  const headers = ['Order ID', 'Customer', 'Date', 'Amount', 'Category', 'Status'];
-  let xPositions = [20, 70, 130, 180, 230, 280];
-
-  // Header row
-  headers.forEach((header, i) => doc.text(header, xPositions[i], y));
-  y += 10;
-
-  // Table rows
-  filteredData.forEach((row) => {
-    doc.text(row.displayOrderId || row.orderId, xPositions[0], y);
-    doc.text(row.deliveryDetails ? `${row.deliveryDetails.fname} ${row.deliveryDetails.sname}`.substring(0,12) : '', xPositions[1], y);
-    doc.text(row.Date ? new Date(row.Date).toLocaleDateString() : '', xPositions[2], y);
-    doc.text(`₹${row.subtotal || row.amount}`, xPositions[3], y);
-    doc.text(row.product && row.product.length > 0 ? row.product[0].category.name : '', xPositions[4], y);
-    doc.text(row.status || 'Pending', xPositions[5], y);
-    y += 8;
-
-    if (y > 200) { // adjust for larger page
-      doc.addPage();
-      y = 20;
-      // Optionally, re-add headers on new page
-      headers.forEach((header, i) => doc.text(header, xPositions[i], y));
-      y += 10;
-    }
-  });
-
-  doc.save('sales_report.pdf');
 }
 
 
-    // 3️⃣ Notification helper
+
+    // Notification helper
     function showNotification(message) {
-      const notification = document.getElementById("notification");
-      const span = notification.querySelector("span");
+      const notification = document.getElementById('notification');
+      const span = notification.querySelector('span');
       span.textContent = message;
-      notification.classList.add("show");
-      setTimeout(() => notification.classList.remove("show"), 3000);
+      notification.classList.add('show');
+      setTimeout(() => notification.classList.remove('show'), 3000);
     }
 
-    // 4️⃣ Handle filter selection
-    document.querySelectorAll("#filterDropdown .dropdown-item").forEach(item => {
-      item.addEventListener("click", function(e) {
-        e.preventDefault();
-        const filter = this.dataset.filter;
-        console.log("Selected filter:", filter);
-        // Add your filtering logic here
-      });
-    });
-
-    // 5️⃣ Attach button events
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('exportExcel').addEventListener('click', () => exportToExcel());
-      document.getElementById('exportPDF').addEventListener('click', () => exportToPDF());
-      // Note: refreshBtn event listener removed as the button is not present in the HTML
-    });
-  </script>
+    // Attach export button events
+    document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+    document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+  });
+</script>
 </body>
 </html>

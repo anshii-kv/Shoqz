@@ -485,10 +485,10 @@
         <i class="fas fa-download"></i> Invoice
       </button>
     <% } else if(order.status === 'Pending') { %>
-      <%=console.log(item.productId,item.name,"ProductIdsssss")%>
+      <!-- <%=console.log(item.productId,item.name,"ProductIdsssss")%>
       <button class="action-btn btn-danger" onclick="cancelOrder('<%= order._id %>','<%=item.productId%>','<%=item.name%>')">
         <i class="fas fa-times"></i> Cancel
-      </button>
+      </button> -->
     <% } else if(order.status === 'Processing' || order.status === 'Shipped') { %>
       <button class="action-btn btn-primary" onclick="trackOrder('<%= order._id %>')">
         <i class="fas fa-truck"></i> Track
@@ -586,47 +586,47 @@
         }
 
         // Cancel Order Function
-        function cancelOrder(orderId,productId,productName) {
-            console.log(productName,'dfdf')
-  Swal.fire({
-    title: 'Cancel Order',
-    text: `Are you sure you want to cancel order ${productName}?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Yes, Cancel Order'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      fetch('/cancel-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ orderId: orderId,productId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire({
-            title: 'Cancelled!',
-            text: 'Your order has been cancelled.',
-            icon: 'success',
-            confirmButtonColor: '#bdd5eb'
-          }).then(() => {
-            window.location.reload();
-          });
-        } else {
-          Swal.fire('Error', data.message || 'Something went wrong.', 'error');
-        }
-      })
-      .catch(err => {
-        Swal.fire('Error', 'Server error occurred.', 'error');
-        console.error(err);
-      });
-    }
-  });
-}
+//         function cancelOrder(orderId,productId,productName) {
+//             console.log(productName,'dfdf')
+//   Swal.fire({
+//     title: 'Cancel Order',
+//     text: `Are you sure you want to cancel order ${productName}?`,
+//     icon: 'warning',
+//     showCancelButton: true,
+//     confirmButtonColor: '#dc3545',
+//     cancelButtonColor: '#6c757d',
+//     confirmButtonText: 'Yes, Cancel Order'
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       fetch('/cancel-order', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({ orderId: orderId,productId })
+//       })
+//       .then(res => res.json())
+//       .then(data => {
+//         if (data.success) {
+//           Swal.fire({
+//             title: 'Cancelled!',
+//             text: 'Your order has been cancelled.',
+//             icon: 'success',
+//             confirmButtonColor: '#bdd5eb'
+//           }).then(() => {
+//             window.location.reload();
+//           });
+//         } else {
+//           Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+//         }
+//       })
+//       .catch(err => {
+//         Swal.fire('Error', 'Server error occurred.', 'error');
+//         console.error(err);
+//       });
+//     }
+//   });
+// }
 
 
         // Return Order Function

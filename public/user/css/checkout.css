@@ -1,0 +1,82 @@
+
+            .default-address-container {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+            .address-item {
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .address-item:hover {
+                background-color: #f0f0f0;
+            }
+            .address-item.selected {
+                border-color: #007bff;
+                background-color: #e7f1ff;
+            }
+            .default-badge {
+                background-color: #28a745;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                margin-left: 10px;
+            }
+            .payment-option {
+                padding: 10px;
+                border-radius: 5px;
+                transition: background-color 0.2s;
+            }
+            .payment-option:hover {
+                background-color: #f0f0f0;
+            }
+            .payment-option.selected {
+                background-color: #e7f1ff;
+                border: 1px solid #007bff;
+            }
+            .order-item img {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+            }
+            .progress-steps .col-4 {
+                flex: 1 0 33.33%;
+                max-width: 33.33%;
+            }
+            @media (max-width: 576px) {
+                .progress-steps .col-4 {
+                    flex: 1 0 100%;
+                    max-width: 100%;
+                    margin-bottom: 10px;
+                }
+            }
+            .is-invalid {
+                border-color: #dc3545 !important;
+            }
+            .invalid-feedback {
+                display: none;
+                font-size: 0.875rem;
+                color: #dc3545;
+            }
+            .is-invalid ~ .invalid-feedback {
+                display: block;
+            }
+            .coupon-item {
+    transition: all 0.2s ease;
+}
+
+.coupon-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.coupon-item .badge {
+    font-family: monospace;
+    font-weight: bold;
+}
+        

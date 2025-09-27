@@ -131,12 +131,13 @@ deliveryCharge: {
   type: Number,
   default: 0,
 },
+appliedOffer: { type: Number, default: 0 }, 
 finalPrice: {
   type: Number,
   default: 0,
 },
 });
 
-// module.exports = mongoose.model("order", OrderSchema);
+
 const order = mongoose.model("Order",OrderSchema);
 module.exports=order

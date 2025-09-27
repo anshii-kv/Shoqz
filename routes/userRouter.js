@@ -23,7 +23,7 @@ router.get("/pageNotfound",usercontroller.pageNotfound);
 
 router.get("/signup",auth.User,usercontroller.loadSignuppage);
 
-router.post("/signup",usercontroller.signup);
+router.post("/signup",auth.User,usercontroller.signup);
 
 
 router.get("/login",auth.User,usercontroller.loadloginpage)
@@ -141,7 +141,7 @@ router.get('/thankyou/:orderId',usercontroller.loadThankyou)
 
 router.get('/order',auth.isBlock,auth.toLogin,orderController.orderlist)
 
-router.post('/cancel-order',orderController.cancelOrder)
+// router.post('/cancel-order',orderController.cancelOrder)
 
 router.post("/cancel-orders",orderController.cancelOrders);
 

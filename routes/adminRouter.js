@@ -64,9 +64,9 @@ router.delete('/category-offers/delete/:id', offerController.removeCategoryOffer
 
 
 
-router.get('/Offer',offerController.productOfferget)
+router.get('/Offer',auth.adminLogin,offerController.productOfferget)
 
-router.get('/categoryOffer',offerController.categoryOffer)
+router.get('/categoryOffer',auth.adminLogin,offerController.categoryOffer)
 
 router.post("/product-offers/create",offerController.updateProductOffer)
 

@@ -440,7 +440,7 @@
                     <%= order.deliveryDetails.fname %> <%= order.deliveryDetails.sname %><br>
                     <small><%= order.deliveryDetails.email %></small>
                 </td>
-                <td>₹<%= order.subtotal.toFixed(2) %></td>
+                <td>₹<%= order.finalPrice.toFixed(2) %></td>
 
                 <td>
                     <span class="status-badge status-<%= order.status %>">

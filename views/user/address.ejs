@@ -663,47 +663,56 @@
             });
         }
 
-        function handleAddressSubmit(event) {
-            event.preventDefault();
-            
-            // Get form data
-            const formData = {
-                fname: document.getElementById('fname').value,
-                sname: document.getElementById('sname').value,
-                mobile: document.getElementById('mobile').value,
-                email: document.getElementById('email').value,
-                addressType: document.getElementById('addressType').value,
-                pin: document.getElementById('pin').value,
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                isDefault: document.getElementById('isDefault').checked
-            };
+       function handleAddressSubmit(event) {
+    event.preventDefault();
 
-            // Add address via API
-            fetch('/addAddress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    swal("Address added successfully!", {
-                        icon: "success",
-                        timer: 2000,
-                        buttons: false
-                    });
-                    hideAddressForm();
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    swal(result.message || "Failed to add address", { icon: "error" });
-                }
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                swal("Server Error", { icon: "error" });
+    const isDefault = document.getElementById('isDefault').checked;
+
+    // ❌ Prevent multiple defaults
+    if (isDefault && addressesData.some(addr => addr.isDefault)) {
+        swal("You already have a default address!", {
+            icon: "warning"
+        });
+        return;
+    }
+
+    const formData = {
+        fname: document.getElementById('fname').value,
+        sname: document.getElementById('sname').value,
+        mobile: document.getElementById('mobile').value,
+        email: document.getElementById('email').value,
+        addressType: document.getElementById('addressType').value,
+        pin: document.getElementById('pin').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        isDefault: isDefault
+    };
+
+    fetch('/addAddress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            swal("Address added successfully!", {
+                icon: "success",
+                timer: 2000,
+                buttons: false
             });
+            hideAddressForm();
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            swal(result.message || "Failed to add address", { icon: "error" });
         }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        swal("Server Error", { icon: "error" });
+    });
+}
+
 
         function editAddress(addressId,index) {
             // Find the address data
@@ -731,60 +740,59 @@
             editModal.show();
         }
 
-        function updateAddress() {
-            const addressId = document.getElementById('editAddressId').value;
-            
-            // Get updated form data
-            const formData = {
-                addressId: addressId,
-                fname: document.getElementById('editFname').value,
-                sname: document.getElementById('editSname').value,
-                mobile: document.getElementById('editMobile').value,
-                email: document.getElementById('editEmail').value,
-                addressType: document.getElementById('editAddressType').value,
-                pin: document.getElementById('editPin').value,
-                address: document.getElementById('editAddress').value,
-                city: document.getElementById('editCity').value,
-                isDefault: document.getElementById('editIsDefault').checked
-            };
+      function updateAddress() {
+    const addressId = document.getElementById('editAddressId').value;
+    const isDefault = document.getElementById('editIsDefault').checked;
 
-            // Validate required fields
-            if (!formData.fname || !formData.sname || !formData.mobile || !formData.email || 
-                !formData.addressType || !formData.pin || !formData.address || !formData.city) {
-                swal("Please fill all required fields!", { icon: "warning" });
-                return;
-            }
-
-            // Update address via API
-            fetch('/editAddress', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    swal("Address updated successfully!", {
-                        icon: "success",
-                        timer: 2000,
-                        buttons: false
-                    });
-                    
-                    // Hide the modal
-                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
-                    editModal.hide();
-                    
-                    // Reload the page to show updated data
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    swal(result.message || "Failed to update address", { icon: "error" });
-                }
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                swal("Server Error", { icon: "error" });
-            });
+    // ❌ Prevent multiple defaults (only if setting new one)
+    if (isDefault) {
+        const anotherDefault = addressesData.find(addr => addr.isDefault && addr._id !== addressId);
+        if (anotherDefault) {
+            swal("You already have a default address!", { icon: "warning" });
+            return;
         }
+    }
+
+    const formData = {
+        addressId: addressId,
+        fname: document.getElementById('editFname').value,
+        sname: document.getElementById('editSname').value,
+        mobile: document.getElementById('editMobile').value,
+        email: document.getElementById('editEmail').value,
+        addressType: document.getElementById('editAddressType').value,
+        pin: document.getElementById('editPin').value,
+        address: document.getElementById('editAddress').value,
+        city: document.getElementById('editCity').value,
+        isDefault: isDefault
+    };
+
+    fetch('/editAddress', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            swal("Address updated successfully!", {
+                icon: "success",
+                timer: 2000,
+                buttons: false
+            });
+
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+            editModal.hide();
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            swal(result.message || "Failed to update address", { icon: "error" });
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        swal("Server Error", { icon: "error" });
+    });
+}
+
          async function  deleteAddress(addressId) {
           
             swal({
