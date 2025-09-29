@@ -1,11 +1,17 @@
 const Order = require("../../model/orderSchema");
-const Category = require("../../model/categorySchema");
 
 const salesReport = async (req, res) => {
     try {
-        const { filter = "monthly", startDate, endDate } = req.query;
 
-        // ✅ Build date filter
+        let { filter, startDate, endDate } = req.query;
+        
+     
+        if (!filter) {
+            filter = "weekly";
+        }
+
+        console.log("Applied Filter:", filter); 
+
         let dateFilter = {};
         const now = new Date();
 
@@ -20,7 +26,7 @@ const salesReport = async (req, res) => {
 
             case "weekly":
                 const startOfWeek = new Date();
-                startOfWeek.setDate(startOfWeek.getDate() - 7); // 7 days ago
+                startOfWeek.setDate(startOfWeek.getDate() - 7); 
                 startOfWeek.setHours(0, 0, 0, 0);
                 const endOfWeek = new Date();
                 endOfWeek.setHours(23, 59, 59, 999);
@@ -35,46 +41,54 @@ const salesReport = async (req, res) => {
                 dateFilter.Date = { $gte: startOfMonth, $lte: endOfMonth };
                 break;
 
-        
-                case "custom":
+            case "custom":
                 if (startDate && endDate) {
                     const customStart = new Date(startDate);
                     customStart.setHours(0, 0, 0, 0);
                     const customEnd = new Date(endDate);
                     customEnd.setHours(23, 59, 59, 999);
                     dateFilter.Date = { $gte: customStart, $lte: customEnd };
+                } else {
+                    
+                    filter = "weekly";
+                    const fallbackStart = new Date();
+                    fallbackStart.setDate(fallbackStart.getDate() - 7);
+                    fallbackStart.setHours(0, 0, 0, 0);
+                    const fallbackEnd = new Date();
+                    fallbackEnd.setHours(23, 59, 59, 999);
+                    dateFilter.Date = { $gte: fallbackStart, $lte: fallbackEnd };
                 }
                 break;
 
             default:
-                // Default to monthly
-                const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1);
+               
+                filter = "weekly";
+                const defaultStart = new Date();
+                defaultStart.setDate(defaultStart.getDate() - 7);
                 defaultStart.setHours(0, 0, 0, 0);
                 const defaultEnd = new Date();
                 defaultEnd.setHours(23, 59, 59, 999);
                 dateFilter.Date = { $gte: defaultStart, $lte: defaultEnd };
         }
 
-        console.log("Filter:", filter);
+        console.log("Final Filter:", filter);
         console.log("Date Range:", dateFilter.Date);
 
-        // ✅ Fetch orders with date filter
         const orders = await Order.find({
             "deliveryDetails.paymentSuccess": true,
             status: "delivered",
             ...dateFilter,
         })
-            .populate("user")
-            .populate("product")
-            .sort({ Date: -1 });
+        .populate("user")
+        .populate("product")
+        .sort({ Date: -1 });
 
         console.log("Orders found:", orders.length);
 
-        // ✅ Totals
+      
         const totalRevenue = orders.reduce((acc, order) => acc + (order.subtotal || 0), 0);
         const totalOrders = orders.length;
 
-        // ✅ Discounts
         const totalDiscounts = orders.reduce((acc, order) => {
             let discount = 0;
             if (order.product && order.product.length > 0) {
@@ -89,13 +103,12 @@ const salesReport = async (req, res) => {
 
         const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
 
+        
         const tableData = orders.map((order) => {
-            // Collect product details (including salePrice)
             let offerDiscount = 0;
             let appliedOffers = [];
 
             const productDetails = order.product.map((p) => {
-                // ✅ if finalamount already includes quantity, don’t multiply again
                 if (p.salePrice && p.finalamount) {
                     const originalLineTotal = p.salePrice * p.quantity;
                     const discountedLineTotal = p.finalamount;
@@ -116,16 +129,10 @@ const salesReport = async (req, res) => {
                 };
             });
 
-            console.log(productDetails, "abcd");
-
-            // ✅ Original price = regularPrice × quantity for all products
             const originalPrice =
                 order.product && order.product.length > 0
                     ? order.product.reduce((sum, p) => sum + p.regularPrice * p.quantity, 0)
                     : order.subtotal + offerDiscount + (order.couponDiscount || 0);
-
-            console.log("Original Price:", originalPrice);
-            console.log("Offer Discount:", offerDiscount);
 
             return {
                 orderId: order.displayOrderId || order._id.toString().slice(-6),
@@ -147,21 +154,22 @@ const salesReport = async (req, res) => {
                     ? order.paymentMethod.toUpperCase()
                     : order.deliveryDetails?.paymentMethod?.toUpperCase() || "N/A",
                 originalPrice: originalPrice,
-                products: productDetails, // ✅ Send products array with salePrice
+                products: productDetails,
             };
         });
-        console.log();
 
+       
         res.render("admin/salesReport", {
             totalRevenue,
             totalOrders,
             totalDiscounts,
             avgOrderValue,
             recentOrders: tableData,
-            currentFilter: filter,
+            currentFilter: filter, 
             startDate: startDate || "",
             endDate: endDate || "",
         });
+
     } catch (error) {
         console.error("Error in salesReport:", error);
         res.status(500).send("Server Error");

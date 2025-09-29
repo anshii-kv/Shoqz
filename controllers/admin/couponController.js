@@ -103,7 +103,7 @@ const toggleCouponStatus = async (req, res) => {
             couponId,
             { 
                
-                status: 'active' ? 'inactive' : 'active'
+                status: couponData.status=='active'?'inactive':'active'
             },
             { new: true }
         );

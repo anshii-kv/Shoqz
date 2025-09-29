@@ -550,7 +550,7 @@
                         <a href="/product/<%= product._id %>"><%= product.productName %></a>
                       </h3>
                       <div class="price-section">
-                        <span class="current-price">₹<%= product.finalamount %></span>
+                        <span class="current-price">₹<%= product.salePrice %></span>
                         <% if (product.productOffer > 0 || product.categoryoffer > 0) { %>
                           <span class="original-price">₹<%= product.salePrice.toFixed(2) %></span>
                         <% } %>

@@ -145,13 +145,19 @@
                                                 </h5>
                                                 <h5 id="subtotalDisplay">₹<%= subtotal.toFixed(2) %></h5>
                                             </div>
+                                             <div class="d-flex justify-content-between mb-4">
+                                                <h5 class="text-uppercase">
+                                                    Delivery Charge
+                                                </h5>
+                                                <h5 id="subtotalDisplay">₹ 60</h5>
+                                            </div>
 
                                             <hr class="my-4" />
 
                                             <div class="d-flex justify-content-between mb-5">
                                                 <h5 class="text-uppercase">Total</h5>
                                                 <h5 id="totalDisplay">
-                                                    ₹<span id="totalAmount"><%= total.toFixed(2) %></span>
+                                                    ₹<span id="totalAmount"><%= total+60 %></span>
                                                 </h5>
                                             </div>
 

@@ -72,13 +72,13 @@ const productOfferget = async(req,res)=>{
     console.log(req.body, "offerparams");
     const { product, offer, expires } = req.body;
 
-    // Find the product
+   
     const productDoc = await Product.findById(product).populate("productOffer");
     if (!productDoc) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // If product already has a productOffer, update it
+  
     if (productDoc.productOffer) {
       const updatedOffer = await productOffer.findByIdAndUpdate(
         productDoc.productOffer._id,
@@ -97,7 +97,7 @@ const productOfferget = async(req,res)=>{
       });
     }
 
-    // Otherwise, create a new one
+   
     const newOffer = new productOffer({
       product: productDoc._id,
       offer: Number(offer),
@@ -202,13 +202,12 @@ const addCategoryOffer = async (req, res) => {
     const { category, offer, expires } = req.body;
     console.log(req.body, "incoming category offer request");
 
-    // Find the category
     const categoryDoc = await Category.findById(category).populate("offer");
     if (!categoryDoc) {
       return res.status(404).json({ success: false, message: "Category not found" });
     }
 
-    // If category already has an offer → update it
+  
     if (categoryDoc.offer) {
       const updatedOffer = await CategoryOffer.findByIdAndUpdate(
         categoryDoc.offer._id,
@@ -226,14 +225,13 @@ const addCategoryOffer = async (req, res) => {
       });
     }
 
-    // Otherwise, create a new offer
     const newOffer = await CategoryOffer.create({
       category: categoryDoc._id,
       offer: Number(offer),
       expires: new Date(expires),
     });
 
-    // Attach new offer to category
+
     categoryDoc.offer = newOffer._id;
     await categoryDoc.save();
 
@@ -283,6 +281,39 @@ const editOffer = async(req,res)=>{
     res.status(400).json({sucess:false,message:"Internal Server Error"})
   }
 }
-module.exports = { updateProductOffer ,removeProductOffer,addCategoryOffer,removeCategoryOffer,productOfferget,editOffer,categoryOffer};
+
+const extendCategoryOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { days } = req.body;
+
+    if (!days || isNaN(days)) {
+      return res.status(400).json({ success: false, message: "Invalid days value" });
+    }
+
+    const offer = await CategoryOffer.findById(id);
+    if (!offer) {
+      return res.status(404).json({ success: false, message: "Offer not found" });
+    }
+
+    
+    const baseDate = offer.expires && offer.expires > new Date() ? offer.expires : new Date();
+    const newExpiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+
+    offer.expires = newExpiry;
+    await offer.save();
+
+    return res.json({
+      success: true,
+      message: `Offer extended by ${days} day(s). New expiry: ${newExpiry.toDateString()}`,
+      offer,
+    });
+  } catch (error) {
+    console.error("Error extending category offer:", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+module.exports = { updateProductOffer ,removeProductOffer,addCategoryOffer,removeCategoryOffer,productOfferget,editOffer,categoryOffer,extendCategoryOffer};
 
 

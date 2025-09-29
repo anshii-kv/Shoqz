@@ -417,15 +417,16 @@ console.log(data.message,"dataststssdty");
     const isActive = status
 console.log(isActive,"isactiveeeeeeeeeeeeeeeeee");
 
-    const btn = document.getElementById(`coupon-btn-${couponId}`);
-    btn.textContent = isActive ? 'Deactivate' : 'Activate';
-    btn.className = `toggle-button ${isActive ? 'deactivate-button' : 'activate-button'}`;
-    btn.onclick = () => toggleStatus(couponId, isActive ? 'inactive' : 'active');
-console.log("hi anshi");
+window.location.reload()
+//     const btn = document.getElementById(`coupon-btn-${couponId}`);
+//     btn.textContent = isActive ? 'Deactivate' : 'Activate';
+//     btn.className = `toggle-button ${isActive ? 'deactivate-button' : 'activate-button'}`;
+//     btn.onclick = () => toggleStatus(couponId, isActive ? 'inactive' : 'active');
+// console.log("hi anshi");
 
-    const badge = document.querySelector(`#coupon-row-${couponId} .status-badge`);
-    badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-    badge.className = `status-badge status-${status}`;
+//     const badge = document.querySelector(`#coupon-row-${couponId} .status-badge`);
+//     badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+//     badge.className = `status-badge status-${status}`;
 
     Swal.fire('Updated!', data.message, 'success');
   })

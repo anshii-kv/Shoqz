@@ -351,6 +351,11 @@
             position: relative;
         }
 
+        #salesChartCanvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         .loading-overlay {
             position: absolute;
             top: 0;
@@ -551,7 +556,7 @@
             </button>
         </div>
 
-        Enhanced Filters Container
+       
         <!-- <div class="filters-container" id="filtersContainer">
             <div class="filters-header" onclick="toggleFilters()">
                 <h3 class="filters-title">
@@ -839,9 +844,9 @@
         function showLoading(show) {
             const loadingOverlay = document.getElementById('chartLoading');
             if (show) {
-                loadingOverlay.style.display = 'flex';
+                loadingOverlay.classList.add('active');
             } else {
-                loadingOverlay.style.display = 'none';
+                loadingOverlay.classList.remove('active');
             }
         }
 
@@ -851,17 +856,7 @@
         }
 
         function generateSalesReport() {
-            // confirm("Are you sure want")
-            const filters = {
-                // dateRange: document.getElementById('dateRange').value,
-                // startDate: document.getElementById('startDate').value,
-                // endDate: document.getElementById('endDate').value,
-                // status: document.getElementById('statusFilter').value,
-                // category: document.getElementById('categoryFilter').value,
-                // revenueRange: document.getElementById('revenueRange').value
-            };
-            
-            // console.log('Generating sales report with filters:', filters);
+            const filters = {};
             
             const params = new URLSearchParams();
             Object.entries(filters).forEach(([key, value]) => {
@@ -873,7 +868,13 @@
 
         // Chart functionality
         function renderChart(labels, data) {
-            const ctx = document.getElementById('salesChartCanvas').getContext('2d');
+            const canvas = document.getElementById('salesChartCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
             
             // Destroy existing chart if it exists
             if (salesChart) {
@@ -919,6 +920,8 @@
                     }
                 }
             });
+            
+            console.log('Chart rendered successfully with monthly data');
         }
 
         // Fetch sales data
@@ -930,48 +933,54 @@
             event.target.classList.add('active');
 
             // Show loading
-            document.getElementById('chartLoading').style.display = 'flex';
+            showLoading(true);
             
             try {
                 const res = await fetch(`/admin/sales/${period}`);
-                
                 const data = await res.json();
-                console.log("dadadada",data)
-              
-                    renderChart(data.labels, data.sales);
-               
+                console.log("Filtered data:", data);
+                renderChart(data.labels, data.sales);
             } catch (err) {
                 console.error('Error fetching sales data:', err);
             } finally {
-                document.getElementById('chartLoading').style.display = 'none';
+                showLoading(false);
             }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('endDate').value = today;
+            console.log('Dashboard initialized');
             
-            const lastMonth = new Date();
-            lastMonth.setMonth(lastMonth.getMonth() - 1);
-            document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
-
             // Initialize chart with server data
             try {
                 const initialLabels = <%- JSON.stringify(chartLabels || []) %>;
                 const initialSales = <%- JSON.stringify(chartSales || []) %>;
                 
-                if (initialLabels.length > 0 && initialSales.length > 0) {
-                    renderChart(initialLabels, initialSales);
+                console.log("Server chart data:", initialLabels, initialSales);
+                
+                if (initialLabels && initialLabels.length > 0 && initialSales && initialSales.length > 0) {
+                    // Wait for DOM to be fully ready
+                    setTimeout(() => {
+                        renderChart(initialLabels, initialSales);
+                        console.log('Monthly chart rendered from server data');
+                    }, 500);
                 } else {
-                    // Fallback empty chart
-                    renderChart(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], [0, 0, 0, 0, 0, 0]);
+                    console.warn('No chart data from server, using fallback');
+                    // Fallback empty chart for monthly
+                    const fallbackLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    const fallbackData = [0, 0, 0, 0];
+                    setTimeout(() => {
+                        renderChart(fallbackLabels, fallbackData);
+                    }, 500);
                 }
             } catch (error) {
                 console.error('Error initializing chart:', error);
                 // Fallback empty chart
-                renderChart(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], [0, 0, 0, 0, 0, 0]);
+                const fallbackLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                const fallbackData = [0, 0, 0, 0];
+                setTimeout(() => {
+                    renderChart(fallbackLabels, fallbackData);
+                }, 500);
             }
         });
     </script>

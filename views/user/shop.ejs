@@ -34,11 +34,15 @@
                             <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label class="filter-label"><i class="fas fa-tags"></i> Category</label>
-                                    <select name="category" class="form-control custom-select" id="categoryFilter">
-                                        <option value="">All Categories</option>
+                                    <select style="" name="category" class="form-control custom-select" id="categoryFilter">
+                                        <option style="color: blue;" value="">All Categories</option>
                                         <% if (categories && categories.length > 0) { %>
                                             <% categories.forEach(category => { %>
-                                                <option value="<%= category._id %>" <%= selectedCategory == category._id ? 'selected' : '' %>><%= category.name %></option>
+                                                <option 
+    value="<%= category._id %>" 
+    <%= String(selectedCategory) === String(category._id) ? 'selected' : '' %>>
+    <%= category.name %>
+</option>
                                             <% }); %>
                                         <% } %>
                                     </select>

@@ -1,7 +1,7 @@
 const PDFDocument = require("pdfkit");
 
 const generatePDF = (req, res) => {
-  const salesData = req.body; // Or fetched from DB
+  const salesData = req.body; 
   const doc = new PDFDocument({ size: "A4", margin: 50 });
 
   res.setHeader("Content-Type", "application/pdf");
@@ -11,7 +11,7 @@ const generatePDF = (req, res) => {
   doc.fontSize(18).text("Sales Report", { align: "center" });
   doc.moveDown();
 
-  // Example: Loop sales data
+
   salesData.forEach((sale, i) => {
     doc.fontSize(12).text(`${i + 1}. ${sale.orderId} - ₹${sale.amount} (${sale.status})`);
     doc.moveDown(0.5);
@@ -54,7 +54,7 @@ const generateExcel = async (res, salesData) => {
   worksheet.addRow([`Generated on: ${todayFormatted}`]);
   worksheet.addRow([]);
 
-  // Define columns
+
   worksheet.columns = [
     { header: "Date", key: "date", width: 15 },
     { header: "Order ID", key: "orderId", width: 30 },
@@ -64,7 +64,6 @@ const generateExcel = async (res, salesData) => {
     { header: "Delivery Charge", key: "deliveryCharge", width: 20 },
   ];
 
-  // Add sales data rows
   salesData.sales.forEach((sale) => {
     worksheet.addRow({
       date: new Date(sale.date).toLocaleDateString(),
@@ -84,7 +83,7 @@ const generateExcel = async (res, salesData) => {
   worksheet.addRow(["Total Discounts", "", `Rs. ${salesData.discounts.toLocaleString()}`]);
   worksheet.addRow(["Total Delivery Charge", "", `Rs. ${salesData.lessPrices.toLocaleString()}`]);
 
-  // Formatting
+
   worksheet.getRow(1).font = { bold: true, size: 14 };
   if (subheading) {
     worksheet.getRow(2).font = { italic: true, size: 12 };
@@ -95,7 +94,7 @@ const generateExcel = async (res, salesData) => {
     worksheet.getRow(4).font = { bold: true };
   }
 
-  // Set headers for download
+  
   res.setHeader(
     "Content-Type",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

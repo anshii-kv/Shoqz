@@ -45,7 +45,7 @@ async function generateDisplayOrderId() {
 const loadHomepage = async (req, res) => {
     try {
         const products = await Product.find({ isBlocked: false }).limit(4);
-        // console.log(products,"hwy home");
+        console.log(products,"hwy home");
         
         return res.render("home", { products });
     } catch (error) {
@@ -228,7 +228,7 @@ const verifiedOtp = async (req, res) => {
                         },
                     });
 
-                    // ✅ Update new user wallet
+               
                     await Wallet.findByIdAndUpdate(newWallet._id, {
                         $inc: { balance: 50 },
                         $push: {
@@ -457,7 +457,7 @@ const changepassword = async (req, res) => {
 
 const getShopPage = async (req, res) => {
     try {
-        // console.log(req.query);
+        console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
 
         const searchQuery = req.query.search || "";
         const selectedCategory = req.query.category || "";
@@ -489,13 +489,17 @@ const getShopPage = async (req, res) => {
             if (maxPrice !== "" && maxPrice >= 0) {
                 filter.finalamount.$lte = maxPrice;
             }
+// console.log('tttttttttttttttttttttt');
 
-          
+        //   let cat= await Categories.find({ isListed: true })
+            console.log(cat,"hhhhhh");
             if (minPrice !== "" && maxPrice !== "" && minPrice > maxPrice) {
+                
                 return res.render("shop", {
                     title: "Shop",
                     products: [],
-                    categories: await Categories.find({ isListed: false }),
+                    categories: await Categories.find({ isListed: true }),
+                   
                     category: selectedCategory,
                     currentPage: 1,
                     totalPages: 1,
@@ -507,8 +511,10 @@ const getShopPage = async (req, res) => {
                     maxPrice: maxPrice,
                     error: "Minimum price cannot be greater than maximum price",
                 });
+                
             }
         }
+        
 
       
         let sortOptions = {};
@@ -533,7 +539,7 @@ const getShopPage = async (req, res) => {
 
      
        const [categories, totalProducts, products] = await Promise.all([
-  Categories.find({ isListed: false }).lean(),
+  Categories.find({ isListed: true }).lean(),
   Product.countDocuments(filter),
   Product.find(filter)
     .populate("category", "name categoryOffer") 
@@ -542,6 +548,7 @@ const getShopPage = async (req, res) => {
     .limit(limit)
     .lean(),
 ]);
+console.log('aaaaaaa',categories);
 
 console.log("Products:", JSON.stringify(products, null, 2));
 
@@ -587,7 +594,11 @@ console.log("Products:", JSON.stringify(products, null, 2));
                 finalamount: Math.round(finalAmount * 100) / 100, 
             };
         });
-
+        console.log(selectedCategory,"hkhkhkhk");
+        // let selCat;
+        // if(selectedCategory){
+        //     selCat=await Category.findById(selectedCategory)
+        // }
         res.render("shop", {
             title: "Shop",
             products: processedProducts,
@@ -596,13 +607,18 @@ console.log("Products:", JSON.stringify(products, null, 2));
             currentPage: page,
             totalPages: totalPages,
             paginationUrl: paginationUrl,
-            selectedCategory: selectedCategory,
+            selectedCategory:  selectedCategory ? String(selectedCategory) : "",
             sortBy: sortBy,
             searchQuery: searchQuery,
             minPrice: minPrice,
             maxPrice: maxPrice,
             totalProducts: totalProducts, 
         });
+        
+       
+        
+        
+        
     } catch (error) {
         console.error("Error in shop page controller:", error);
         res.status(500).render("user/error", {
@@ -616,12 +632,12 @@ const loadProductDetails = async (req, res, next) => {
   try {
     const productId = req.params.id;
 
-    // Fetch product with productOffer
+   
     const product = await Product.findById(productId)
       .populate("productOffer")
       .populate({
         path: "category",
-        populate: { path: "offer" } // populate category's offer (CategoryOffer)
+        populate: { path: "offer" } 
       });
 
     if (!product) {
@@ -631,23 +647,23 @@ const loadProductDetails = async (req, res, next) => {
       });
     }
 
-    // Extract discount values
+   
     const productOfferValue = product.productOffer ? product.productOffer.offer : 0;
     let categoryOfferValue = 0;
 
-    // If category has an offer, use it
+    
     if (product.category && product.category.offer) {
-      categoryOfferValue = product.category.offer.offer; // percentage
+      categoryOfferValue = product.category.offer.offer; 
     } else if (product.category && product.category.categoryoffer) {
-      // fallback if you are storing a direct number in `categoryoffer`
+      
       categoryOfferValue = product.category.categoryoffer;
     }
 
-    // Determine max discount
+   
     const maxDiscount = Math.max(productOfferValue, categoryOfferValue);
 console.log(maxDiscount,"123456");
 
-    // Calculate final price
+   
     const basePrice = product.salePrice || product.regularPrice || 0;
   
     
@@ -848,11 +864,11 @@ const loadCart = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Fetch cart and populate necessary product details
+    
     const cartData = await Cart.findOne({ userId })
       .populate({
         path: "product.productId",
-        select: "name salePrice regularPrice productOffer category productImage", // select needed fields
+        select: "name salePrice regularPrice productOffer category productImage",
         populate: [
           { path: "productOffer", select: "offer" },
           { path: "category", populate: { path: "offer", select: "offer" } }
@@ -869,7 +885,7 @@ const loadCart = async (req, res) => {
       });
     }
 
-    // Filter out invalid products
+   
     cartData.product = cartData.product.filter(
       (item) => item.productId && item.quantity > 0
     );
@@ -887,12 +903,10 @@ const loadCart = async (req, res) => {
     let subtotal = 0;
     let total = 0;
 
-    // Calculate discounted price per item
     cartData.product.forEach((item) => {
       const product = item.productId;
       const quantity = item.quantity;
 
-      // Step 1: Get product & category offers
       const productOfferValue = product.productOffer?.offer || 0;
       let categoryOfferValue = 0;
 
@@ -902,22 +916,22 @@ const loadCart = async (req, res) => {
         categoryOfferValue = product.category.categoryoffer;
       }
 
-      // Step 2: Determine max discount
+    
       const maxDiscount = Math.max(productOfferValue, categoryOfferValue);
 
-      // Step 3: Calculate final price after discount
+    
       const basePrice = product.salePrice || product.regularPrice || 0;
       const discountAmount = (maxDiscount / 100) * basePrice;
       const finalPrice = basePrice - discountAmount;
 console.log(finalPrice,"kkkkkkkkkkk");
 
-      // Step 4: Multiply by quantity for total
+    
       const itemTotal = finalPrice * quantity;
 
       subtotal += itemTotal;
       total += itemTotal;
 
-      // Attach values to item for EJS rendering
+
       item.finalPrice = finalPrice;
       item.appliedOffer = maxDiscount;
     });
@@ -1057,7 +1071,7 @@ const loadCheckout = async (req, res) => {
 
     const userId = req.session.userId;
 
-    // Fetch cart and populate offers
+  
     const cartData = await Cart.findOne({ userId })
       .populate({
         path: 'product.productId',
@@ -1082,7 +1096,7 @@ const loadCheckout = async (req, res) => {
 
     let subtotal = 0;
 
-    // Apply discount logic per item (same as loadCart)
+    
     cartData.product.forEach(item => {
       const product = item.productId;
       const quantity = item.quantity;
@@ -1102,15 +1116,14 @@ const loadCheckout = async (req, res) => {
       const discountAmount = (maxDiscount / 100) * basePrice;
       const finalPrice = basePrice - discountAmount;
 
-      // Save discounted price and applied offer for EJS rendering
+      
       item.finalPrice = finalPrice;
       item.appliedOffer = maxDiscount;
 
-      // subtotal
+  
       subtotal += finalPrice * quantity;
     });
 
-    // Fetch user addresses
     const addressData = await Address.findOne({ user: userId });
     const userAddresses = addressData ? addressData.address : [];
     const defaultAddress = userAddresses.find(addr => addr.isDefault) || null;
@@ -1135,12 +1148,6 @@ const loadCheckout = async (req, res) => {
 
 
 
-
-
-
-
-
-
 const wishlist = async (req, res) => {
     try {
         // console.log("hiiiii");
@@ -1154,8 +1161,6 @@ const wishlist = async (req, res) => {
        res.render("wishlist",{wishlistdata:wishlist})  
     } catch (error) {}
 };
-
-
 
 
 
@@ -1570,9 +1575,12 @@ const loadThankyou = async (req, res) => {
 
 const transactionHistory = async (req, res) => {
   try {
-    const userId = req.session.userId || req.user._id; // depending on how you store session
+    const userId = req.session.userId || req.user._id;
 
-    // find wallet for logged-in user
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; 
+    const skip = (page - 1) * limit;
+
     const wallet = await Wallet.findOne({ userId });
 
     if (!wallet) {
@@ -1581,11 +1589,14 @@ const transactionHistory = async (req, res) => {
         credits: 0,
         debits: 0,
         thisMonth: 0,
-        transactions: []
+        transactions: [],
+        currentPage: page,
+        totalPages: 1,
+        totalTransactions: 0
       });
     }
 
-    // calculate totals
+    // Totals
     const credits = wallet.Transactionhistory
       .filter(tx => tx.type === "credit")
       .reduce((acc, tx) => acc + tx.amount, 0);
@@ -1594,18 +1605,38 @@ const transactionHistory = async (req, res) => {
       .filter(tx => tx.type === "debit")
       .reduce((acc, tx) => acc + tx.amount, 0);
 
-    // only current month
     const currentMonth = new Date().getMonth();
     const thisMonth = wallet.Transactionhistory
       .filter(tx => new Date(tx.date).getMonth() === currentMonth)
       .reduce((acc, tx) => acc + (tx.type === "credit" ? tx.amount : -tx.amount), 0);
+
+    const totalTransactions = wallet.Transactionhistory.length;
+    const totalPages = Math.ceil(totalTransactions / limit);
+
+    // Slice transactions for current page
+    const transactions = wallet.Transactionhistory
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(skip, skip + limit);
+
+    // Pagination range
+    const maxButtons = 5;
+    let startPage = Math.max(1, page - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage + 1 < maxButtons) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
 
     res.render("transactionHistory", {
       balance: wallet.balance || 0,
       credits,
       debits,
       thisMonth,
-      transactions: wallet.Transactionhistory
+      transactions,
+      currentPage: page,
+      totalPages,
+      totalTransactions,
+      startPage,
+      endPage
     });
 
   } catch (error) {
@@ -1613,6 +1644,7 @@ const transactionHistory = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 // const coupon = async (req, res) => {
 //     try {
@@ -1632,7 +1664,7 @@ const transactionHistory = async (req, res) => {
 // }
 const applyCoupon = async (req,res)=>{
     try {
-       const coupons = await Coupon.find({status:'active'});
+       const coupons = await Coupon.find({status:'active',expiresAt:{$gt:new Date()}});
        res.json({success:true, coupons})
     } catch (error) {
         console.error(error);

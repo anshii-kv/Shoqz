@@ -131,7 +131,7 @@ const editAddress = async (req, res) => {
   try {
     const { fname, sname, mobile, email, address, city, pin, addressId } = req.body;
     
-    // Validate required fields
+    
     if (
       !fname || fname.trim().length === 0 ||
       !sname || sname.trim().length === 0 ||
@@ -147,7 +147,7 @@ const editAddress = async (req, res) => {
       });
     }
 
-    // Check if user is logged in
+  
     if (!req.session.userId) {
       return res.status(401).json({
         success: false,
@@ -155,12 +155,11 @@ const editAddress = async (req, res) => {
       });
     }
 
-    // Update the address
+  
     const updatedAddress = await Address.updateOne(
       { 
         user: req.session.userId, 
-        "address._id": addressId // Use addressId if you're tracking by ID
-        // OR use fname if that's your identifier: "address.fname": fname
+        "address._id": addressId 
       },
       {
         $set: {
@@ -171,14 +170,14 @@ const editAddress = async (req, res) => {
           "address.$.address": address.trim(),
           "address.$.city": city.trim(),
           "address.$.pin": pin.trim(),
-          // Add other fields if needed
+         
           ...(req.body.addressType && { "address.$.addressType": req.body.addressType }),
           ...(req.body.isDefault !== undefined && { "address.$.isDefault": req.body.isDefault })
         }
       }
     );
 
-    // Check if the update was successful
+   
     if (updatedAddress.matchedCount === 0) {
       return res.status(404).json({
         success: false,
@@ -193,7 +192,7 @@ const editAddress = async (req, res) => {
       });
     }
 
-    // Return success response
+  
     res.status(200).json({
       success: true,
       message: "Address updated successfully!"

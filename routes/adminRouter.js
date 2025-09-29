@@ -59,6 +59,9 @@ router.put('/category/:id',categoryController.editCategory)
 
 router.post('/category-offers/create',offerController.addCategoryOffer);
 
+router.patch('/category-offers/extend/:id', offerController.extendCategoryOffer);
+
+
 // `/admin/category-offers/delete/${offerId}`
 router.delete('/category-offers/delete/:id', offerController.removeCategoryOffer);
 

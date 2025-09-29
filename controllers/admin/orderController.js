@@ -103,10 +103,9 @@ const loadviewOrder=async(req,res)=>{
   try {
    const orderId = req.params.orderId
    const order = await Order.findById({_id:orderId})
-  
+   console.log(order,"anshikv");
    
-    
-    res.render('admin/viewOrder',{order})
+     res.render('admin/viewOrder',{order})
   } catch (error) {
     
   }

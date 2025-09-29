@@ -4,13 +4,13 @@ const Order = require('../../model/orderSchema');
 const Category = require('../../model/categorySchema');
 const PDFDocument = require("pdfkit");
 
-// Helper to get start date for chart
+
 const getStartDate = (period) => {
     const now = new Date();
     switch (period) {
         case 'weekly':
-            const day = now.getDay(); // 0 = Sunday
-            const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+            const day = now.getDay(); 
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1); 
             return new Date(now.setDate(diff));
         case 'monthly':
             return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -24,10 +24,10 @@ const getStartDate = (period) => {
 const generateSalesData = async (period = 'monthly') => {
     const now = new Date();
 
-    // Determine startDate
+ 
     let startDate;
     if (period === 'weekly') {
-        const day = now.getDay(); // Sunday = 0, Monday = 1
+        const day = now.getDay(); 
         const diff = (day === 0 ? -6 : 1 - day);
         startDate = new Date(now);
         startDate.setDate(now.getDate() + diff);
@@ -40,11 +40,11 @@ const generateSalesData = async (period = 'monthly') => {
 
     console.log("Start date:", startDate);
 
-    // Fetch orders delivered after startDate
+   
     let orders = [];
 
     if (period === 'weekly') {
-        // Aggregate sales per day of week
+    
         orders = await Order.aggregate([
             { $match: { status: "delivered", Date: { $gte: startDate } } },
             { $unwind: "$product" },
@@ -62,7 +62,7 @@ const generateSalesData = async (period = 'monthly') => {
             }
         ]);
     } else {
-        // For monthly/yearly keep previous aggregation
+       
         orders = await Order.aggregate([
             { $match: { status: "delivered", Date: { $gte: startDate } } },
             { $unwind: "$product" },
@@ -92,13 +92,15 @@ const generateSalesData = async (period = 'monthly') => {
         const month = now.getMonth();
         const year = now.getFullYear();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        labels = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
+        labels = Array.from({ length: daysInMonth }, (_, i) => `Day ${i + 1}`);
         sales = new Array(daysInMonth).fill(0);
 
         if (orders.length > 0) {
             orders[0].orderDates.forEach(date => {
                 const day = new Date(date).getDate() - 1;
-                sales[day] += orders[0].totalSales / orders[0].orderDates.length;
+                if (day >= 0 && day < daysInMonth) {
+                    sales[day] += orders[0].totalSales / orders[0].orderDates.length;
+                }
             });
         }
     } else if (period === 'yearly') {
@@ -108,7 +110,9 @@ const generateSalesData = async (period = 'monthly') => {
         if (orders.length > 0) {
             orders[0].orderDates.forEach(date => {
                 const month = new Date(date).getMonth();
-                sales[month] += orders[0].totalSales / orders[0].orderDates.length;
+                if (month >= 0 && month < 12) {
+                    sales[month] += orders[0].totalSales / orders[0].orderDates.length;
+                }
             });
         }
     }
@@ -118,21 +122,21 @@ const generateSalesData = async (period = 'monthly') => {
 
 const loadDashboard = async (req, res) => {
     try {
-        // Counts
+       
         const countUser = await User.countDocuments();
         const countProduct = await Product.countDocuments();
         const countOrder = await Order.countDocuments();
 
-
-          const category = await Category.find({ isListed: true }).lean();
-        // Total revenue
+        const category = await Category.find({ isListed: true }).lean();
+        
+     
         const revenueOrder = await Order.aggregate([
             { $match: { status: "delivered" } },
             { $group: { _id: null, totalRevenue: { $sum: "$subtotal" } } },
         ]);
         const revenue = revenueOrder.length > 0 ? revenueOrder[0].totalRevenue : 0;
 
-        // Top Categories
+       
         const topCategories = await Order.aggregate([
             { $match: { status: "delivered" } },
             { $unwind: "$product" },
@@ -162,7 +166,7 @@ const loadDashboard = async (req, res) => {
             { $sort: { totalSales: -1 } },
         ]);
 
-        // Top Products
+      
         const topProducts = await Order.aggregate([
             { $match: { status: "delivered" } },
             { $unwind: "$product" },
@@ -197,10 +201,14 @@ const loadDashboard = async (req, res) => {
             { $limit: 5 },
         ]);
 
-        // Get default sales data for monthly chart
-        const salesData = await generateSalesData(req?.query?.period || "monthly");
-        console.log(salesData);
+        const salesData = await generateSalesData("monthly");
         
+        console.log("=== DASHBOARD CHART DATA ===");
+        console.log("Labels:", salesData.labels);
+        console.log("Sales:", salesData.sales);
+        console.log("Labels length:", salesData.labels.length);
+        console.log("Sales length:", salesData.sales.length);
+        console.log("============================");
 
         res.render("admin/dashboard", {
             countUser,
@@ -215,19 +223,55 @@ const loadDashboard = async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("Dashboard Error:", err);
         res.status(500).send("Server Error");
     }
 };
-  const filterGraph =  async (req, res) => {
-  try {
-    const { period } = req.params;
-    const data = await generateSalesData(period);
-    res.json(data); 
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch sales data" });
-  }
+
+const filterGraph = async (req, res) => {
+    try {
+        const { period } = req.params;
+        const data = await generateSalesData(period);
+        res.json(data); 
+    } catch (err) {
+        console.log("Filter Graph Error:", err);
+        res.status(500).json({ error: "Failed to fetch sales data" });
+    }
 };
 
+module.exports = { loadDashboard, filterGraph };
 
-module.exports = { loadDashboard,filterGraph };
+// const pagination = async(req,res)=>{
+//     const page = parseInt(req.query.page)|| 1;
+//     const limit = 8;
+//     let skip = (page-1)*limit;
+//     const products = await Product.find().skip(skip).limit(limit).sort({createdAt:-1})
+//     const totalProducts = await Product.countDocuments();
+// const totalPages = Math.ceil(totalProducts / limit);
+
+// }
+
+// const search = req.query.search||"";
+// const products = await Product.find({$or:[
+//     {name:{$regex:query,$option:i}}
+// ]})
+
+
+// const page = parseInt(req.query.page) || 1;
+// const limit = 8;
+// const skip = (page - 1) * limit;
+// const search = req.query.search || "";
+
+// const query = search
+//     ? { name: { $regex: search, $options: "i" } }  
+//     : {};
+
+// const products = await Product.find(query)
+//     .skip(skip)
+//     .limit(limit)
+//     .sort({ createdAt: -1 });
+
+// const totalProducts = await Product.countDocuments(query);
+// const totalPages = Math.ceil(totalProducts / limit);
+
+// res.json({ products, totalPages, currentPage: page });
